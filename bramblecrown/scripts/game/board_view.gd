@@ -17,6 +17,28 @@ void fragment() {
 }
 """
 const MODELS := "res://assets/models/%s.glb"
+## Per-region look: tile models, surrounding props, and lighting.
+const THEMES := {
+	"marsh": {
+		"plain": "hex_peat", "stone": "hex_stone", "water": "hex_water",
+		"outer": [["hex_peat", 0.8], ["hex_stone", 0.2]],
+		"props": [["willow", 0.16], ["reeds", 0.34], ["menhir", 0.06], ["blight", 0.14]],
+		"tall": ["willow", "menhir"], "filler": "reeds", "tall_scale": {"willow": 1.4},
+		"bg": Color(0.045, 0.06, 0.065), "ambient": Color(0.42, 0.5, 0.52), "fog": Color(0.1, 0.14, 0.15),
+		"key": Color(1.0, 0.86, 0.66), "key_energy": 1.7, "rim": Color(0.55, 0.45, 0.95),
+		"pool": Color(0.03, 0.06, 0.06),
+	},
+	"cloister": {
+		"plain": "hex_flag", "stone": "hex_pillar", "water": "hex_flood",
+		"outer": [["hex_flag", 0.75], ["hex_flood", 0.25]],
+		"props": [["arch", 0.12], ["candles", 0.22], ["bell_fallen", 0.05], ["blight", 0.12]],
+		"tall": ["arch"], "filler": "candles", "tall_scale": {"arch": 1.1},
+		"bg": Color(0.035, 0.045, 0.07), "ambient": Color(0.4, 0.46, 0.6), "fog": Color(0.08, 0.1, 0.16),
+		"key": Color(0.82, 0.86, 1.0), "key_energy": 1.45, "rim": Color(0.35, 0.7, 0.9),
+		"pool": Color(0.025, 0.045, 0.07),
+		"candle_lights": true,
+	},
+}
 const OVERLAY_SHADER := """
 shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabled;
@@ -45,6 +67,8 @@ var _unit_base := {}  # node -> base y
 var player_light: OmniLight3D
 var _outline_mat: ShaderMaterial
 var _incoming: Label3D
+var _candle_lights := 0
+var theme: Dictionary = THEMES["marsh"]
 
 
 func _ready() -> void:
@@ -71,13 +95,14 @@ func _ready() -> void:
 
 
 ## Moody marsh lighting shared by combat and title: warm key, cold violet rim, fog, glow.
-static func make_environment(parent: Node) -> void:
+static func make_environment(parent: Node, theme_id: String = "marsh") -> void:
+	var th: Dictionary = THEMES.get(theme_id, THEMES["marsh"])
 	var we := WorldEnvironment.new()
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.045, 0.06, 0.065)
+	env.background_color = th["bg"]
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.42, 0.5, 0.52)
+	env.ambient_light_color = th["ambient"]
 	env.ambient_light_energy = 0.55
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.tonemap_exposure = 1.05
@@ -90,7 +115,7 @@ static func make_environment(parent: Node) -> void:
 	env.ssao_intensity = 1.6
 	env.ssr_enabled = true
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.1, 0.14, 0.15)
+	env.fog_light_color = th["fog"]
 	env.fog_density = 0.018
 	env.fog_sky_affect = 0.0
 	env.adjustment_enabled = true
@@ -99,14 +124,14 @@ static func make_environment(parent: Node) -> void:
 	we.environment = env
 	parent.add_child(we)
 	var key := DirectionalLight3D.new()
-	key.light_color = Color(1.0, 0.86, 0.66)
-	key.light_energy = 1.7
+	key.light_color = th["key"]
+	key.light_energy = th["key_energy"]
 	key.shadow_enabled = true
 	key.directional_shadow_max_distance = 40.0
 	key.rotation_degrees = Vector3(-52, -38, 0)
 	parent.add_child(key)
 	var rim := DirectionalLight3D.new()
-	rim.light_color = Color(0.55, 0.45, 0.95)
+	rim.light_color = th["rim"]
 	rim.light_energy = 0.55
 	rim.rotation_degrees = Vector3(-25, 150, 0)
 	parent.add_child(rim)
@@ -126,13 +151,14 @@ func world(h: Vector2i) -> Vector3:
 
 # ------------------------------------------------------------------ build
 
-func build(c: CombatState, region_seed: int = 1) -> void:
+func build(c: CombatState, region_seed: int = 1, theme_id: String = "marsh") -> void:
 	combat = c
+	theme = THEMES.get(theme_id, THEMES["marsh"])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = region_seed
 	for h in c.terrain:
 		var t: String = c.terrain[h]
-		var tile: Node3D = scene("hex_water" if t == "water" else ("hex_stone" if t == "stone" else "hex_peat")).instantiate()
+		var tile: Node3D = scene(theme["water"] if t == "water" else (theme["stone"] if t == "stone" else theme["plain"])).instantiate()
 		var hgt := rng.randf_range(-0.03, 0.04) if t != "water" else -0.0
 		tile_height[h] = hgt if t != "water" else -0.25
 		tile.position = Hex.to_world(h, HEX_SIZE) + Vector3(0, hgt, 0)
@@ -253,7 +279,7 @@ func _build_surroundings(rng: RandomNumberGenerator) -> void:
 	pm.size = Vector2(140, 140)
 	water.mesh = pm
 	var wm := StandardMaterial3D.new()
-	wm.albedo_color = Color(0.03, 0.06, 0.06)
+	wm.albedo_color = theme["pool"]
 	wm.roughness = 0.06
 	wm.metallic_specular = 0.8
 	water.material_override = wm
@@ -266,30 +292,45 @@ func _build_surroundings(rng: RandomNumberGenerator) -> void:
 			var roll := rng.randf()
 			if roll < 0.35 + 0.1 * (ring_r - r):
 				continue
-			var t: Node3D = scene("hex_peat" if rng.randf() < 0.8 else "hex_stone").instantiate()
+			var tr := rng.randf()
+			var tname: String = theme["outer"][0][0]
+			for o in theme["outer"]:
+				if tr < o[1]:
+					tname = o[0]
+					break
+				tr -= o[1]
+			var t: Node3D = scene(tname).instantiate()
 			t.position = Hex.to_world(h, HEX_SIZE) + Vector3(0, -0.35 - 0.12 * (ring_r - r) + rng.randf_range(-0.1, 0.1), 0)
 			t.rotation.y = deg_to_rad(60.0 * rng.randi_range(0, 5))
 			add_child(t)
 			var prop_roll := rng.randf()
 			var prop := ""
-			if prop_roll < 0.16:
-				prop = "willow"
-			elif prop_roll < 0.5:
-				prop = "reeds"
-			elif prop_roll < 0.56:
-				prop = "menhir"
-			elif prop_roll < 0.7:
-				prop = "blight"
+			for pr in theme["props"]:
+				if prop_roll < pr[1]:
+					prop = pr[0]
+					break
+				prop_roll -= pr[1]
 			# Tall props in front of the board would cover the hand and End Turn button.
-			if prop in ["willow", "menhir"] and (t.position.z > -1.0 or ring_r < r + 2):
-				prop = "reeds" if t.position.z < combat.radius * 1.5 else ""
+			if prop in theme["tall"] and (t.position.z > -1.0 or ring_r < r + 2):
+				prop = theme["filler"] if t.position.z < combat.radius * 1.5 else ""
 			if prop != "":
 				var pn: Node3D = scene(prop).instantiate()
 				pn.position = t.position + Vector3(rng.randf_range(-0.3, 0.3), 0.05, rng.randf_range(-0.3, 0.3))
 				pn.rotation.y = rng.randf_range(0, TAU)
-				var sc := rng.randf_range(0.8, 1.3) * (1.4 if prop == "willow" else 1.0)
+				if prop == "arch":
+					# Arches face the board so they frame it rather than cut across it.
+					pn.rotation.y = atan2(t.position.x, t.position.z) + PI * 0.5
+				var sc := rng.randf_range(0.8, 1.3) * float(theme["tall_scale"].get(prop, 1.0))
 				pn.scale = Vector3.ONE * sc
 				add_child(pn)
+				if prop == "candles" and theme.get("candle_lights", false) and _candle_lights < 6:
+					_candle_lights += 1
+					var cl := OmniLight3D.new()
+					cl.light_color = Color(1.0, 0.68, 0.32)
+					cl.light_energy = 1.6
+					cl.omni_range = 3.2
+					cl.position = pn.position + Vector3(0, 0.6, 0)
+					add_child(cl)
 
 
 func _make_hex_mesh(radius: float) -> ArrayMesh:

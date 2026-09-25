@@ -9,6 +9,9 @@ extends RefCounted
 ##   summon  {enemy, count, max}   adds enemies on free hexes near itself
 ##   ward    {n}                   gains ward
 ##   strength {n}                  permanently gains strength
+##   daze {n}                      the Grovewalker starts its next turn with n less energy (min 1)
+##   shield_allies {n}             every other enemy gains n ward
+##   heal_allies {n}               every enemy (itself included) heals n
 ## Flags: move (hexes per turn), keep_range (preferred distance), flying (ignores Thicket cost),
 ## trample (destroys Thicket it walks through), death_blight (blights its hex on death), size (visual scale).
 
@@ -71,6 +74,67 @@ const ENEMIES := {
 		"pattern": [0, 1, 2],
 		"phase2_at": 0.5,
 		"pattern2": [4, 3, 0, 1],
+	},
+	# ---------------- Region 2: Sunken Cloister ----------------
+	"drowned_novice": {
+		"name": "Drowned Novice", "hp": [9, 12], "move": 2, "model": "drowned_novice", "size": 0.85,
+		"death_blight": true,
+		"moves": [
+			{"name": "Clutch", "actions": [{"t": "attack", "dmg": 5, "range": 1}]},
+			{"name": "Weep", "actions": [{"t": "attack", "dmg": 3, "range": 1}, {"t": "blight_self", "radius": 1, "count": 2}]},
+		],
+		"pattern": [0, 1],
+	},
+	"censer_wraith": {
+		"name": "Censer Wraith", "hp": [15, 18], "move": 3, "keep_range": 2, "flying": true, "model": "censer_wraith",
+		"size": 1.0,
+		"moves": [
+			{"name": "Incense", "actions": [{"t": "spread", "count": 3, "radius": 2}]},
+			{"name": "Swing Censer", "actions": [{"t": "attack", "dmg": 6, "range": 2}]},
+		],
+		"pattern": [0, 1],
+	},
+	"bell_ghoul": {
+		"name": "Bell Ghoul", "hp": [24, 28], "move": 2, "model": "bell_ghoul", "size": 1.05,
+		"moves": [
+			{"name": "Toll", "actions": [{"t": "daze", "n": 1}, {"t": "attack", "dmg": 4, "range": 1}]},
+			{"name": "Maul", "actions": [{"t": "attack", "dmg": 10, "range": 1}]},
+		],
+		"pattern": [1, 0],
+	},
+	"moss_knight": {
+		"name": "Moss Knight", "hp": [36, 40], "move": 1, "trample": true, "model": "moss_knight", "size": 1.2,
+		"moves": [
+			{"name": "Advance", "move_bonus": 1, "actions": [{"t": "attack", "dmg": 8, "range": 1}, {"t": "blight_self", "radius": 1, "count": 2}]},
+			{"name": "Greatsword", "actions": [{"t": "attack", "dmg": 13, "range": 1}]},
+			{"name": "Bulwark", "stay": true, "actions": [{"t": "ward", "n": 8}, {"t": "shield_allies", "n": 6}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"choir_of_ash": {
+		"name": "Choir of Ash", "hp": [72, 76], "move": 1, "keep_range": 3, "model": "choir_of_ash", "size": 1.3,
+		"elite": true,
+		"moves": [
+			{"name": "Dirge", "actions": [{"t": "spread", "count": 5, "radius": 2}, {"t": "daze", "n": 1}]},
+			{"name": "Crescendo", "actions": [{"t": "attack", "dmg": 13, "range": 3}]},
+			{"name": "Hymn of Ash", "stay": true, "actions": [{"t": "heal_allies", "n": 8}, {"t": "ward", "n": 10}, {"t": "summon", "enemy": "drowned_novice", "count": 1, "max": 2}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"drowned_abbess": {
+		"name": "The Drowned Abbess", "hp": [150, 150], "move": 1, "keep_range": 2, "trample": true,
+		"model": "drowned_abbess", "size": 1.15, "boss": true,
+		"moves": [
+			{"name": "Call the Faithful", "actions": [{"t": "summon", "enemy": "drowned_novice", "count": 2, "max": 3}, {"t": "ward", "n": 10}]},
+			{"name": "Litany of Salt", "actions": [{"t": "attack", "dmg": 11, "range": 3}, {"t": "daze", "n": 1}]},
+			{"name": "Flood the Nave", "actions": [{"t": "spread", "count": 6, "radius": 2}]},
+			{"name": "Great Bell", "actions": [{"t": "attack", "dmg": 20, "range": 2}]},
+			{"name": "Last Rites", "actions": [{"t": "summon", "enemy": "censer_wraith", "count": 1, "max": 1}, {"t": "heal_allies", "n": 12}]},
+			{"name": "Undertow", "actions": [{"t": "spread", "count": 5, "radius": 2}, {"t": "strength", "n": 2}]},
+		],
+		"pattern": [2, 1, 0],
+		"phase2_at": 0.5,
+		"pattern2": [4, 3, 5, 1],
 	},
 }
 

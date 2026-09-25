@@ -772,6 +772,539 @@ def build_props():
     finish("menhir")
 
 
+# ------------------------------------------------------------------ region 2: Sunken Cloister
+
+def cloister_palette():
+    P = palette()
+    P.update({
+        "flag": mat("flagstone", (0.085, 0.088, 0.09), 0.75),
+        "flag_light": mat("flagstone_light", (0.12, 0.118, 0.11), 0.7),
+        "flag_dark": mat("flagstone_dark", (0.055, 0.058, 0.062), 0.85),
+        "grout": mat("grout_moss", (0.05, 0.085, 0.035), 0.95),
+        "marble": mat("marble", (0.26, 0.25, 0.22), 0.45),
+        "marble_dark": mat("marble_dark", (0.14, 0.135, 0.125), 0.55),
+        "bronze": mat("bronze", (0.45, 0.30, 0.13), 0.35, metal=1.0),
+        "verdigris": mat("verdigris", (0.20, 0.42, 0.36), 0.6, metal=0.3),
+        "wax": mat("wax", (0.86, 0.80, 0.64), 0.5),
+        "flame": mat("flame", (1.0, 0.7, 0.3), 0.3, emit=(1.0, 0.62, 0.22), emit_strength=9.0),
+        "ghost": mat("ghost_cloth", (0.30, 0.33, 0.36), 0.9),
+        "ghost_dark": mat("ghost_cloth_dark", (0.12, 0.13, 0.15), 0.95),
+        "mask": mat("pale_mask", (0.80, 0.77, 0.68), 0.45),
+        "ash": mat("ash", (0.36, 0.34, 0.32), 0.95),
+        "ash_dark": mat("ash_dark", (0.12, 0.11, 0.10), 1.0),
+        "ember": mat("ember", (1.0, 0.4, 0.1), 0.4, emit=(1.0, 0.36, 0.08), emit_strength=6.0),
+        "drowned": mat("drowned_cloth", (0.10, 0.20, 0.21), 0.6),
+        "drowned_light": mat("drowned_light", (0.20, 0.34, 0.33), 0.55),
+        "ghoul": mat("ghoul_skin", (0.46, 0.44, 0.38), 0.7),
+        "ghoul_dark": mat("ghoul_dark", (0.20, 0.18, 0.16), 0.8),
+        "steel": mat("steel_old", (0.34, 0.35, 0.36), 0.4, metal=0.85),
+        "incense": mat("incense_glow", (0.9, 0.6, 0.3), 0.4, emit=(1.0, 0.55, 0.2), emit_strength=5.0),
+        "pool": mat("pool", (0.04, 0.08, 0.09), 0.05),
+    })
+    return P
+
+
+def _flag_top(P, parts, rng_seed, z=0.0, cracked=0.0):
+    """A hex top tiled with irregular flagstones (Voronoi-ish slabs) over mossy grout."""
+    random.seed(rng_seed)
+    grout = hex_prism("grout", 0.98, 0.06, z0=z - 0.06, bevel=0.02)
+    assign(grout, P["grout"])
+    parts.append(grout)
+    # Slabs: a centre stone and a ring of six wedges, each shrunk to leave grout lines.
+    centre = hex_prism("slab_c", 0.34, 0.07, z0=z - 0.04, bevel=0.03)
+    centre.rotation_euler = (0, 0, random.uniform(-0.2, 0.2))
+    assign(centre, P["flag_light"])
+    parts.append(centre)
+    for i in range(6):
+        a0 = math.radians(60 * i + 30 + 3)
+        a1 = math.radians(60 * (i + 1) + 30 - 3)
+        r_in, r_out = 0.40, 0.93
+        bm = bmesh.new()
+        h = 0.07 + random.uniform(-0.02, 0.015) - (0.03 if random.random() < cracked else 0)
+        tilt = random.uniform(-0.02, 0.02)
+        pts = [(r_in * math.cos(a0), r_in * math.sin(a0)), (r_out * math.cos(a0), r_out * math.sin(a0)),
+               (r_out * math.cos(a1), r_out * math.sin(a1)), (r_in * math.cos(a1), r_in * math.sin(a1))]
+        top = [bm.verts.new((x, y, z - 0.04 + h + tilt * k)) for k, (x, y) in enumerate(pts)]
+        bot = [bm.verts.new((x, y, z - 0.05)) for (x, y) in pts]
+        bm.faces.new(top)
+        bm.faces.new(list(reversed(bot)))
+        for k in range(4):
+            j = (k + 1) % 4
+            bm.faces.new((bot[k], bot[j], top[j], top[k]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        me = bpy.data.meshes.new(f"slab{i}")
+        bm.to_mesh(me)
+        bm.free()
+        o = bpy.data.objects.new(f"slab{i}", me)
+        bpy.context.collection.objects.link(o)
+        bev = o.modifiers.new("bevel", "BEVEL")
+        bev.width = 0.02
+        bev.segments = 2
+        assign(o, random.choice([P["flag"], P["flag"], P["flag_light"], P["flag_dark"]]))
+        parts.append(o)
+    # Moss in the cracks and a few chips.
+    for i in range(5):
+        a = random.uniform(0, 6.28)
+        r = random.uniform(0.35, 0.9)
+        t = ico("tuft", random.uniform(0.04, 0.08), (r * math.cos(a), r * math.sin(a), z + 0.03),
+                scale=(1.3, 1, 0.35), sub=1)
+        assign(t, P["moss"])
+        parts.append(t)
+
+
+def build_cloister_tiles():
+    # Plain: flagstone floor over a masonry plinth.
+    reset()
+    P = cloister_palette()
+    parts = []
+    body = hex_prism("body", 0.98, 1.0, z0=-1.06, bevel=0.0)
+    assign(body, P["flag_dark"])
+    band = hex_prism("band", 0.99, 0.08, z0=-0.3, bevel=0.02)
+    assign(band, P["marble_dark"])
+    parts += [body, band]
+    _flag_top(P, parts, 101)
+    join(parts, "hex_flag")
+    finish("hex_flag")
+
+    # Stone: a broken fluted pillar on flagstones.
+    reset()
+    P = cloister_palette()
+    random.seed(102)
+    parts = []
+    body = hex_prism("body", 0.98, 1.0, z0=-1.06, bevel=0.0)
+    assign(body, P["flag_dark"])
+    parts.append(body)
+    _flag_top(P, parts, 103, cracked=0.5)
+    plinth = hex_prism("plinth", 0.5, 0.18, z0=0.0, bevel=0.03)
+    assign(plinth, P["marble_dark"])
+    parts.append(plinth)
+    shaft = cyl("shaft", 0.33, 1.25, (0, 0, 0.8), verts=16)
+    # Fluting: alternate vertex radii.
+    for v in shaft.data.vertices:
+        ang = math.atan2(v.co.y, v.co.x)
+        k = 0.92 + 0.08 * (1 if int(round(ang / (math.pi / 8))) % 2 else 0)
+        v.co.x *= k
+        v.co.y *= k
+    # Broken top: jitter the top ring heights.
+    for v in shaft.data.vertices:
+        if v.co.z > 0.5:
+            v.co.z += random.uniform(-0.35, 0.05)
+    assign(shaft, P["marble"])
+    parts.append(shaft)
+    drum = cyl("drum", 0.3, 0.42, (0.5, -0.45, 0.2), verts=16, rot=(math.radians(90), 0, math.radians(35)))
+    assign(drum, P["marble_dark"])
+    parts.append(drum)
+    ivy = ico("ivy", 0.3, (0.05, 0.1, 1.1), scale=(1.2, 1.1, 0.5), sub=2)
+    noise_displace(ivy, 0.08, 0.2)
+    assign(ivy, P["moss"])
+    parts.append(ivy)
+    for i in range(6):
+        z = random.uniform(0.3, 1.1)
+        a = random.uniform(0, 6.28)
+        lf = ico("vine", 0.06, (0.34 * math.cos(a), 0.34 * math.sin(a), z), scale=(1, 1, 1.6), sub=1)
+        assign(lf, P["leaf"])
+        parts.append(lf)
+    join(parts, "hex_pillar")
+    finish("hex_pillar")
+
+    # Water: a flooded, sunken bay with a masonry lip.
+    reset()
+    P = cloister_palette()
+    random.seed(104)
+    base = hex_prism("base", 0.98, 0.55, z0=-0.8, bevel=0.05)
+    assign(base, P["flag_dark"])
+    lip = hex_prism("lip", 0.98, 0.08, z0=-0.28, bevel=0.03)
+    assign(lip, P["marble_dark"])
+    parts = [base, lip]
+    for i in range(3):
+        a = random.uniform(0, 6.28)
+        r = random.uniform(0.25, 0.6)
+        slab = cube("sunk", 0.3, (r * math.cos(a), r * math.sin(a), -0.24), scale=(1, 0.7, 0.2),
+                    rot=(random.uniform(-0.3, 0.3), random.uniform(-0.3, 0.3), a))
+        assign(slab, P["flag"])
+        parts.append(slab)
+    candle = cyl("candle", 0.04, 0.16, (-0.4, 0.35, -0.12), verts=8)
+    assign(candle, P["wax"])
+    flame = sphere("flame", 0.03, (-0.4, 0.35, -0.01), scale=(1, 1, 1.8), seg=8, rings=6)
+    assign(flame, P["flame"])
+    parts += [candle, flame]
+    join(parts, "hex_flood")
+    finish("hex_flood")
+
+
+def build_cloister_props():
+    # Ruined pointed arch.
+    reset()
+    P = cloister_palette()
+    random.seed(111)
+    parts = []
+    for s in (-1, 1):
+        base = cube("base", 0.5, (s * 0.9, 0, 0.1), scale=(1, 1, 0.5))
+        assign(base, P["marble_dark"])
+        col = cyl("col", 0.18, 2.0, (s * 0.9, 0, 1.2), verts=12)
+        assign(col, P["marble"])
+        cap = cube("cap", 0.46, (s * 0.9, 0, 2.25), scale=(1, 1, 0.3))
+        assign(cap, P["marble_dark"])
+        parts += [base, col, cap]
+    # Pointed arch from voussoir blocks; the right half is broken off.
+    n = 14
+    for i in range(n):
+        u = i / (n - 1)
+        if u > 0.7:
+            break
+        ang = math.pi * u
+        x = -0.9 * math.cos(ang)
+        z = 2.4 + 1.0 * math.sin(ang)
+        blk = cube("vous", 0.36, (x, 0, z), scale=(0.75, 1.2, 0.95), rot=(0, -ang + math.pi / 2, 0))
+        assign(blk, P["marble"] if i % 2 else P["marble_dark"])
+        parts.append(blk)
+    for i in range(4):
+        rub = ico("rubble", random.uniform(0.1, 0.2), (random.uniform(0.4, 1.3), random.uniform(-0.4, 0.4), 0.08), sub=1)
+        assign(rub, P["marble_dark"])
+        parts.append(rub)
+    ivy = tube("ivy", [(-0.95, 0.15, 0.2), (-0.9, 0.2, 1.0), (-0.85, 0.2, 1.8), (-0.6, 0.18, 2.8), (-0.2, 0.2, 3.1)], 0.05, P["leaf"])
+    parts.append(ivy)
+    join(parts, "arch")
+    finish("arch")
+
+    # Candle cluster.
+    reset()
+    P = cloister_palette()
+    random.seed(112)
+    parts = []
+    for i in range(7):
+        a = random.uniform(0, 6.28)
+        r = random.uniform(0, 0.28)
+        h = random.uniform(0.12, 0.45)
+        x, y = r * math.cos(a), r * math.sin(a)
+        c = cyl("candle", random.uniform(0.035, 0.06), h, (x, y, h / 2), verts=10)
+        assign(c, P["wax"])
+        drip = sphere("drip", 0.05, (x, y, 0.02), scale=(1.4, 1.4, 0.4), seg=8, rings=5)
+        assign(drip, P["wax"])
+        f = sphere("flame", 0.025, (x, y, h + 0.04), scale=(1, 1, 1.9), seg=8, rings=6)
+        assign(f, P["flame"])
+        parts += [c, drip, f]
+    join(parts, "candles")
+    finish("candles")
+
+    # Fallen bronze bell, half sunk.
+    reset()
+    P = cloister_palette()
+    parts = []
+    bell = cyl("bell", 0.5, 0.75, (0, 0, 0.3), verts=24, r2=0.26, rot=(math.radians(22), 0, 0))
+    subsurf(bell, 1)
+    smooth(bell)
+    assign(bell, P["bronze"])
+    lip = cyl("lip", 0.54, 0.09, (0, 0.14, -0.04), verts=24, rot=(math.radians(22), 0, 0))
+    assign(lip, P["verdigris"])
+    band = cyl("band", 0.4, 0.06, (0, -0.08, 0.5), verts=24, rot=(math.radians(22), 0, 0))
+    assign(band, P["verdigris"])
+    crown = cyl("crown", 0.1, 0.18, (0, -0.2, 0.72), verts=10, rot=(math.radians(22), 0, 0))
+    assign(crown, P["bronze"])
+    parts += [bell, lip, band, crown]
+    random.seed(113)
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        rub = ico("rubble", random.uniform(0.08, 0.16), (0.6 * math.cos(a), 0.6 * math.sin(a), 0.04), sub=1)
+        assign(rub, P["marble_dark"])
+        parts.append(rub)
+    join(parts, "bell_fallen")
+    finish("bell_fallen")
+
+
+def build_censer_wraith():
+    reset()
+    P = cloister_palette()
+    random.seed(121)
+    parts = []
+    robe = cyl("robe", 0.32, 1.0, (0, 0, 0.9), verts=16, r2=0.12)
+    # Tattered hem: pull alternate bottom vertices down.
+    for v in robe.data.vertices:
+        if v.co.z < 0:
+            ang = math.atan2(v.co.y, v.co.x)
+            v.co.z -= 0.12 * (1 if int(round(ang / (math.pi / 8))) % 2 else 0) + random.uniform(0, 0.05)
+    subsurf(robe, 1)
+    noise_displace(robe, 0.03, 0.15)
+    assign(robe, P["ghost"])
+    smooth(robe)
+    hood = sphere("hood", 0.2, (0, 0.03, 1.45), scale=(1, 1.1, 1.2))
+    assign(hood, P["ghost_dark"])
+    mask = sphere("mask", 0.12, (0, -0.12, 1.42), scale=(0.9, 0.5, 1.15))
+    assign(mask, P["mask"])
+    _eyes(parts, P, [(-0.045, -0.18, 1.45), (0.045, -0.18, 1.45)], 0.022)
+    for s in (-1, 1):
+        sl = cyl("sleeve", 0.08, 0.5, (s * 0.26, -0.1, 1.15), verts=10, r2=0.12, rot=(0.9, s * 0.4, 0))
+        assign(sl, P["ghost"])
+        parts.append(sl)
+    parts += [robe, hood, mask]
+    body = join(parts, "censer_wraith_body")
+    # Censer on a chain, pivoting at the right hand.
+    cparts = []
+    chain = cyl("chain", 0.012, 0.5, (0, 0, -0.25), verts=6)
+    assign(chain, P["bronze"])
+    pot = sphere("pot", 0.1, (0, 0, -0.55), scale=(1, 1, 0.8), seg=12, rings=8)
+    assign(pot, P["bronze"])
+    lid = cyl("lid", 0.07, 0.08, (0, 0, -0.45), verts=10, r2=0.02)
+    assign(lid, P["verdigris"])
+    glow = sphere("glow", 0.06, (0, -0.02, -0.55), seg=8, rings=6)
+    assign(glow, P["incense"])
+    cparts += [chain, pot, lid, glow]
+    for i in range(4):
+        puff = ico("smoke", 0.05 + i * 0.02, (0.03 * i, 0, -0.4 + 0.15 * i), sub=1)
+        assign(puff, P["ghost_dark"])
+        cparts.append(puff)
+    censer = join(cparts, "censer")
+    censer.parent = body
+    censer.location = (0.36, -0.35, 1.0)
+    scene = bpy.context.scene
+    scene.frame_start = 1
+    scene.frame_end = 40
+    for f, ang in ((1, 0.45), (21, -0.45), (40, 0.45)):
+        censer.rotation_euler = (ang, 0, 0)
+        censer.keyframe_insert("rotation_euler", frame=f)
+    for f, z in ((1, 0.0), (21, 0.08), (40, 0.0)):
+        body.location = (0, 0, z)
+        body.keyframe_insert("location", frame=f)
+    finish("censer_wraith")
+
+
+def build_bell_ghoul():
+    reset()
+    P = cloister_palette()
+    random.seed(122)
+    parts = []
+    torso = ico("torso", 0.34, (0, 0.05, 0.7), scale=(1.0, 1.2, 0.9), sub=3)
+    noise_displace(torso, 0.05, 0.25)
+    assign(torso, P["ghoul"])
+    smooth(torso)
+    head = ico("head", 0.16, (0, -0.32, 0.78), scale=(0.9, 1.1, 0.85), sub=2)
+    assign(head, P["ghoul"])
+    smooth(head)
+    jaw = ico("jaw", 0.1, (0, -0.42, 0.68), scale=(1, 1, 0.5), sub=2)
+    assign(jaw, P["ghoul_dark"])
+    _eyes(parts, P, [(-0.06, -0.45, 0.82), (0.06, -0.45, 0.82)], 0.028)
+    for s in (-1, 1):
+        arm = tube("arm", [(s * 0.28, -0.1, 0.85), (s * 0.45, -0.3, 0.55), (s * 0.4, -0.45, 0.15)], 0.06, P["ghoul"])
+        hand = ico("hand", 0.08, (s * 0.4, -0.47, 0.08), scale=(1, 1.3, 0.5), sub=1)
+        assign(hand, P["ghoul_dark"])
+        leg = cyl("leg", 0.07, 0.4, (s * 0.18, 0.2, 0.2), verts=8, r2=0.05, rot=(-0.3, 0, 0))
+        assign(leg, P["ghoul_dark"])
+        parts += [arm, hand, leg]
+    # Great bell strapped to the back.
+    bell = cyl("bell", 0.32, 0.55, (0, 0.46, 0.88), verts=20, r2=0.16, rot=(-1.1, 0, 0))
+    subsurf(bell, 1)
+    smooth(bell)
+    assign(bell, P["bronze"])
+    rim = cyl("rim", 0.35, 0.06, (0, 0.68, 0.73), verts=20, rot=(-1.1, 0, 0))
+    assign(rim, P["verdigris"])
+    strap = cyl("strap", 0.36, 0.06, (0, 0.2, 0.9), verts=16, rot=(0.9, 0, 0))
+    assign(strap, P["bark"])
+    clapper = sphere("clapper", 0.07, (0, 0.72, 0.66), seg=8, rings=6)
+    assign(clapper, P["iron"])
+    rags = cyl("rags", 0.3, 0.35, (0, 0.05, 0.42), verts=12, r2=0.36)
+    noise_displace(rags, 0.04, 0.12)
+    assign(rags, P["drowned"])
+    parts += [torso, head, jaw, bell, rim, strap, clapper, rags]
+    join(parts, "bell_ghoul")
+    finish("bell_ghoul")
+
+
+def build_moss_knight():
+    reset()
+    P = cloister_palette()
+    random.seed(123)
+    parts = []
+    torso = cyl("torso", 0.34, 0.75, (0, 0, 1.0), verts=12, r2=0.4)
+    subsurf(torso, 1)
+    assign(torso, P["steel"])
+    tabard = cyl("tabard", 0.36, 0.7, (0, 0, 0.5), verts=12, r2=0.3)
+    noise_displace(tabard, 0.03, 0.12)
+    assign(tabard, P["drowned"])
+    helm = cyl("helm", 0.2, 0.36, (0, 0, 1.55), verts=12, r2=0.17)
+    assign(helm, P["steel"])
+    crest = cube("crest", 0.3, (0, 0.02, 1.8), scale=(0.1, 0.9, 0.5))
+    assign(crest, P["moss"])
+    slit = cube("slit", 0.25, (0, -0.17, 1.58), scale=(0.9, 0.2, 0.12))
+    assign(slit, P["ash_dark"])
+    _eyes(parts, P, [(-0.05, -0.2, 1.58), (0.05, -0.2, 1.58)], 0.025)
+    for s in (-1, 1):
+        pa = sphere("pauldron", 0.2, (s * 0.42, 0, 1.28), scale=(1.1, 1, 0.7))
+        assign(pa, P["steel"])
+        leg = cyl("leg", 0.1, 0.5, (s * 0.15, 0, 0.25), verts=10)
+        assign(leg, P["steel"])
+        parts += [pa, leg]
+    # Tower shield on the left arm, greatsword in the right.
+    shield = cube("shield", 1.0, (-0.52, -0.2, 0.85), scale=(0.08, 0.5, 0.8), rot=(0, 0, 0.25))
+    assign(shield, P["bronze"])
+    boss_ = sphere("boss", 0.08, (-0.58, -0.35, 0.95), scale=(1, 0.6, 1))
+    assign(boss_, P["verdigris"])
+    blade = cube("blade", 1.0, (0.5, -0.3, 0.95), scale=(0.05, 0.12, 1.2), rot=(0.25, 0, 0))
+    assign(blade, P["steel"])
+    guard = cube("guard", 1.0, (0.5, -0.17, 0.4), scale=(0.3, 0.06, 0.05), rot=(0.25, 0, 0))
+    assign(guard, P["bronze"])
+    parts += [torso, tabard, helm, crest, slit, shield, boss_, blade, guard]
+    # Moss overgrowth and small ferns all over the armour.
+    for i in range(14):
+        a = random.uniform(0, 6.28)
+        z = random.uniform(0.6, 1.5)
+        m = ico("moss", random.uniform(0.07, 0.13), (0.36 * math.cos(a), 0.36 * math.sin(a), z), scale=(1, 1, 0.55), sub=1)
+        assign(m, P["moss"] if i % 3 else P["leaf"])
+        parts.append(m)
+    for i in range(3):
+        cap = sphere("fcap", 0.06, (random.uniform(-0.2, 0.2), 0.3, random.uniform(0.9, 1.3)), scale=(1, 1, 0.5))
+        assign(cap, P["blight_glow"])
+        parts.append(cap)
+    join(parts, "moss_knight")
+    finish("moss_knight")
+
+
+def build_drowned_novice():
+    reset()
+    P = cloister_palette()
+    random.seed(124)
+    parts = []
+    robe = cyl("robe", 0.26, 0.7, (0, 0, 0.35), verts=14, r2=0.1)
+    subsurf(robe, 1)
+    noise_displace(robe, 0.03, 0.12)
+    assign(robe, P["drowned"])
+    smooth(robe)
+    hood = sphere("hood", 0.15, (0, 0.0, 0.78), scale=(1, 1.1, 1.1))
+    assign(hood, P["drowned_light"])
+    face = sphere("face", 0.09, (0, -0.1, 0.76), scale=(0.9, 0.5, 1.0))
+    assign(face, P["ghoul"])
+    _eyes(parts, P, [(-0.035, -0.14, 0.78), (0.035, -0.14, 0.78)], 0.02)
+    for s in (-1, 1):
+        arm = cyl("arm", 0.05, 0.35, (s * 0.18, -0.12, 0.5), verts=8, r2=0.04, rot=(1.0, s * 0.3, 0))
+        assign(arm, P["drowned"])
+        parts.append(arm)
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        weed = cyl("weed", 0.012, 0.3, (0.22 * math.cos(a), 0.22 * math.sin(a), 0.3), verts=4, r2=0.004,
+                   rot=(random.uniform(-0.3, 0.3), random.uniform(-0.3, 0.3), 0))
+        assign(weed, P["moss"])
+        parts.append(weed)
+    candle = cyl("candle", 0.03, 0.12, (0, -0.3, 0.5), verts=8)
+    assign(candle, P["wax"])
+    fl = sphere("flame", 0.022, (0, -0.3, 0.59), scale=(1, 1, 1.8), seg=8, rings=6)
+    assign(fl, P["flame"])
+    parts += [robe, hood, face, candle, fl]
+    join(parts, "drowned_novice")
+    finish("drowned_novice")
+
+
+def build_choir_of_ash():
+    reset()
+    P = cloister_palette()
+    random.seed(125)
+    parts = []
+    plinth = cyl("plinth", 0.75, 0.2, (0, 0, 0.1), verts=6)
+    plinth.rotation_euler = (0, 0, math.radians(30))
+    assign(plinth, P["marble_dark"])
+    parts.append(plinth)
+    for k, (x, y, h) in enumerate([(0, 0.2, 1.3), (-0.42, -0.2, 1.05), (0.42, -0.2, 1.1)]):
+        robe = cyl("robe", 0.22, h, (x, y, 0.2 + h / 2), verts=12, r2=0.08)
+        subsurf(robe, 1)
+        noise_displace(robe, 0.04, 0.1)
+        assign(robe, P["ash"])
+        smooth(robe)
+        head = sphere("head", 0.12, (x, y - 0.02, 0.2 + h + 0.08), scale=(0.9, 0.9, 1.15))
+        assign(head, P["ash"])
+        mouth = sphere("mouth", 0.04, (x, y - 0.12, 0.2 + h + 0.03), scale=(0.8, 0.4, 1.4), seg=8, rings=6)
+        assign(mouth, P["ember"])
+        _eyes(parts, P, [(x - 0.04, y - 0.11, 0.2 + h + 0.12), (x + 0.04, y - 0.11, 0.2 + h + 0.12)], 0.018)
+        book = cube("hymnal", 0.16, (x, y - 0.2, 0.2 + h * 0.62), scale=(1, 0.2, 0.7), rot=(0.6, 0, 0))
+        assign(book, P["ash_dark"])
+        parts += [robe, head, mouth, book]
+        # Cracks of ember light in the robes.
+        for i in range(3):
+            z = 0.25 + random.uniform(0.1, h * 0.8)
+            a = random.uniform(-2.4, -0.7)
+            crack = cube("crack", 0.05, (x + 0.2 * math.cos(a), y + 0.2 * math.sin(a), z), scale=(0.3, 0.3, 2.0),
+                         rot=(0, random.uniform(-0.4, 0.4), a))
+            assign(crack, P["ember"])
+            parts.append(crack)
+    for i in range(6):
+        a = i * 1.047
+        c = cyl("candle", 0.04, 0.2, (0.62 * math.cos(a), 0.62 * math.sin(a), 0.3), verts=8)
+        assign(c, P["wax"])
+        f = sphere("flame", 0.025, (0.62 * math.cos(a), 0.62 * math.sin(a), 0.44), scale=(1, 1, 1.8), seg=8, rings=6)
+        assign(f, P["flame"])
+        parts += [c, f]
+    join(parts, "choir_of_ash")
+    finish("choir_of_ash")
+
+
+def build_drowned_abbess():
+    reset()
+    P = cloister_palette()
+    random.seed(126)
+    parts = []
+    # Robes that spill out into a pool of black water.
+    pool = cyl("pool", 1.0, 0.03, (0, 0, 0.015), verts=24)
+    noise_displace(pool, 0.03, 0.3)
+    assign(pool, P["pool"])
+    skirt = cyl("skirt", 0.75, 0.9, (0, 0, 0.45), verts=20, r2=0.32)
+    for v in skirt.data.vertices:
+        if v.co.z < 0:
+            v.co.x *= random.uniform(1.0, 1.25)
+            v.co.y *= random.uniform(1.0, 1.25)
+    subsurf(skirt, 1)
+    noise_displace(skirt, 0.05, 0.2)
+    assign(skirt, P["drowned"])
+    smooth(skirt)
+    body = cyl("body", 0.32, 0.8, (0, 0, 1.25), verts=16, r2=0.22)
+    subsurf(body, 1)
+    assign(body, P["drowned_light"])
+    smooth(body)
+    scap = cyl("scapular", 0.14, 1.2, (0, -0.26, 0.95), verts=8, r2=0.1)
+    scap.scale = (1.0, 0.2, 1.0)
+    assign(scap, P["mask"])
+    head = sphere("wimple", 0.2, (0, 0, 1.8), scale=(1, 1, 1.2))
+    assign(head, P["mask"])
+    veil = cyl("veil", 0.26, 0.9, (0, 0.06, 1.55), verts=16, r2=0.18)
+    noise_displace(veil, 0.03, 0.12)
+    assign(veil, P["ghost_dark"])
+    face = sphere("face", 0.12, (0, -0.14, 1.78), scale=(0.9, 0.45, 1.1))
+    assign(face, P["ghoul"])
+    _eyes(parts, P, [(-0.05, -0.2, 1.8), (0.05, -0.2, 1.8)], 0.03)
+    for s in (-1, 1):
+        sl = cyl("sleeve", 0.1, 0.7, (s * 0.35, -0.1, 1.35), verts=10, r2=0.18, rot=(0.5, s * 0.6, 0))
+        assign(sl, P["drowned"])
+        parts.append(sl)
+    # Bell staff.
+    staff = tube("staff", [(0.6, -0.3, 0.0), (0.62, -0.3, 1.2), (0.6, -0.32, 2.2), (0.55, -0.32, 2.5)], 0.035, P["bronze"], taper=False)
+    bell = cyl("bell", 0.16, 0.26, (0.55, -0.32, 2.35), verts=16, r2=0.08)
+    assign(bell, P["verdigris"])
+    # Halo of candles behind the head.
+    halo = bpy.ops.mesh.primitive_torus_add(major_radius=0.45, minor_radius=0.03, location=(0, 0.2, 2.0),
+                                            rotation=(math.radians(90), 0, 0))
+    halo = bpy.context.active_object
+    assign(halo, P["bronze"])
+    parts += [pool, skirt, body, scap, head, veil, face, staff, bell, halo]
+    for i in range(9):
+        a = i / 9 * 6.283
+        x, z = 0.45 * math.cos(a), 2.0 + 0.45 * math.sin(a)
+        c = cyl("candle", 0.03, 0.14, (x, 0.2, z + 0.07), verts=8)
+        assign(c, P["wax"])
+        f = sphere("flame", 0.022, (x, 0.2, z + 0.17), scale=(1, 1, 1.8), seg=8, rings=6)
+        assign(f, P["flame"])
+        parts += [c, f]
+    # Weeds and chains trailing in the water.
+    for i in range(10):
+        a = random.uniform(0, 6.28)
+        weed = tube("weed", [(0.6 * math.cos(a), 0.6 * math.sin(a), 0.3), (0.85 * math.cos(a), 0.85 * math.sin(a), 0.12),
+                             (1.0 * math.cos(a + 0.2), 1.0 * math.sin(a + 0.2), 0.02)], 0.025, P["moss"])
+        parts.append(weed)
+    for i in range(6):
+        a = random.uniform(0, 6.283)
+        sp = cyl("spike", 0.06, 0.4, (0.35 * math.cos(a), 0.35 * math.sin(a) + 0.1, 1.5), verts=5, r2=0.0,
+                 rot=(random.uniform(-0.6, 0.6), random.uniform(-0.6, 0.6), 0))
+        assign(sp, P["blight_glow"])
+        parts.append(sp)
+    join(parts, "drowned_abbess")
+    finish("drowned_abbess")
+
+
 BUILDERS = {
     "hex": build_hex_tiles,
     "thicket": build_thicket,
@@ -784,6 +1317,14 @@ BUILDERS = {
     "bog_warden": build_bog_warden,
     "mire_mother": build_mire_mother,
     "props": build_props,
+    "cloister_tiles": build_cloister_tiles,
+    "cloister_props": build_cloister_props,
+    "censer_wraith": build_censer_wraith,
+    "bell_ghoul": build_bell_ghoul,
+    "moss_knight": build_moss_knight,
+    "drowned_novice": build_drowned_novice,
+    "choir_of_ash": build_choir_of_ash,
+    "drowned_abbess": build_drowned_abbess,
 }
 
 

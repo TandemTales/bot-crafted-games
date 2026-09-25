@@ -1,10 +1,12 @@
 extends Node
-## Packaged-build QA: Bramblecrown.exe --screenshot-tour <dir> [--shot-size WxH]
-## Walks title -> map -> combat (idle, targeting, enemy turn) -> reward -> camp/shrine/market -> quits.
+## Packaged-build QA: Bramblecrown.exe --screenshot-tour <dir> [--shot-size WxH] [--tour-only r2]
+## Walks title -> map -> combat (idle, targeting, enemy turn) -> reward -> camp/shrine/market ->
+## region 2 map, fight, elite, boss -> quits. `--tour-only r2` skips straight to the region 2 shots.
 
 var out_dir := ""
 var res := Vector2i(1920, 1080)
 var _shots: Array = []
+var only := ""
 
 
 func _ready() -> void:
@@ -16,6 +18,8 @@ func _ready() -> void:
 		if args[i] == "--shot-size" and i + 1 < args.size():
 			var p := args[i + 1].split("x")
 			res = Vector2i(int(p[0]), int(p[1]))
+		if args[i] == "--tour-only" and i + 1 < args.size():
+			only = args[i + 1]
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	_run.call_deferred()
 
@@ -27,6 +31,10 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "r2":
+		await _region2()
+		get_tree().quit(0)
+		return
 	await _shot("01_title")
 	Game.clear_run()
 	Game.new_run(4242)
@@ -77,9 +85,39 @@ func _run() -> void:
 		Game.route_to_status()
 		await _wait(1.2)
 		await _shot("07_%s" % st)
+	await _region2()
+	get_tree().quit(0)
+
+
+func _region2() -> void:
+	Game.clear_run()
+	Game.new_run(5151)
+	var r := Game.run
+	r.region = 1
+	r.node_id = -1
+	r.generate_map()
+	r.status = "map"
+	Game.goto_map()
+	await _wait(1.5)
+	await _shot("08_map_r2")
+	for enc in ["clo_knight", "clo_choir", "clo_abbess"]:
+		r.enter_node(r.available_nodes()[0])
+		r.current_encounter = enc
+		Game.goto_combat()
+		await _wait(3.5)
+		await _shot("09_r2_%s" % enc)
+		if enc == "clo_abbess":
+			var scene = get_tree().current_scene
+			if scene and scene.has_method("_on_end_turn"):
+				scene._on_end_turn()
+				await _wait(1.6)
+				await _shot("10_r2_boss_enemy_turn")
+				await _wait(4.0)
+		r.current_encounter = ""
+		r.node_id = -1
+		r.status = "map"
 	Game.clear_run()
 	print("[tour] wrote %d screenshots to %s" % [_shots.size(), out_dir])
-	get_tree().quit(0)
 
 
 func _wait(t: float) -> void:

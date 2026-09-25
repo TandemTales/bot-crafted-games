@@ -15,6 +15,8 @@ func _init() -> void:
 		"test_defeat", "test_deterministic_combat", "test_summon_max", "test_boss_phase2",
 		"test_map_generation", "test_run_save_load", "test_rewards_and_market", "test_events",
 		"test_autoplay_region", "test_preview_matches_play", "test_smart_bot_balance",
+		"test_region_data", "test_daze", "test_shield_and_heal_allies", "test_region2_boss_phase2",
+		"test_region_transition",
 	]
 	for t in tests:
 		_current = t
@@ -379,7 +381,7 @@ func test_autoplay_region() -> bool:
 		var r := RunState.new()
 		r.new_run(s)
 		var guard := 0
-		while r.status != "victory" and r.status != "defeat" and guard < 40:
+		while r.status != "victory" and r.status != "defeat" and guard < 80:
 			guard += 1
 			var opts := r.available_nodes()
 			var t := r.enter_node(opts[0])
@@ -469,13 +471,14 @@ func test_preview_matches_play() -> bool:
 ## Heuristic bot used as a balance gauge (a competent human should beat it comfortably).
 func test_smart_bot_balance() -> bool:
 	var wins := 0
+	var region1 := 0
 	var floors := []
 	var seeds := range(100, 120)
 	for s in seeds:
 		var r := RunState.new()
 		r.new_run(s)
 		var guard := 0
-		while r.status != "victory" and r.status != "defeat" and guard < 40:
+		while r.status != "victory" and r.status != "defeat" and guard < 80:
 			guard += 1
 			var opts: Array = r.available_nodes()
 			var pick: int = opts[0]
@@ -537,9 +540,11 @@ func test_smart_bot_balance() -> bool:
 						r.status = "map"
 		if r.status == "victory":
 			wins += 1
+		if r.region >= 1 or r.status == "victory":
+			region1 += 1
 		floors.append(r.floor_num)
-	print("  smart bot: %d/%d region clears, floors reached %s" % [wins, seeds.size(), floors])
-	check(wins >= 1, "smart bot clears the region at least once in 20 seeds")
+	print("  smart bot: %d/%d region-1 clears, %d full-run wins, floors reached %s" % [region1, seeds.size(), wins, floors])
+	check(region1 >= 1, "smart bot clears region 1 at least once in 20 seeds")
 	return true
 
 
@@ -635,3 +640,114 @@ func _smart_step(c: CombatState) -> bool:
 		c.play_card(best_uid, best_tgt)
 		return true
 	return false
+
+
+# ---------------------------------------------------------------- region 2
+
+func test_region_data() -> bool:
+	check(EncounterDB.REGIONS.size() >= 2, "at least two regions")
+	for reg in EncounterDB.REGIONS:
+		check(reg["fights"].size() >= 6, "%s has at least 6 fights" % reg["id"])
+		for id in reg.get("easy", []):
+			check(reg["fights"].has(id), "%s easy fight %s is a region fight" % [reg["id"], id])
+		check(BoardView.THEMES.has(reg.get("theme", "marsh")), "%s theme exists" % reg["id"])
+		for id in reg["fights"] + reg["elites"] + [reg["boss"]]:
+			var e: Dictionary = EncounterDB.ENCOUNTERS[id]
+			# Every enemy must be reachable on foot from the player (through passable hexes).
+			var c := CombatState.new()
+			c.setup(EncounterDB.get_def(id), [{"id": "thornstrike", "up": false}], 50, 50, [], Rng.new(1))
+			var seen := {c.player["pos"]: true}
+			var frontier: Array = [c.player["pos"]]
+			while not frontier.is_empty():
+				var h: Vector2i = frontier.pop_back()
+				for n in Hex.neighbors(h):
+					if c.in_bounds(n) and not seen.has(n) and c.terrain[n] == "plain":
+						seen[n] = true
+						frontier.append(n)
+			for en in c.enemies:
+				var adj := false
+				for n in Hex.neighbors(en["pos"]):
+					if seen.has(n):
+						adj = true
+				check(adj or seen.has(en["pos"]), "%s: %s reachable" % [id, en["id"]])
+	for id in EnemyDB.ENEMIES:
+		var m: String = EnemyDB.ENEMIES[id]["model"]
+		check(ResourceLoader.exists("res://assets/models/%s.glb" % m), "model for %s exists" % id)
+	for th in BoardView.THEMES.values():
+		for key in ["plain", "stone", "water"]:
+			check(ResourceLoader.exists("res://assets/models/%s.glb" % th[key]), "theme tile %s exists" % th[key])
+		for pr in th["props"]:
+			check(ResourceLoader.exists("res://assets/models/%s.glb" % pr[0]), "theme prop %s exists" % pr[0])
+	return true
+
+
+func test_daze() -> bool:
+	var c := _blank_combat({"player": [0, 0], "enemies": [["bell_ghoul", 0, -1]]})
+	var e: Dictionary = c.enemies[0]
+	e["pattern_idx"] = 1  # next = Toll
+	c._choose_intent(e)
+	check(e["intent"]["name"] == "Toll", "ghoul tolls")
+	c.end_turn()
+	check(c.player["energy"] == CombatState.BASE_ENERGY - 1, "dazed costs one energy next turn")
+	check(not c.player["statuses"].has("dazed"), "daze is consumed")
+	c.player["statuses"]["dazed"] = 1
+	var e2: Dictionary = c.enemies[0]
+	e2["intent"] = {"name": "Toll", "actions": [{"t": "daze", "n": 5}]}
+	c.end_turn()
+	check(c.player["energy"] >= 1, "daze never drops energy below 1")
+	return true
+
+
+func test_shield_and_heal_allies() -> bool:
+	var c := _blank_combat({"player": [0, 3], "enemies": [["moss_knight", 0, -2], ["drowned_novice", -2, -1], ["choir_of_ash", 2, -3]]})
+	var knight: Dictionary = c.enemies[0]
+	var novice: Dictionary = c.enemies[1]
+	var choir: Dictionary = c.enemies[2]
+	knight["intent"] = {"name": "Bulwark", "stay": true, "actions": [{"t": "ward", "n": 8}, {"t": "shield_allies", "n": 6}]}
+	novice["intent"] = {"name": "Wait", "stay": true, "actions": []}
+	choir["hp"] = 40
+	knight["hp"] = 20
+	choir["intent"] = {"name": "Hymn", "stay": true, "actions": [{"t": "heal_allies", "n": 8}]}
+	c.end_turn()
+	check(int(novice["ward"]) == 6, "ally shielded after the knight acts (%d)" % novice["ward"])
+	check(int(knight["ward"]) == 8, "knight keeps its own ward")
+	check(int(choir["hp"]) == 48, "choir heals itself")
+	check(int(knight["hp"]) == 28, "choir heals allies")
+	return true
+
+
+func test_region2_boss_phase2() -> bool:
+	var c := _blank_combat({"radius": 4, "player": [0, 4], "enemies": [["drowned_abbess", 0, -3]]})
+	var e: Dictionary = c.enemies[0]
+	c._damage_enemy(e, 76)
+	check(e["phase2"], "abbess enters phase 2 at half HP")
+	for i in 3:
+		c._choose_intent(e)
+	c.end_turn()
+	check(c.enemies.has(e) or c.phase != "player", "abbess survives its own turn")
+	return true
+
+
+func test_region_transition() -> bool:
+	var r := RunState.new()
+	r.new_run(77)
+	var boss_id := -1
+	for n in r.map:
+		if n["type"] == "boss":
+			boss_id = n["id"]
+	r.node_id = boss_id
+	r.status = "reward"
+	r.reward = {"gold": 0, "cards": [], "charm": ""}
+	r.hp = 10
+	r.leave_reward()
+	check(r.region == 1 and r.status == "map", "boss clear moves to region 2")
+	check(r.region_def()["id"] == "cloister", "region 2 is the Sunken Cloister")
+	check(r.hp > 10, "partial heal between regions")
+	var first: int = r.available_nodes()[0]
+	r.enter_node(first)
+	if r.status == "combat":
+		var enc := r.encounter_for_current()
+		check(r.region_def()["fights"].has(enc), "region 2 fights come from the region 2 pool (%s)" % enc)
+	var r2 := RunState.from_json(r.to_json())
+	check(r2.region == 1, "region survives save/load")
+	return true

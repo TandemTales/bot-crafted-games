@@ -319,7 +319,9 @@ func end_turn() -> Array:
 	_tick_player_statuses()
 	if phase != "player":
 		return _flush()
-	# Enemy phase.
+	# Enemy phase. Enemy ward lasts through the player's turn and drops as the enemies act.
+	for e in enemies:
+		e["ward"] = 0
 	for e in enemies.duplicate():
 		if not enemies.has(e):
 			continue
@@ -599,6 +601,11 @@ func _start_player_turn(first: bool) -> void:
 	attacks_this_turn = 0
 	player["ward"] = 0
 	player["energy"] = BASE_ENERGY
+	var dazed := int(player["statuses"].get("dazed", 0))
+	if dazed > 0:
+		player["energy"] = maxi(1, BASE_ENERGY - dazed)
+		player["statuses"].erase("dazed")
+		_emit({"type": "dazed", "target": "player", "n": dazed})
 	player["move"] = BASE_MOVE + (1 if charms.has("heron_feather") else 0)
 	if first and charms.has("ironbark_husk"):
 		player["ward"] = 8
@@ -726,7 +733,6 @@ func _enemy_act(e: Dictionary) -> void:
 		if int(e["hp"]) <= 0:
 			_kill_enemy(e)
 			return
-	e["ward"] = 0
 	var mv: Dictionary = e["intent"]
 	_emit({"type": "enemy_act", "target": e["uid"], "name": mv.get("name", "")})
 	var path := _enemy_plan_path(e)
@@ -775,6 +781,21 @@ func _enemy_act(e: Dictionary) -> void:
 			"strength":
 				e["strength"] = int(e["strength"]) + int(a["n"])
 				_emit({"type": "status", "target": e["uid"], "status": "strength", "n": e["strength"]})
+			"daze":
+				var st: Dictionary = player["statuses"]
+				st["dazed"] = mini(2, int(st.get("dazed", 0)) + int(a["n"]))
+				_emit({"type": "status", "target": "player", "status": "dazed", "n": st["dazed"], "source": e["uid"]})
+			"shield_allies":
+				for o in enemies:
+					if o != e:
+						o["ward"] = int(o["ward"]) + int(a["n"])
+						_emit({"type": "ward", "target": o["uid"], "n": o["ward"], "gain": a["n"]})
+			"heal_allies":
+				for o in enemies:
+					var before := int(o["hp"])
+					o["hp"] = mini(int(o["max_hp"]), before + int(a["n"]))
+					if int(o["hp"]) > before:
+						_emit({"type": "heal", "target": o["uid"], "n": int(o["hp"]) - before})
 	for s in ["rooted", "weak"]:
 		if int(e["statuses"].get(s, 0)) > 0:
 			e["statuses"][s] = int(e["statuses"][s]) - 1

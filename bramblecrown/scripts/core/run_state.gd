@@ -170,7 +170,8 @@ func encounter_for_current() -> String:
 		pool = reg["fights"].duplicate()
 	if n.get("row", 0) <= 1:
 		# Early floors use the gentlest layouts.
-		var easy := pool.filter(func(e): return e in ["ash_scouts", "ash_moths", "ash_brute"])
+		var easy_ids: Array = reg.get("easy", [])
+		var easy := pool.filter(func(e): return e in easy_ids)
 		if not easy.is_empty():
 			pool = easy
 	var pick: String = pool[stable_index(n.get("id", 0), pool.size())]

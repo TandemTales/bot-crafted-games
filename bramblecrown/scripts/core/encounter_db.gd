@@ -11,6 +11,17 @@ const REGIONS := [
 		"fights": ["ash_scouts", "ash_moths", "ash_brute", "ash_caller", "ash_pair", "ash_nest"],
 		"elites": ["ash_warden"],
 		"boss": "ash_mother",
+		"easy": ["ash_scouts", "ash_moths", "ash_brute"],
+		"theme": "marsh",
+	},
+	{
+		"id": "cloister", "name": "Sunken Cloister",
+		"blurb": "A drowned abbey whose bells still ring for the Blight.",
+		"fights": ["clo_nave", "clo_bells", "clo_knight", "clo_vespers", "clo_aisle", "clo_procession"],
+		"elites": ["clo_choir"],
+		"boss": "clo_abbess",
+		"easy": ["clo_nave", "clo_bells", "clo_aisle"],
+		"theme": "cloister",
 	},
 ]
 
@@ -62,6 +73,56 @@ const ENCOUNTERS := {
 		"enemies": [["mire_mother", 0, -3]],
 		"water": [[-4, 0], [-4, 1], [4, -4], [4, -3], [-2, 4], [3, 1]], "stone": [[-2, 1], [2, -1]],
 		"blight": [[0, -3], [-1, -3], [1, -4], [0, -4], [-1, -2], [1, -3], [2, -4], [-2, -2]],
+		"thicket": [[0, 4], [1, 3]],
+	},
+	# ---------------- Region 2: Sunken Cloister ----------------
+	"clo_nave": {
+		"name": "Incense in the Nave", "radius": 3, "player": [0, 3],
+		"enemies": [["censer_wraith", -2, -1], ["censer_wraith", 2, -3]],
+		"water": [[3, -1], [-3, 3]], "stone": [[-2, 1], [2, 0], [-1, -1], [1, -2]],
+		"blight": [[-2, -1], [2, -3], [1, -3], [-1, -2]], "thicket": [[0, 3]],
+	},
+	"clo_bells": {
+		"name": "The Bell-Ringer", "radius": 3, "player": [-1, 3],
+		"enemies": [["bell_ghoul", 1, -2], ["drowned_novice", -2, -1], ["drowned_novice", 3, -3]],
+		"water": [[-3, 0], [3, 0]], "stone": [[-1, 1], [1, 0], [0, -1]],
+		"blight": [[1, -2], [0, -2], [-2, -1], [3, -3], [2, -3]], "thicket": [[-1, 3], [0, 2]],
+	},
+	"clo_knight": {
+		"name": "Knight of the Moss", "radius": 3, "player": [0, 3],
+		"enemies": [["moss_knight", 0, -2], ["drowned_novice", -2, -1], ["drowned_novice", 2, -3]],
+		"water": [[-3, 1], [3, -2]], "stone": [[-1, 0], [1, 0]],
+		"blight": [[0, -2], [-1, -2], [1, -3], [-2, -1], [2, -3], [0, -3]], "thicket": [],
+	},
+	"clo_vespers": {
+		"name": "Vespers", "radius": 3, "player": [0, 2],
+		"enemies": [["bell_ghoul", 0, -3], ["censer_wraith", -3, 0], ["drowned_novice", 2, -2]],
+		"water": [[-2, 3], [3, -1]], "stone": [[-1, -1], [2, -1], [-2, 1]],
+		"blight": [[0, -3], [1, -3], [-3, 0], [2, -2], [-1, -2]], "thicket": [[0, 2]],
+	},
+	"clo_aisle": {
+		"name": "The Flooded Aisle", "radius": 3, "player": [-2, 3],
+		"enemies": [["moss_knight", 1, -3], ["censer_wraith", 3, -2]],
+		"water": [[0, 0], [1, -1], [-1, 1], [2, -2]], "stone": [[-3, 1], [3, 0]],
+		"blight": [[1, -3], [2, -3], [3, -2], [0, -2]], "thicket": [[-2, 3], [-1, 3]],
+	},
+	"clo_procession": {
+		"name": "Procession of the Drowned", "radius": 3, "player": [0, 3],
+		"enemies": [["drowned_novice", -2, -1], ["drowned_novice", -1, -2], ["drowned_novice", 1, -3], ["drowned_novice", 2, -2], ["bell_ghoul", 0, -3]],
+		"water": [[-3, 3], [3, 0]], "stone": [[-2, 2], [2, 1]],
+		"blight": [[-2, -1], [-1, -2], [1, -3], [2, -2], [0, -3], [0, -2], [-1, -1]], "thicket": [],
+	},
+	"clo_choir": {
+		"name": "The Choir of Ash", "radius": 3, "player": [0, 3], "elite": true,
+		"enemies": [["choir_of_ash", 0, -3], ["drowned_novice", -2, -1], ["drowned_novice", 2, -2]],
+		"water": [[-3, 0], [3, -3]], "stone": [[-1, 0], [1, -1], [-2, 2], [2, 1]],
+		"blight": [[0, -3], [-1, -2], [1, -3], [-2, -1], [2, -2], [0, -2]], "thicket": [[0, 3]],
+	},
+	"clo_abbess": {
+		"name": "The Drowned Abbess", "radius": 4, "player": [0, 4], "boss": true,
+		"enemies": [["drowned_abbess", 0, -3]],
+		"water": [[-4, 1], [-4, 2], [4, -4], [4, -3], [0, 0], [-1, 1]], "stone": [[-3, 0], [3, -1], [-2, 3], [2, 1], [-1, -2], [2, -3]],
+		"blight": [[0, -3], [-1, -3], [1, -4], [0, -4], [1, -3], [-2, -2], [2, -4]],
 		"thicket": [[0, 4], [1, 3]],
 	},
 }

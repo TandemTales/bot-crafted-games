@@ -74,7 +74,7 @@ func _draw() -> void:
 		var n := int(statuses[s])
 		if n <= 0:
 			continue
-		var col: Color = {"bleed": UITheme.BLOOD, "rooted": UITheme.LEAF, "weak": Color(0.9, 0.85, 0.4), "strength": Color(1, 0.55, 0.3)}.get(s, UITheme.INK)
+		var col: Color = {"bleed": UITheme.BLOOD, "rooted": UITheme.LEAF, "weak": Color(0.9, 0.85, 0.4), "strength": Color(1, 0.55, 0.3), "dazed": UITheme.GOLD}.get(s, UITheme.INK)
 		var label := "%s %d" % [s.capitalize(), n]
 		var lw := fb.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 10
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0.7), col, 1, 5, 0), Rect2(sx, y, lw, 18))
@@ -103,6 +103,15 @@ func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 		"ward":
 			col = UITheme.WARD
 			_shield(c, 11, col)
+		"daze":
+			col = UITheme.GOLD
+			# A bell.
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-4, -9), c + Vector2(4, -9), c + Vector2(7, 3), c + Vector2(10, 7), c + Vector2(-10, 7), c + Vector2(-7, 3)]), col)
+			draw_circle(c + Vector2(0, 10), 3, col)
+		"heal":
+			col = UITheme.LEAF
+			draw_line(c + Vector2(-8, 0), c + Vector2(8, 0), col, 5)
+			draw_line(c + Vector2(0, -8), c + Vector2(0, 8), col, 5)
 		"strength":
 			col = Color(1, 0.55, 0.3)
 			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -10), c + Vector2(9, 2), c + Vector2(3, 2), c + Vector2(3, 10), c + Vector2(-3, 10), c + Vector2(-3, 2), c + Vector2(-9, 2)]), col)

@@ -49,10 +49,11 @@ func _ready() -> void:
 		Game.run.enter_node(Game.run.available_nodes()[0])
 		Game.combat = Game.run.make_combat()
 	c = Game.combat
-	BoardView.make_environment(self)
+	var theme_id: String = Game.run.region_def().get("theme", "marsh")
+	BoardView.make_environment(self, theme_id)
 	board = BoardView.new()
 	add_child(board)
-	board.build(c, Game.run.seed_value + Game.run.floor_num)
+	board.build(c, Game.run.seed_value + Game.run.floor_num, theme_id)
 	rig = CameraRig.new()
 	add_child(rig)
 	rig.frame_radius(c.radius)
@@ -276,7 +277,7 @@ func _refresh_all() -> void:
 
 func _refresh_hud() -> void:
 	var p := c.player
-	hud_hp.update_from({"title": "", "hp": p["hp"], "max_hp": p["max_hp"], "ward": p["ward"], "statuses": {}})
+	hud_hp.update_from({"title": "", "hp": p["hp"], "max_hp": p["max_hp"], "ward": p["ward"], "statuses": p["statuses"]})
 	energy_label.text = "%d/%d" % [p["energy"], CombatState.BASE_ENERGY]
 	move_label.text = "Movement %d" % p["move"]
 	var g := c.grove().size()
@@ -322,6 +323,12 @@ func _sync_plates() -> void:
 					icons.append({"kind": "ward", "n": a["n"]})
 				"strength":
 					icons.append({"kind": "strength", "n": a["n"]})
+				"daze":
+					icons.append({"kind": "daze", "n": a["n"]})
+				"shield_allies":
+					icons.append({"kind": "ward", "n": a["n"]})
+				"heal_allies":
+					icons.append({"kind": "heal", "n": a["n"]})
 		plates[e["uid"]].update_from({"title": e["def"]["name"], "hp": e["hp"], "max_hp": e["max_hp"],
 			"ward": e["ward"], "statuses": e["statuses"], "intent": {"name": e["intent"].get("name", ""), "icons": icons}})
 	for uid in plates.keys():
@@ -578,6 +585,10 @@ func _place_plates() -> void:
 		var sp := cam.unproject_position(n.position + Vector3(0, hgt, 0))
 		var pl: UnitPlate = plates[uid]
 		pl.position = sp - Vector2(UnitPlate.W / 2, pl.size.y)
+		# Keep plates on screen and clear of the encounter title for back-row and tall units.
+		var vp_w := get_viewport().get_visible_rect().size.x
+		pl.position.y = maxf(pl.position.y, 64.0)
+		pl.position.x = clampf(pl.position.x, 8.0, vp_w - UnitPlate.W - 8.0)
 	if info_panel.visible:
 		var mp := get_viewport().get_mouse_position()
 		info_panel.position = mp + Vector2(24, 24)
@@ -615,6 +626,12 @@ func _update_info() -> void:
 					lines.append("• Gain %d Ward" % a["n"])
 				"strength":
 					lines.append("• Gain %d strength" % a["n"])
+				"daze":
+					lines.append("• Toll: you are [color=#e0c060]Dazed[/color] (%d less energy next turn)" % a["n"])
+				"shield_allies":
+					lines.append("• Give every other enemy %d Ward" % a["n"])
+				"heal_allies":
+					lines.append("• Heal every enemy %d HP" % a["n"])
 		if e["def"].get("flying", false):
 			lines.append("[i]Flies: ignores Thicket and water.[/i]")
 		if e["def"].get("trample", false):
@@ -751,6 +768,16 @@ func _play_event(ev: Dictionary) -> void:
 				var sp := rig.camera.unproject_position(board.units[ev["target"]].position + Vector3(0, 1.8, 0))
 				_float_text(sp, "%s %d" % [String(ev["status"]).capitalize(), ev["n"]], UITheme.GOLD, 26)
 			_sync_plates()
+		"heal":
+			if board.units.has(ev["target"]):
+				var sp := rig.camera.unproject_position(board.units[ev["target"]].position + Vector3(0, 1.6, 0))
+				_float_text(sp, "+%d" % ev["n"], UITheme.LEAF, 32)
+			Sfx.play("grow", 0.1, -6)
+			_sync_plates()
+		"dazed":
+			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.8, 0))
+			_float_text(sp, "Dazed: -%d energy" % ev["n"], UITheme.GOLD, 30, 1.3)
+			_refresh_hud()
 		"death":
 			board.kill_unit(ev["target"])
 			Sfx.play("death")
@@ -786,7 +813,8 @@ func _play_event(ev: Dictionary) -> void:
 			_show_banner("Enemy Turn", 0.7)
 			await _wait(0.5)
 		"phase2":
-			_show_banner("The Mire Mother rises in fury!", 1.8)
+			var boss = c.enemy_by_uid(ev["target"])
+			_show_banner("%s rises in fury!" % (boss["def"]["name"] if boss != null else "The boss"), 1.8)
 			rig.shake(1.0)
 			await _wait(0.8)
 		"energy", "move_points", "power":
