@@ -14,7 +14,7 @@ func _init() -> void:
 		"test_blight_empower_and_rot", "test_spread_locked", "test_burn_grove", "test_victory",
 		"test_defeat", "test_deterministic_combat", "test_summon_max", "test_boss_phase2",
 		"test_map_generation", "test_run_save_load", "test_rewards_and_market", "test_events",
-		"test_autoplay_region",
+		"test_autoplay_region", "test_preview_matches_play",
 	]
 	for t in tests:
 		_current = t
@@ -333,6 +333,12 @@ func test_run_save_load() -> bool:
 	check(r2.to_json() == text, "roundtrip identical")
 	check(r2.rng.randi_range(0, 1000000) == r.rng.randi_range(0, 1000000), "rng state restored")
 	check(r2.encounter_for_current() == r.encounter_for_current(), "same encounter after load")
+	# A fight in progress resumes as the same encounter even though it is marked used.
+	var c1 := r.make_combat()
+	var r3 := RunState.from_json(r.to_json())
+	var c2 := r3.make_combat()
+	check(c1.encounter["id"] == c2.encounter["id"], "resumed fight uses same encounter")
+	check(c1.enemies.size() == c2.enemies.size() and c1.enemies[0]["hp"] == c2.enemies[0]["hp"], "resumed fight identical setup")
 	return true
 
 
@@ -431,3 +437,30 @@ func _autoplay_turn(c: CombatState) -> void:
 			break
 	if c.phase == "player":
 		c.end_turn()
+
+
+## The on-board preview must agree with what actually happens.
+func test_preview_matches_play() -> bool:
+	for id in ["sow", "briar_wall", "reclaim", "taproot", "hollow_oak"]:
+		var c := _blank_combat({"enemies": [["husk_brute", 3, -3]], "blight": [[1, -1], [2, -2], [0, -2]], "thicket": [[0, 0]]})
+		var uid := _give(c, id)
+		var inst: Dictionary = c.hand[c.hand_index(uid)]
+		var targets := c.valid_targets(inst)
+		var tgt: Vector2i = targets[targets.size() / 2]
+		var pv := c.preview_card(inst, tgt)
+		var before := c.growth.duplicate()
+		c.play_card(uid, tgt)
+		var changed := []
+		for h in c.growth:
+			if c.growth[h] != before[h]:
+				changed.append(h)
+		for h in changed:
+			check(pv["grow"].has(h), "%s: changed hex %s was previewed" % [id, h])
+	var c := _blank_combat({"enemies": [["husk_brute", 1, 0]], "thicket": [[0, 0], [0, 1]]})
+	var e: Dictionary = c.enemies[0]
+	var uid := _give(c, "heartwood_maul")
+	var pv := c.preview_card(c.hand[c.hand_index(uid)], e["pos"])
+	var hp0: int = e["hp"]
+	c.play_card(uid, e["pos"])
+	check(pv["damage"][e["uid"]] == hp0 - int(e["hp"]), "maul damage preview exact")
+	return true

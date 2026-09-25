@@ -193,6 +193,74 @@ func path_to(dest: Vector2i) -> Array[Vector2i]:
 	return _build_path(res["prev"], player["pos"], dest)
 
 
+## What a card would do at `target`, without changing state: hexes that change and damage per enemy uid.
+func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
+	var def := card_def(inst)
+	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}}
+	var g := grove()
+	for fx in def["effects"]:
+		match fx["op"]:
+			"damage":
+				var e = enemy_at(target)
+				if e != null:
+					var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0))
+					if fx.get("double_if", "") != "" and int(e["statuses"].get(fx["double_if"], 0)) > 0:
+						amt *= 2
+					out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
+			"damage_grove_area":
+				var area := {}
+				var src: Array = g if not g.is_empty() else [player["pos"]]
+				for h in src:
+					area[h] = true
+					for n in Hex.neighbors(h):
+						area[n] = true
+				for e in enemies:
+					if area.has(e["pos"]):
+						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + CardDB.val(def, fx["amount"]) + g.size() / 3
+			"grow":
+				out["grow"] += _cluster(target, CardDB.val(def, fx["count"]), func(h): return growth[h] != "thicket")
+			"grow_self":
+				var hexes: Array[Vector2i] = [player["pos"]]
+				var n := 0
+				for h in Hex.neighbors(player["pos"]):
+					if n >= CardDB.val(def, fx["count"]):
+						break
+					if passable(h) and growth[h] != "thicket":
+						hexes.append(h)
+						n += 1
+				out["grow"] += hexes
+			"grow_line":
+				var dir: Vector2i = Hex.DIRS[Hex.direction_toward(player["pos"], target)]
+				for i in range(1, CardDB.val(def, fx["length"]) + 1):
+					var h: Vector2i = player["pos"] + dir * i
+					if not in_bounds(h):
+						break
+					if passable(h):
+						out["grow"].append(h)
+			"reclaim":
+				out["grow"] += _cluster(target, CardDB.val(def, fx["count"]), func(h): return growth[h] == "blight", true)
+			"cleanse":
+				for h in Hex.disc(player["pos"], CardDB.val(def, fx["radius"])):
+					if growth.get(h, "") == "blight":
+						out["blight_clear"].append(h)
+			"burn_grove":
+				out["burn"] = g.duplicate()
+				var touched := {}
+				for h in g:
+					touched[h] = true
+					for n in Hex.neighbors(h):
+						touched[n] = true
+				var amt := mini(g.size(), int(fx.get("cap", 99))) * CardDB.val(def, fx["per_hex"])
+				for e in enemies:
+					if touched.has(e["pos"]) and amt > 0:
+						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
+			"weak_area":
+				for h in Hex.disc(target, CardDB.val(def, fx["radius"])):
+					if in_bounds(h):
+						out["blight_clear"].append(h)
+	return out
+
+
 # ------------------------------------------------------------------ player actions
 
 func move_player(dest: Vector2i) -> Array:

@@ -24,6 +24,7 @@ var reward := {}  # pending reward after a fight
 var market := {}  # current market stock
 var status := "map"  # map | combat | reward | camp | shrine | market | victory | defeat
 var current_event := ""
+var current_encounter := ""
 var stats := {"fights": 0, "elites": 0, "bosses": 0, "cards_played": 0}
 
 
@@ -181,7 +182,9 @@ func stable_index(salt: int, size: int) -> int:
 
 
 func make_combat() -> CombatState:
-	var enc_id := encounter_for_current()
+	if current_encounter == "":
+		current_encounter = encounter_for_current()
+	var enc_id := current_encounter
 	if not used_encounters.has(enc_id):
 		used_encounters.append(enc_id)
 	var c := CombatState.new()
@@ -192,6 +195,7 @@ func make_combat() -> CombatState:
 
 func finish_combat(c: CombatState) -> void:
 	hp = int(c.player["hp"])
+	current_encounter = ""
 	if c.phase == "lost":
 		status = "defeat"
 		return
@@ -413,7 +417,7 @@ func to_dict() -> Dictionary:
 		"max_hp": max_hp, "gold": gold, "deck": deck, "charms": charms, "region": region, "map": map,
 		"node_id": node_id, "floor": floor_num, "used_encounters": used_encounters,
 		"used_events": used_events, "reward": reward, "market": market, "status": status,
-		"current_event": current_event, "stats": stats,
+		"current_event": current_event, "current_encounter": current_encounter, "stats": stats,
 	}
 
 
@@ -445,6 +449,7 @@ func from_dict(d: Dictionary) -> void:
 	market = d.get("market", {})
 	status = d.get("status", "map")
 	current_event = d.get("current_event", "")
+	current_encounter = d.get("current_encounter", "")
 	var st: Dictionary = d.get("stats", {})
 	for k in stats:
 		stats[k] = int(st.get(k, 0))
