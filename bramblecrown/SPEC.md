@@ -128,6 +128,7 @@ tested headless. Scenes and views only read rule state and submit actions.
 | `scripts/ui/run_hud.gd` | ui-engineer | out-of-combat top bar |
 | `scripts/ui/deck_viewer.gd` | ui-engineer | deck grid (view / upgrade / remove) |
 | `scripts/ui/room_scene.gd` | ui-engineer | camp, shrine, and market screens |
+| `scripts/ui/room_stage.gd` | render-engineer | live 3D vignettes behind camp/shrine/market/reward screens |
 | `scripts/ui/run_end_scene.gd` | ui-engineer | victory / defeat summary |
 | `scripts/game/audio.gd` (autoload `Sfx`) | audio-designer | SFX/music playback |
 | `source-art/*.py`, `source-art/*.blend` | 3d-artist | Blender asset generation |

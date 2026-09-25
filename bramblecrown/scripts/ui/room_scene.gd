@@ -8,14 +8,17 @@ var body: VBoxContainer
 func _ready() -> void:
 	theme = UITheme.theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg := RoomBackdrop.new()
-	bg.kind = Game.run.status
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	var st: String = Game.run.status
+	add_child(RoomStage.create(st, Game.run.region_def().get("theme", "marsh"), "left"))
+	add_child(RoomStage.shade("right"))
 	hud = RunHud.new()
 	add_child(hud)
 	body = VBoxContainer.new()
-	UITheme.anchor(body, Control.PRESET_CENTER, Vector2(-700, -360), Vector2(1400, 780))
+	if st == "market":
+		# Five cards need most of the width; the pedlar keeps the left edge.
+		UITheme.anchor(body, Control.PRESET_CENTER_RIGHT, Vector2(-1420, -380), Vector2(1380, 800))
+	else:
+		UITheme.anchor(body, Control.PRESET_CENTER_RIGHT, Vector2(-880, -360), Vector2(800, 760))
 	body.alignment = BoxContainer.ALIGNMENT_CENTER
 	body.add_theme_constant_override("separation", 20)
 	add_child(body)
@@ -46,7 +49,7 @@ func _heading(text: String, sub: String = "") -> void:
 		s.bbcode_enabled = true
 		s.fit_content = true
 		s.scroll_active = false
-		s.custom_minimum_size = Vector2(900, 0)
+		s.custom_minimum_size = Vector2(760, 0)
 		s.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		s.add_theme_font_size_override("normal_font_size", 26)
 		s.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
@@ -83,7 +86,7 @@ func _done(msg: String) -> void:
 
 func _camp() -> void:
 	var r := Game.run
-	_heading("Campfire", "The peat smoke keeps the Blight at bay for a night.")
+	_heading("Campfire", "Candle-wax and wet stone. The Blight will not cross a lit hearth tonight." if r.region_def().get("theme", "") == "cloister" else "The peat smoke keeps the Blight at bay for a night.")
 	var heal := mini(r.max_hp - r.hp, int(ceil(r.max_hp * 0.3)))
 	_button("Rest: heal %d HP" % heal, func():
 		var got := r.camp_rest()
@@ -177,30 +180,3 @@ func _market() -> void:
 		Sfx.play("click")
 		Game.goto_map())
 
-
-class RoomBackdrop extends Control:
-	var kind := ""
-	var _t := 0.0
-	func _process(d: float) -> void:
-		_t += d
-		queue_redraw()
-	func _draw() -> void:
-		for i in 24:
-			var t := i / 23.0
-			draw_rect(Rect2(0, size.y * t, size.x, size.y / 23.0 + 1), Color(0.03, 0.04, 0.04).lerp(Color(0.09, 0.07, 0.05), t))
-		var c := Vector2(size.x / 2, size.y * 0.86)
-		match kind:
-			"camp":
-				for k in 4:
-					var r := 380.0 - k * 80.0 + sin(_t * 3.0 + k) * 8.0
-					draw_circle(c, r, Color(1.0, 0.5, 0.15, 0.05 + k * 0.03))
-				for k in 3:
-					var h := 90.0 + 20.0 * sin(_t * 7.0 + k * 2.0)
-					draw_colored_polygon(PackedVector2Array([c + Vector2(-40 + k * 40, 0), c + Vector2(-10 + k * 40 - 30, -h), c + Vector2(20 + k * 40 - 40, 0)]), Color(1, 0.55 + k * 0.1, 0.2, 0.85))
-			"shrine":
-				for k in 5:
-					draw_circle(Vector2(size.x / 2, size.y * 0.45), 460.0 - k * 70, Color(0.6, 0.8, 0.5, 0.03))
-			"market":
-				for k in 6:
-					var p := Vector2(size.x * (0.15 + k * 0.14), size.y * 0.92)
-					draw_circle(p, 30 + 6 * sin(_t * 2.0 + k), Color(1, 0.8, 0.35, 0.08))

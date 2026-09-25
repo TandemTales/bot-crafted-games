@@ -35,6 +35,11 @@ func _run() -> void:
 		await _region2()
 		get_tree().quit(0)
 		return
+	if only == "rooms":
+		for reg in [0, 1]:
+			await _rooms(reg)
+		get_tree().quit(0)
+		return
 	await _shot("01_title")
 	Game.clear_run()
 	Game.new_run(4242)
@@ -87,6 +92,36 @@ func _run() -> void:
 		await _shot("07_%s" % st)
 	await _region2()
 	get_tree().quit(0)
+
+
+## Reward (with a charm) and every room screen for one region's theme.
+func _rooms(reg: int) -> void:
+	Game.clear_run()
+	Game.new_run(6060 + reg)
+	var r := Game.run
+	r.region = reg
+	r.generate_map()
+	var elite := -1
+	for n in r.map:
+		if n["type"] == "fight":
+			elite = n["id"]
+	r.node_id = elite
+	r.reward = {"gold": 31, "cards": r.roll_cards(3, 1.6), "charm": r.roll_charm()}
+	r.status = "reward"
+	Game.route_to_status()
+	await _wait(1.8)
+	await _shot("20_r%d_reward" % (reg + 1))
+	for st in ["camp", "shrine", "market"]:
+		r.status = st
+		if st == "shrine":
+			r.current_event = "hermit_grafter"
+		if st == "market":
+			r.gold = 180
+			r._stock_market()
+		Game.route_to_status()
+		await _wait(1.8)
+		await _shot("21_r%d_%s" % [reg + 1, st])
+	Game.clear_run()
 
 
 func _region2() -> void:

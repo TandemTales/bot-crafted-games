@@ -9,31 +9,38 @@ var _charm_btn: Button
 func _ready() -> void:
 	theme = UITheme.theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg := ColorRect.new()
-	bg.color = Color(0.04, 0.06, 0.05)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	var r := Game.run
+	add_child(RoomStage.create("reward", r.region_def().get("theme", "marsh"), "top"))
+	add_child(RoomStage.shade("bottom"))
 	hud = RunHud.new()
 	add_child(hud)
-	var r := Game.run
 	var v := VBoxContainer.new()
-	UITheme.anchor(v, Control.PRESET_CENTER, Vector2(-600, -330), Vector2(1200, 700))
-	v.add_theme_constant_override("separation", 22)
-	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	UITheme.anchor(v, Control.PRESET_CENTER_TOP, Vector2(-640, 120), Vector2(1280, 930))
+	v.add_theme_constant_override("separation", 14)
+	v.alignment = BoxContainer.ALIGNMENT_BEGIN
 	add_child(v)
 	var h := Label.new()
 	h.text = "The clearing is quiet again"
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 52)
 	h.add_theme_color_override("font_color", UITheme.GOLD)
+	h.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	h.add_theme_constant_override("outline_size", 10)
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 	var g := Label.new()
 	g.text = "+%d gold" % int(r.reward.get("gold", 0))
 	g.add_theme_font_size_override("font_size", 28)
 	g.add_theme_color_override("font_color", Color(0.93, 0.75, 0.38))
+	g.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	g.add_theme_constant_override("outline_size", 6)
 	g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(g)
+	# The Grovewalker stands in the clearing in this gap.
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 250 if r.reward.get("charm", "") == "" else 170)
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(gap)
 	if r.reward.get("charm", "") != "":
 		var cd := CharmDB.get_def(r.reward["charm"])
 		_charm_btn = Button.new()
@@ -51,6 +58,8 @@ func _ready() -> void:
 	var pick := Label.new()
 	pick.text = "Choose a card to add to your deck"
 	pick.add_theme_font_size_override("font_size", 26)
+	pick.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	pick.add_theme_constant_override("outline_size", 6)
 	pick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(pick)
 	_cards_box = HBoxContainer.new()

@@ -1305,6 +1305,198 @@ def build_drowned_abbess():
     finish("drowned_abbess")
 
 
+# ------------------------------------------------------------------ room vignettes (camp, shrine, market)
+
+def build_campfire():
+    reset()
+    P = cloister_palette()
+    random.seed(201)
+    parts = []
+    for i in range(9):
+        a = i / 9 * 6.283
+        st = ico("stone", random.uniform(0.09, 0.13), (0.34 * math.cos(a), 0.34 * math.sin(a), 0.05),
+                 scale=(1.2, 1.0, 0.7), sub=2)
+        noise_displace(st, 0.03, 0.1)
+        assign(st, P["stone"] if i % 2 else P["stone_dark"])
+        parts.append(st)
+    ash = cyl("ash", 0.3, 0.03, (0, 0, 0.015), verts=16)
+    assign(ash, P["soil_dark"])
+    parts.append(ash)
+    for i in range(5):
+        a = i / 5 * 6.283 + 0.3
+        log = cyl("log", 0.045, 0.5, (0.08 * math.cos(a), 0.08 * math.sin(a), 0.14), verts=8,
+                  rot=(math.cos(a + math.pi / 2) * 0.9, math.sin(a + math.pi / 2) * 0.9, 0))
+        assign(log, P["bark"])
+        parts.append(log)
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        r = random.uniform(0.0, 0.1)
+        h = random.uniform(0.18, 0.38)
+        fl = cyl("flame", random.uniform(0.05, 0.08), h, (r * math.cos(a), r * math.sin(a), 0.12 + h / 2), verts=6, r2=0.0)
+        assign(fl, P["flame"])
+        parts.append(fl)
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        em = sphere("ember", 0.025, (0.15 * math.cos(a), 0.15 * math.sin(a), 0.05), seg=6, rings=4)
+        assign(em, P["ember"])
+        parts.append(em)
+    # Bedroll and a pot on a tripod.
+    roll = cyl("bedroll", 0.1, 0.6, (-0.7, 0.25, 0.1), verts=12, rot=(0, math.radians(90), math.radians(20)))
+    assign(roll, P["cloth_red"])
+    parts.append(roll)
+    for k in range(3):
+        a = k / 3 * 6.283
+        leg = cyl("tripod", 0.015, 0.8, (0.18 * math.cos(a), 0.18 * math.sin(a), 0.36), verts=5,
+                  rot=(-math.sin(a) * 0.22, math.cos(a) * 0.22, 0))
+        assign(leg, P["bark_light"])
+        parts.append(leg)
+    pot = sphere("pot", 0.1, (0, 0, 0.5), scale=(1, 1, 0.8), seg=12, rings=8)
+    assign(pot, P["iron"])
+    parts.append(pot)
+    join(parts, "campfire")
+    finish("campfire")
+
+
+def build_pedlar():
+    reset()
+    P = cloister_palette()
+    random.seed(202)
+    parts = []
+    # Cart bed, wheels, shafts.
+    bed = cube("bed", 1.0, (0, 0.2, 0.55), scale=(1.1, 0.7, 0.12))
+    assign(bed, P["bark_light"])
+    parts.append(bed)
+    for s in (-1, 1):
+        side = cube("side", 1.0, (s * 0.55, 0.2, 0.72), scale=(0.04, 0.7, 0.25))
+        assign(side, P["bark"])
+        wheel = cyl("wheel", 0.36, 0.06, (s * 0.62, 0.2, 0.36), verts=16, rot=(0, math.radians(90), 0))
+        assign(wheel, P["bark"])
+        hub = cyl("hub", 0.07, 0.1, (s * 0.66, 0.2, 0.36), verts=8, rot=(0, math.radians(90), 0))
+        assign(hub, P["iron"])
+        shaft = cyl("shaft", 0.03, 1.2, (s * 0.35, -0.65, 0.45), verts=6, rot=(math.radians(80), 0, 0))
+        assign(shaft, P["bark"])
+        parts += [side, wheel, hub, shaft]
+        for k in range(6):
+            a = k / 6 * 6.283
+            sp = cyl("spoke", 0.015, 0.62, (s * 0.62, 0.2, 0.36), verts=4, rot=(a, math.radians(90), 0))
+            sp.rotation_euler = (a, 0, 0)
+            sp.location = (s * 0.62, 0.2, 0.36)
+            assign(sp, P["bark_light"])
+            parts.append(sp)
+    # Canopy on poles.
+    for x in (-0.5, 0.5):
+        for y in (-0.12, 0.55):
+            pole = cyl("pole", 0.02, 0.9, (x, y, 1.05), verts=6)
+            assign(pole, P["bark"])
+            parts.append(pole)
+    canopy = cube("canopy", 1.0, (0, 0.22, 1.52), scale=(1.2, 0.85, 0.05), rot=(0.12, 0, 0))
+    assign(canopy, P["cloth_red"])
+    parts.append(canopy)
+    for k in range(7):
+        fr = cube("fringe", 0.1, (-0.55 + k * 0.18, -0.22, 1.43), scale=(0.9, 0.2, 1.2))
+        assign(fr, P["gold"] if k % 2 else P["cloth_red"])
+        parts.append(fr)
+    # Wares: sacks, jars, bundles.
+    for i in range(6):
+        x = random.uniform(-0.4, 0.4)
+        y = random.uniform(0.0, 0.45)
+        sack = ico("sack", random.uniform(0.12, 0.17), (x, y, 0.72), scale=(1, 1, 1.1), sub=2)
+        noise_displace(sack, 0.03, 0.1)
+        assign(sack, random.choice([P["husk"], P["cloth"], P["reed"]]))
+        parts.append(sack)
+    for i in range(4):
+        jar = cyl("jar", 0.05, 0.14, (-0.35 + i * 0.22, -0.05, 0.68), verts=10)
+        assign(jar, P["verdigris"] if i % 2 else P["seed_glow"])
+        parts.append(jar)
+    lantern = cube("lantern", 0.12, (0.5, -0.2, 1.3), scale=(1, 1, 1.3))
+    assign(lantern, P["flame"])
+    lcap = cyl("lcap", 0.09, 0.06, (0.5, -0.2, 1.4), verts=4, r2=0.02)
+    assign(lcap, P["iron"])
+    parts += [lantern, lcap]
+    # The pedlar: hunched, hooded, moss-stitched coat, long nose.
+    coat = cyl("coat", 0.26, 0.8, (-0.85, -0.3, 0.4), verts=12, r2=0.13)
+    subsurf(coat, 1)
+    noise_displace(coat, 0.03, 0.12)
+    assign(coat, P["bark_light"])
+    smooth(coat)
+    # A towering pack of wares on the pedlar's back.
+    pack = cube("pack", 1.0, (-0.85, -0.05, 0.95), scale=(0.34, 0.26, 0.5), rot=(-0.15, 0, 0))
+    assign(pack, P["husk"])
+    roll = cyl("packroll", 0.09, 0.42, (-0.85, -0.02, 1.28), verts=10, rot=(0, math.radians(90), 0))
+    assign(roll, P["cloth_red"])
+    pan = cyl("pan", 0.1, 0.02, (-0.66, 0.02, 0.9), verts=12, rot=(0, math.radians(90), 0))
+    assign(pan, P["iron"])
+    hump = ico("hump", 0.2, (-0.85, -0.22, 0.8), scale=(1, 1.1, 0.8), sub=2)
+    assign(hump, P["bark"])
+    hood = sphere("hood", 0.16, (-0.85, -0.3, 0.9), scale=(1, 1.0, 1.05))
+    assign(hood, P["cloth"])
+    face = sphere("face", 0.1, (-0.85, -0.42, 0.87), scale=(0.9, 0.7, 1.0))
+    assign(face, P["skin"])
+    nose = cyl("nose", 0.03, 0.16, (-0.85, -0.56, 0.85), verts=6, r2=0.01, rot=(math.radians(100), 0, 0))
+    assign(nose, P["skin"])
+    _eyes(parts, P, [(-0.89, -0.5, 0.9), (-0.81, -0.5, 0.9)], 0.02)
+    parts += [pack, roll, pan, face]
+    for i in range(5):
+        a = random.uniform(0, 6.28)
+        patch = ico("patch", 0.06, (-0.85 + 0.22 * math.cos(a), -0.3 + 0.22 * math.sin(a), random.uniform(0.2, 0.7)),
+                    scale=(1, 1, 0.5), sub=1)
+        assign(patch, P["moss"])
+        parts.append(patch)
+    stick = tube("stick", [(-1.1, -0.45, 0.0), (-1.1, -0.47, 0.6), (-1.08, -0.47, 1.05)], 0.02, P["bark_light"], taper=False)
+    parts += [coat, hump, hood, nose, stick]
+    join(parts, "pedlar")
+    finish("pedlar")
+
+
+def build_altar():
+    reset()
+    P = cloister_palette()
+    random.seed(203)
+    parts = []
+    base = cyl("base", 0.55, 0.2, (0, 0, 0.1), verts=8)
+    assign(base, P["stone_dark"])
+    step = cyl("step", 0.42, 0.18, (0, 0, 0.29), verts=8)
+    assign(step, P["stone"])
+    slab = cube("slab", 1.0, (0, 0.1, 0.95), scale=(0.5, 0.18, 1.1))
+    subsurf(slab, 1)
+    noise_displace(slab, 0.05, 0.25)
+    assign(slab, P["stone"])
+    # Carved spiral disc with a glowing seed at its heart.
+    disc = cyl("disc", 0.2, 0.04, (0, -0.01, 1.15), verts=24, rot=(math.radians(90), 0, 0))
+    assign(disc, P["stone_dark"])
+    seed = sphere("seed", 0.07, (0, -0.05, 1.15), scale=(1, 0.7, 1.25))
+    assign(seed, P["seed_glow"])
+    parts += [base, step, slab, disc, seed]
+    for i in range(24):
+        a = i / 24 * 6.283 * 2
+        rr = 0.03 + i * 0.0065
+        dot = sphere("groove", 0.012, (rr * math.cos(a), -0.04, 1.15 + rr * math.sin(a)), seg=6, rings=4)
+        assign(dot, P["seed_glow"] if i % 3 == 0 else P["thorn"])
+        parts.append(dot)
+    # Thorn wreath and offerings.
+    for i in range(10):
+        a = i / 10 * 6.283
+        pts = [(0.45 * math.cos(a), 0.45 * math.sin(a), 0.4), (0.5 * math.cos(a + 0.3), 0.5 * math.sin(a + 0.3), 0.5),
+               (0.45 * math.cos(a + 0.6), 0.45 * math.sin(a + 0.6), 0.42)]
+        vine = tube("vine", pts, 0.02, P["bark"])
+        parts.append(vine)
+        lf = ico("leaf", 0.05, pts[1], scale=(1.4, 0.7, 0.2), sub=1)
+        assign(lf, P["leaf"])
+        parts.append(lf)
+    for i in range(3):
+        bowl = sphere("bowl", 0.07, (-0.25 + i * 0.25, -0.38, 0.42), scale=(1, 1, 0.45), seg=10, rings=6)
+        assign(bowl, P["bark_light"])
+        parts.append(bowl)
+    for i in range(4):
+        c = cyl("candle", 0.03, 0.14, (-0.35 + i * 0.23, -0.5, 0.27), verts=8)
+        assign(c, P["wax"])
+        f = sphere("flame", 0.022, (-0.35 + i * 0.23, -0.5, 0.37), scale=(1, 1, 1.8), seg=8, rings=6)
+        assign(f, P["flame"])
+        parts += [c, f]
+    join(parts, "altar")
+    finish("altar")
+
+
 BUILDERS = {
     "hex": build_hex_tiles,
     "thicket": build_thicket,
@@ -1325,6 +1517,9 @@ BUILDERS = {
     "drowned_novice": build_drowned_novice,
     "choir_of_ash": build_choir_of_ash,
     "drowned_abbess": build_drowned_abbess,
+    "campfire": build_campfire,
+    "pedlar": build_pedlar,
+    "altar": build_altar,
 }
 
 
