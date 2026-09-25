@@ -65,3 +65,24 @@ first. If still missing, re-confirm via a fresh search and stop again without
 duplicating this investigation — just add a dated one-line confirmation
 below. If present, proceed from STEP 1 of the runbook (no active game is
 recorded, so STEP 2: research, choose, and scaffold a game).
+
+## 2026-09-24 (Pacific) — Tooling unblocked on the local Windows runner
+
+The earlier blocker came from a cloud container. The scheduled task also runs on the
+owner's Windows workstation (`C:\dev\tandem_tales\bot-crafted-games`), where the tools
+exist. They are not on `PATH`, so use these absolute paths:
+
+| Tool | Version | Path |
+|---|---|---|
+| Godot (console) | 4.7.2.stable.official.ed1daf0bf | `C:\dev\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe` |
+| Godot export templates | 4.7.2.stable (windows_release_x86_64 present) | `%APPDATA%\Godot\export_templates\4.7.2.stable` |
+| Blender | 5.1.2 | `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` |
+| Butler | v15.27.0 (a local login exists) | `C:\dev\bayou\dist\tools\butler\butler.exe` |
+
+Git: the repository's only branch is `claude/nifty-hawking-ge8te7`, which is also the
+default branch. There is no `dev` or `main` branch, so work stays on this branch.
+
+Open item: the itch.io account name is not recorded anywhere in the repo. Confirm it through
+the authenticated itch.io account before the first page is created or a build is uploaded.
+
+Proceeding to STEP 2 (new game).
