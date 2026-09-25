@@ -30,7 +30,9 @@ var hud_hp: UnitPlate
 var energy_label: Label
 var move_label: Label
 var grove_label: Label
-var pile_label: Label
+var draw_btn: Button
+var discard_btn: Button
+var exhaust_btn: Button
 var hint_label: RichTextLabel
 var end_btn: Button
 var banner: Label
@@ -144,13 +146,17 @@ func _build_ui() -> void:
 	move_label.tooltip_text = UITheme.KEYWORDS["Movement"]
 	move_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	bl.add_child(move_label)
-	pile_label = Label.new()
-	pile_label.add_theme_font_size_override("font_size", 18)
-	pile_label.add_theme_color_override("font_color", UITheme.INK_DIM)
-	pile_label.position = Vector2(0, 172)
-	pile_label.size = Vector2(190, 30)
-	pile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bl.add_child(pile_label)
+	# Clickable piles (A / S / X), like every modern deckbuilder.
+	var piles := HBoxContainer.new()
+	piles.position = Vector2(-6, 172)
+	piles.add_theme_constant_override("separation", 6)
+	bl.add_child(piles)
+	draw_btn = _pile_button("Draw pile (A): cards you will draw, in random order.", func(): _open_pile("draw"))
+	discard_btn = _pile_button("Discard pile (S): reshuffled into the draw pile when it runs out.", func(): _open_pile("discard"))
+	exhaust_btn = _pile_button("Exhausted (X): removed for the rest of this fight.", func(): _open_pile("exhaust"))
+	piles.add_child(draw_btn)
+	piles.add_child(discard_btn)
+	piles.add_child(exhaust_btn)
 	# Bottom-right: end turn.
 	end_btn = Button.new()
 	end_btn.text = "End Turn"
@@ -255,6 +261,51 @@ func _build_pause() -> Control:
 	return dim
 
 
+func _pile_button(tip: String, cb: Callable) -> Button:
+	var b := Button.new()
+	b.tooltip_text = tip
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(0, 36)
+	b.add_theme_font_size_override("font_size", 18)
+	b.add_theme_constant_override("h_separation", 4)
+	b.icon = _card_back_icon()
+	b.pressed.connect(cb)
+	return b
+
+
+func _card_back_icon() -> Texture2D:
+	var img := Image.create(18, 24, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in 24:
+		for x in 18:
+			var edge := x < 2 or y < 2 or x > 15 or y > 21
+			var diag := (x + y) % 6 == 0 and not edge
+			if edge:
+				img.set_pixel(x, y, UITheme.GOLD)
+			elif diag:
+				img.set_pixel(x, y, UITheme.LEAF.darkened(0.2))
+			else:
+				img.set_pixel(x, y, Color(0.16, 0.24, 0.1))
+	return ImageTexture.create_from_image(img)
+
+
+func _open_pile(which: String) -> DeckViewer:
+	if pause_layer.visible:
+		return null
+	Sfx.play("click")
+	var cards: Array = []
+	var src: Array = {"draw": c.draw_pile, "discard": c.discard, "exhaust": c.exhausted}[which]
+	for inst in src:
+		cards.append({"id": inst["id"], "up": inst.get("up", false)})
+	var title: String = {"draw": "Draw Pile", "discard": "Discard Pile", "exhaust": "Exhausted"}[which]
+	var note := ""
+	if which == "draw":
+		# Never reveal the draw order.
+		cards.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
+		note = "%d cards, shown sorted (the real order is hidden)" % cards.size()
+	return DeckViewer.open_pile(self, title, cards, note)
+
+
 func _toggle_pause() -> void:
 	pause_layer.visible = not pause_layer.visible
 	Sfx.play("click")
@@ -282,7 +333,10 @@ func _refresh_hud() -> void:
 	move_label.text = "Movement %d" % p["move"]
 	var g := c.grove().size()
 	grove_label.text = "Grove %d  (+%d)" % [g, g / 3] if g > 0 else "No Grove: stand in Thicket"
-	pile_label.text = "Draw %d · Discard %d" % [c.draw_pile.size(), c.discard.size()]
+	draw_btn.text = "Draw %d" % c.draw_pile.size()
+	discard_btn.text = "Discard %d" % c.discard.size()
+	exhaust_btn.text = "Exh %d" % c.exhausted.size()
+	exhaust_btn.visible = not c.exhausted.is_empty()
 	title_label.text = "%s · Turn %d" % [c.encounter.get("name", ""), c.turn]
 	end_btn.disabled = busy or c.phase != "player"
 	var sel := _selected_inst()
@@ -519,6 +573,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		_on_end_turn()
 	elif event is InputEventKey and event.pressed and not event.echo:
 		var k: int = event.keycode
+		if k == KEY_A:
+			_open_pile("draw")
+			return
+		if k == KEY_S:
+			_open_pile("discard")
+			return
+		if k == KEY_X and not c.exhausted.is_empty():
+			_open_pile("exhaust")
+			return
 		if k >= KEY_1 and k <= KEY_9:
 			var i := k - KEY_1
 			if i < card_views.size():
@@ -910,5 +973,4 @@ class CharmBadge extends Control:
 		var ctr := size / 2
 		draw_circle(ctr, 21, Color(0.08, 0.07, 0.05))
 		draw_arc(ctr, 21, 0, TAU, 32, UITheme.GOLD, 2, true)
-		var col := Color.from_hsv(float(hash(charm_id) % 360) / 360.0, 0.5, 0.85)
-		draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -12), ctr + Vector2(10, 0), ctr + Vector2(0, 12), ctr + Vector2(-10, 0)]), col)
+		CharmGlyph.draw_glyph(self, charm_id, ctr, 1.0)

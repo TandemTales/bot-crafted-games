@@ -97,6 +97,7 @@ original to this project.
 | Rotate camera | Q / E, right-drag | Shoulders |
 | Zoom | Mouse wheel | Triggers |
 | Pause menu | Esc (with no card selected) | Start |
+| View draw / discard / exhausted pile | A / S / X, or click the pile buttons | — |
 
 ## Architecture and ownership
 
@@ -129,6 +130,7 @@ tested headless. Scenes and views only read rule state and submit actions.
 | `scripts/ui/deck_viewer.gd` | ui-engineer | deck grid (view / upgrade / remove) |
 | `scripts/ui/room_scene.gd` | ui-engineer | camp, shrine, and market screens |
 | `scripts/ui/room_stage.gd` | render-engineer | live 3D vignettes behind camp/shrine/market/reward screens |
+| `scripts/ui/charm_glyph.gd` | ui-engineer | vector icon per charm |
 | `scripts/ui/run_end_scene.gd` | ui-engineer | victory / defeat summary |
 | `scripts/game/audio.gd` (autoload `Sfx`) | audio-designer | SFX/music playback |
 | `source-art/*.py`, `source-art/*.blend` | 3d-artist | Blender asset generation |

@@ -141,6 +141,15 @@ func _region2() -> void:
 		Game.goto_combat()
 		await _wait(3.5)
 		await _shot("09_r2_%s" % enc)
+		if enc == "clo_knight":
+			var sc = get_tree().current_scene
+			if sc and sc.has_method("_open_pile"):
+				var dv = sc._open_pile("draw")
+				await _wait(0.6)
+				await _shot("09_r2_draw_pile")
+				if dv:
+					dv.queue_free()
+				await _wait(0.3)
 		if enc == "clo_abbess":
 			var scene = get_tree().current_scene
 			if scene and scene.has_method("_on_end_turn"):
