@@ -14,7 +14,7 @@ func _init() -> void:
 		"test_blight_empower_and_rot", "test_spread_locked", "test_burn_grove", "test_victory",
 		"test_defeat", "test_deterministic_combat", "test_summon_max", "test_boss_phase2",
 		"test_map_generation", "test_run_save_load", "test_rewards_and_market", "test_events",
-		"test_autoplay_region", "test_preview_matches_play",
+		"test_autoplay_region", "test_preview_matches_play", "test_smart_bot_balance",
 	]
 	for t in tests:
 		_current = t
@@ -464,3 +464,174 @@ func test_preview_matches_play() -> bool:
 	c.play_card(uid, e["pos"])
 	check(pv["damage"][e["uid"]] == hp0 - int(e["hp"]), "maul damage preview exact")
 	return true
+
+
+## Heuristic bot used as a balance gauge (a competent human should beat it comfortably).
+func test_smart_bot_balance() -> bool:
+	var wins := 0
+	var floors := []
+	var seeds := range(100, 120)
+	for s in seeds:
+		var r := RunState.new()
+		r.new_run(s)
+		var guard := 0
+		while r.status != "victory" and r.status != "defeat" and guard < 40:
+			guard += 1
+			var opts: Array = r.available_nodes()
+			var pick: int = opts[0]
+			var best_score := -999.0
+			for id in opts:
+				var t: String = r.node(id)["type"]
+				var hp_frac := float(r.hp) / r.max_hp
+				var sc: float = {"fight": 2.0, "elite": 3.0 if hp_frac > 0.7 else -3.0, "camp": 4.0 if hp_frac < 0.6 else 0.5,
+					"shrine": 1.5, "market": 1.0 if r.gold > 120 else 0.0, "boss": 0.0}[t]
+				if sc > best_score:
+					best_score = sc
+					pick = id
+			r.enter_node(pick)
+			match r.status:
+				"combat":
+					var c := r.make_combat()
+					var turns := 0
+					while c.phase == "player" and turns < 60:
+						_smart_turn(c)
+						turns += 1
+					if r.node(r.node_id)["type"] == "boss":
+						var boss_hp := 0
+						for e in c.enemies:
+							if e["def"].get("boss", false):
+								boss_hp = e["hp"]
+						print("    boss fight seed %d: entered hp ?, ended phase %s after %d turns, player hp %d, boss hp %d, deck %d" % [s, c.phase, turns, c.player["hp"], boss_hp, r.deck.size()])
+					r.finish_combat(c)
+					if r.status == "reward":
+						var cards: Array = r.reward["cards"]
+						if not cards.is_empty() and r.deck.size() < 22:
+							var pref := ["heartwood_maul", "bramble_lash", "overgrowth", "deep_roots", "thornvolley", "hollow_oak", "spinebreaker", "rootsnare", "crowns_wrath", "wildfire"]
+							var chosen := ""
+							for id in pref:
+								if cards.has(id):
+									chosen = id
+									break
+							if chosen != "":
+								r.take_reward_card(chosen)
+						r.take_reward_charm()
+						r.leave_reward()
+				"shrine":
+					var opts2: Array = EventDB.EVENTS[r.current_event]["options"]
+					var chosen_i := opts2.size() - 1
+					for i in opts2.size():
+						if r.event_option_enabled(r.current_event, i):
+							chosen_i = i
+							break
+					r.choose_event_option(r.current_event, chosen_i)
+				"market":
+					r.leave_room()
+				"camp":
+					if r.hp < r.max_hp * 0.75:
+						r.camp_rest()
+					else:
+						for i in r.deck.size():
+							if not r.deck[i]["up"] and r.deck[i]["id"] != "barkskin":
+								r.upgrade_card(i)
+								break
+						r.status = "map"
+		if r.status == "victory":
+			wins += 1
+		floors.append(r.floor_num)
+	print("  smart bot: %d/%d region clears, floors reached %s" % [wins, seeds.size(), floors])
+	check(wins >= 1, "smart bot clears the region at least once in 20 seeds")
+	return true
+
+
+func _smart_turn(c: CombatState) -> void:
+	var guard := 0
+	while c.phase == "player" and guard < 30:
+		guard += 1
+		if not _smart_step(c):
+			break
+	if c.phase == "player":
+		# Step off blight if possible.
+		if c.growth[c.player["pos"]] == "blight":
+			for h in c.reachable():
+				if c.growth[h] != "blight":
+					c.move_player(h)
+					break
+		c.end_turn()
+
+
+func _incoming(c: CombatState) -> int:
+	var total := 0
+	for e in c.enemies:
+		var pv := c.enemy_preview(e)
+		if pv["hits"]:
+			total += int(pv["dmg"])
+	return total
+
+
+## One decision; returns false when nothing useful remains.
+func _smart_step(c: CombatState) -> bool:
+	var best_uid := -1
+	var best_tgt := Vector2i.ZERO
+	var best_val := 0.0
+	for inst in c.hand:
+		if not c.can_afford(inst):
+			continue
+		var d := c.card_def(inst)
+		for tgt in c.valid_targets(inst):
+			var pv := c.preview_card(inst, tgt)
+			var v := 0.0
+			for uid in pv["damage"]:
+				var e = c.enemy_by_uid(uid)
+				var dmg: int = pv["damage"][uid]
+				var focus := 1.4 if e["def"].get("boss", false) or e["def"].get("elite", false) else 1.0
+				v += minf(dmg, e["hp"] + e["ward"]) * focus + (6.0 if dmg >= e["hp"] + e["ward"] else 0.0)
+			v += pv["grow"].size() * 0.9
+			for h in pv["grow"]:
+				if Hex.distance(h, c.player["pos"]) <= 1:
+					v += 0.6
+			v += pv["blight_clear"].size() * 0.5
+			for fx in d["effects"]:
+				match fx["op"]:
+					"ward":
+						var w := CardDB.val(d, fx["amount"]) + c.grove().size() / 3 + c.grove().size() * CardDB.val(d, fx.get("grove_mult", 0))
+						v += minf(w, maxi(0, _incoming(c) - int(c.player["ward"]))) * 1.1
+					"power":
+						v += 9.0 if c.turn <= 3 else 3.0
+					"draw":
+						v += 1.5
+					"energy":
+						v += 2.0
+					"apply":
+						v += 2.0
+					"weak_area":
+						v += 1.5 if _incoming(c) > 0 else 0.0
+			v -= float(d["cost"]) * 0.8
+			if v > best_val:
+				best_val = v
+				best_uid = inst["uid"]
+				best_tgt = tgt
+	# Consider moving next to an enemy if an attack could then land.
+	if best_uid < 0 or best_val < 3.0:
+		if int(c.player["move"]) > 0 and not c.enemies.is_empty():
+			var weakest = c.enemies[0]
+			for e in c.enemies:
+				if e["def"].get("boss", false):
+					weakest = e
+					break
+				if e["hp"] < weakest["hp"]:
+					weakest = e
+			var cur := Hex.distance(c.player["pos"], weakest["pos"])
+			var dest: Vector2i = c.player["pos"]
+			var dest_score := cur * 10.0 + (3.0 if c.growth[c.player["pos"]] == "blight" else 0.0)
+			for h in c.reachable():
+				var sc := Hex.distance(h, weakest["pos"]) * 10.0 + (3.0 if c.growth[h] == "blight" else 0.0) - (2.0 if c.growth[h] == "thicket" else 0.0)
+				if sc < dest_score:
+					dest_score = sc
+					dest = h
+			if dest != c.player["pos"]:
+				c.move_player(dest)
+				return true
+	if best_uid >= 0 and best_val > 0.0:
+		c.play_card(best_uid, best_tgt)
+		return true
+	return false

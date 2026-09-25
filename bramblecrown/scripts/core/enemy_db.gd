@@ -59,14 +59,14 @@ const ENEMIES := {
 		"pattern": [2, 0, 1],
 	},
 	"mire_mother": {
-		"name": "The Mire Mother", "hp": [140, 140], "move": 1, "keep_range": 2, "trample": true, "model": "mire_mother",
+		"name": "The Mire Mother", "hp": [124, 124], "move": 1, "keep_range": 1, "trample": true, "model": "mire_mother",
 		"size": 2.0, "boss": true,
 		"moves": [
-			{"name": "Brood Tide", "actions": [{"t": "summon", "enemy": "blightling", "count": 2, "max": 4}, {"t": "spread", "count": 3, "radius": 2}]},
+			{"name": "Brood Tide", "actions": [{"t": "summon", "enemy": "blightling", "count": 1, "max": 3}, {"t": "spread", "count": 3, "radius": 2}]},
 			{"name": "Drowning Grasp", "actions": [{"t": "attack", "dmg": 10, "range": 2}]},
 			{"name": "Rot Swell", "stay": true, "actions": [{"t": "blight_self", "radius": 2, "count": 8}, {"t": "ward", "n": 14}]},
 			{"name": "Mire Crush", "actions": [{"t": "attack", "dmg": 18, "range": 2}]},
-			{"name": "Wake of Moths", "actions": [{"t": "summon", "enemy": "rotmoth", "count": 2, "max": 5}, {"t": "strength", "n": 2}]},
+			{"name": "Wake of Moths", "actions": [{"t": "summon", "enemy": "rotmoth", "count": 1, "max": 2}, {"t": "strength", "n": 2}]},
 		],
 		"pattern": [0, 1, 2],
 		"phase2_at": 0.5,

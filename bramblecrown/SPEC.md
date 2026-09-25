@@ -110,6 +110,8 @@ tested headless. Scenes and views only read rule state and submit actions.
 | `scripts/core/card_db.gd` | content-designer | card definitions and upgrades |
 | `scripts/core/enemy_db.gd` | content-designer | enemy definitions and intent patterns |
 | `scripts/core/encounter_db.gd` | content-designer | authored encounter layouts per region |
+| `scripts/core/charm_db.gd` | content-designer | charm (relic) definitions |
+| `scripts/core/event_db.gd` | content-designer | shrine event definitions |
 | `scripts/core/combat_state.gd` | rules-engineer | combat rules, intents, resolution |
 | `scripts/core/run_state.gd` | rules-engineer | run progression, map generation, rewards, save/load |
 | `scripts/game/game.gd` (autoload `Game`) | integration (main runner) | scene flow, current run, profile |
@@ -121,12 +123,20 @@ tested headless. Scenes and views only read rule state and submit actions.
 | `scripts/ui/map_scene.gd` | ui-engineer | region map screen |
 | `scripts/ui/title_scene.gd` | ui-engineer | title/menu screen |
 | `scripts/ui/reward_scene.gd` | ui-engineer | post-fight rewards |
-| `scripts/ui/theme_builder.gd` | ui-engineer | shared UI theme |
+| `scripts/ui/theme_builder.gd` | ui-engineer | shared UI theme, fonts, anchoring helper |
+| `scripts/ui/unit_plate.gd` | ui-engineer | floating HP / ward / status / intent plates |
+| `scripts/ui/run_hud.gd` | ui-engineer | out-of-combat top bar |
+| `scripts/ui/deck_viewer.gd` | ui-engineer | deck grid (view / upgrade / remove) |
+| `scripts/ui/room_scene.gd` | ui-engineer | camp, shrine, and market screens |
+| `scripts/ui/run_end_scene.gd` | ui-engineer | victory / defeat summary |
 | `scripts/game/audio.gd` (autoload `Sfx`) | audio-designer | SFX/music playback |
 | `source-art/*.py`, `source-art/*.blend` | 3d-artist | Blender asset generation |
 | `tools/make_audio.py` | audio-designer | synthesized audio generation |
 | `tests/test_runner.gd` | qa-engineer | headless rule tests |
-| `tools/screenshot.gd` | qa-engineer | packaged-build screenshot capture mode |
+| `tools/screenshot_tour.gd` | qa-engineer | packaged-build screenshot capture mode |
+| `tools/check.sh` | qa-engineer | import + scene smoke + rule tests |
+| `source-art/preview_sheet.py` | 3d-artist | Blender contact-sheet render for asset QA |
+| `export_presets.cfg` | integration (main runner) | Windows x64 release preset |
 
 ## Why this differs from every existing project
 
