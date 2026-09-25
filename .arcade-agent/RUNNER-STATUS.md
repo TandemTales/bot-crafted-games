@@ -86,3 +86,9 @@ Open item: the itch.io account name is not recorded anywhere in the repo. Confir
 the authenticated itch.io account before the first page is created or a build is uploaded.
 
 Proceeding to STEP 2 (new game).
+
+## 2026-09-24 (Pacific) — Run 1 result
+
+New game started: **bramblecrown** (see `bramblecrown/PROGRESS.md`). There is a playable region-1 build with an exported
+Windows exe, verified at 3 resolutions through the packaged screenshot tour. Not released. The itch.io account and page are
+unverified, and this remains a blocker for release night (Saturday 2026-10-03).
