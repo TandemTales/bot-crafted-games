@@ -1,5 +1,5 @@
 extends Node
-## Packaged-build QA: Bramblecrown.exe --screenshot-tour <dir> [--resolution WxH]
+## Packaged-build QA: Bramblecrown.exe --screenshot-tour <dir> [--shot-size WxH]
 ## Walks title -> map -> combat (idle, targeting, enemy turn) -> reward -> camp/shrine/market -> quits.
 
 var out_dir := ""
@@ -13,7 +13,7 @@ func _ready() -> void:
 	for i in args.size():
 		if args[i] == "--screenshot-tour" and i + 1 < args.size():
 			out_dir = args[i + 1]
-		if args[i] == "--resolution" and i + 1 < args.size():
+		if args[i] == "--shot-size" and i + 1 < args.size():
 			var p := args[i + 1].split("x")
 			res = Vector2i(int(p[0]), int(p[1]))
 	DirAccess.make_dir_recursive_absolute(out_dir)

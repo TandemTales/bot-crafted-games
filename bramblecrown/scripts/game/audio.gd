@@ -43,6 +43,10 @@ func play_music(track: String) -> void:
 	var stream = load(path)
 	if _music.stream == stream and _music.playing:
 		return
+	if stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		stream.loop_begin = 0
+		stream.loop_end = int(stream.get_length() * stream.mix_rate)
 	_music.stream = stream
 	_music.volume_db = linear_to_db(maxf(0.001, float(Game.settings.get("music", 0.6)))) - 8.0
 	_music.play()
