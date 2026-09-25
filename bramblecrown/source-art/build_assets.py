@@ -188,6 +188,8 @@ def join(objs, name):
     bpy.ops.object.join()
     o = bpy.context.active_object
     o.name = name
+    # Bake the transform so the origin is the modelling origin (feet at 0,0,0).
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     return o
 
 
@@ -521,7 +523,7 @@ def build_rotmoth():
             assign(wg, P["moth"])
             wg.location = (s * 0.08, 0, 0.82)
             wg.parent = body_obj
-            wg.location = (s * 0.08, 0, 0)
+            wg.location = (s * 0.08, 0, 0.82)
             wings.append((wg, s))
     body_obj.location = (0, 0, 0)
     # Flap animation: wings rotate about the body axis.
