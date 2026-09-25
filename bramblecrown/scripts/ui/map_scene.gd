@@ -20,7 +20,7 @@ func _ready() -> void:
 	hud = RunHud.new()
 	add_child(hud)
 	var legend := Label.new()
-	legend.text = "Choose your path upward.   X Fight   Horned skull: Elite   Arch: Shrine   Flame: Camp   Coin: Pedlar   Crown: The Mire Mother"
+	legend.text = "Choose your path upward.   X Fight   Horned skull: Elite   Arch: Shrine   Flame: Camp   Coin: Pedlar   Crown: %s" % _boss_name()
 	legend.add_theme_color_override("font_color", UITheme.INK_DIM)
 	legend.add_theme_font_size_override("font_size", 20)
 	UITheme.anchor(legend, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -50), Vector2(1000, 30))
@@ -110,7 +110,7 @@ func _draw() -> void:
 		var n := r.node(_hover)
 		var txt: String = NAMES.get(n["type"], n["type"])
 		if n["type"] == "boss":
-			txt = "Boss: The Mire Mother"
+			txt = "Boss: %s" % _boss_name()
 		var f := UITheme.font("heading")
 		var p: Vector2 = _pos[_hover] + Vector2(ICON_R + 16, -10)
 		var sz := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22)
@@ -198,3 +198,8 @@ func _enter(id: int) -> void:
 		Game.goto_combat()
 	else:
 		Game.route_to_status()
+
+
+func _boss_name() -> String:
+	var enc: Dictionary = EncounterDB.ENCOUNTERS[Game.run.region_def()["boss"]]
+	return EnemyDB.ENEMIES[enc["enemies"][0][0]]["name"]

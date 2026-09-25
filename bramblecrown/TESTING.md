@@ -44,7 +44,9 @@ The export must produce `Bramblecrown.exe` with the embedded PCK (preset `embed_
 ## 5. Packaged-build checks (run the exported exe, never the editor)
 
 - Screenshot mode: `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH` captures
-  the title, map, and combat screens, then quits. Run it at 1280x720, 1920x1080, and 2560x1440, and read
+  the title, map, and combat screens, then quits. Add `--tour-only r2` for just the Region 2 map/fight/elite/boss
+  shots plus the draw-pile viewer, or `--tour-only rooms` for the reward/camp/shrine/market vignettes in both regions.
+  (The tour forces regions without entering nodes, so its HUD shows "Floor 0"; that is expected.) Run it at 1280x720, 1920x1080, and 2560x1440, and read
   every PNG.
 - Manual route: title → new run → map → fight (play cards, grow thicket, end turn, win) →
   reward → map → camp → quit → continue run restores the map position.

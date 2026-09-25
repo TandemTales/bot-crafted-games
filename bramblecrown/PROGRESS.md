@@ -84,3 +84,72 @@ Plan for this run (from Run 1's next action):
 3. Content: Region 2 (Sunken Cloister) board, roster, elite, boss, encounters, new cards.
 
 Housekeeping: stopped tracking Blender `.blend1` backup files (added to `.gitignore`).
+
+### Done (pushed on `dev`)
+
+1. **Region 2: Sunken Cloister** (commit bd0a82e)
+   - Blender assets:
+     - Tiles: flagstone, broken-pillar, and flooded-bay hex tiles.
+     - Props: ruined arch, candle cluster, fallen bell.
+     - Enemies: Drowned Novice, Censer Wraith (flying, animated censer swing), Bell Ghoul, and Moss Knight.
+     - Elite: Choir of Ash. Boss: The Drowned Abbess (two phases).
+   - Content: 6 fights, an elite, and a boss (`clo_*` in `encounter_db.gd`), with a per-region "easy" pool for early floors.
+   - New intents:
+     - `daze`: the Grovewalker has 1 less energy next turn. It stacks to at most 2, and energy never drops below 1. It shows a bell icon and appears on the HP plate.
+     - `shield_allies` and `heal_allies`.
+   - Rules change: enemy ward now clears at the start of the enemy phase, so shields given to allies last through the player's turn.
+   - `BoardView.THEMES` sets tiles, surrounding props, lighting, and warm candle lights per region. The phase-2 banner uses the boss's name.
+   - Enemy plates and floating text are clamped below the encounter title.
+2. **Live 3D vignettes on non-combat screens** (commit d0e5167)
+   - New `RoomStage` (a SubViewport) stages region-themed tiles, props, flickering lights, and Wren behind the camp, shrine, market, and reward screens. The UI moves to a shaded side panel.
+   - New Blender models: campfire, pedlar cart with a beak-nosed merchant, and a wayside altar.
+3. **Combat HUD** (commit 2c32b8e): clickable Draw, Discard, and Exhausted pile viewers (A / S / X). The draw pile is shown sorted so its order stays hidden. Each charm now has its own vector icon (`charm_glyph.gd`).
+4. **Critic-driven fixes**:
+   - The map legend and boss tooltip now name the region's boss.
+   - Rest is disabled at full HP.
+   - The cloister has its own reward headline and camp text.
+
+### Evidence
+
+- `bash tools/check.sh` → ALL CHECKS PASSED, **919 passed / 0 failed**. The count rose from 650 because of new tests:
+  - Region data: fight counts, easy pools, themes, and a reachability flood-fill for every encounter.
+  - Every enemy model and theme asset exists.
+  - Daze, including its energy floor.
+  - Shield and heal allies.
+  - Abbess phase 2.
+  - Region transition and save/load.
+- Balance bot: the smart bot clears region 1 in 2/20 seeds and dies in region 2 (floors 13–14). No full-run wins. This has not been checked with a human.
+- Packaged exe: exported with Godot 4.7.2; SHA-256 `25ea1ac53b6fdc9b3f9897a18f9a012153369e02f13c5009faee71fa3eed313c`, which is gitignored.
+  - The full tour and the rooms tour both exited with code 0 at **1280x720, 1920x1080, and 2560x1440**, producing 23 screenshots per resolution. The latest log has no ERROR lines.
+  - I read these screenshots myself: the region 2 combat, elite, and boss screens; the draw-pile viewer; every room screen in both regions; the 1280x720 market and shrine; the 2560x1440 boss turn; and the post-fix region 2 map and 1280x720 cloister camp.
+
+### Critic verdicts (independent read-only critic; 17 packaged screenshots; vs StS2 / Into the Breach / Monster Train 2)
+
+| Discipline | Verdict | Top complaint |
+|---|---|---|
+| Board / 3D art | loses | board floats in a black void; no ground plane or fog; too much bloom from candles and crystals |
+| Unit readability | **loses badly** | enemy plates overlap models and each other (Abbess, 720p Moss Knight, Rotmoth/Blightling); the Abbess has no readable face |
+| Card design | **loses badly** | most art is re-posed Wren; no rarity frames; body text about 9px at 720p |
+| HUD / UI | loses | pile viewers added, but the combat title bleeds through the modal; empty portrait panel; text "Menu" button |
+| Map | **loses badly** | icon discs on flat parchment, same template for every region (boss name bug fixed) |
+| Reward / room screens | loses (was "loses badly") | the Grafter NPC is not staged; charms are text buttons without icons; the camp layout is the same in both regions |
+| Telegraphs | loses | no per-hex damage tint; intent icons lack tooltips |
+| Art-direction coherence | loses | mixed UI kit; uneven bloom; title boss cropped at 720p |
+| Region 2 identity | loses | only combat is region-specific; the map, events, and camp composition are shared |
+
+No discipline passes, so the game is **not** release-quality.
+
+### Open issues / debt
+
+- The plate-overlap system needs a screen-space rail or stacking. This is the top critic item.
+- Card art: there are no illustrations yet for any new Region 2 cards; none were added this run. The card count is still 24 of the 60 planned.
+- Content still owed: regions 3–5, Cassia and Thatch, about 36 cards, about 10 charms, about 7 events (plus Region 2 event text), and the Withering difficulty tiers.
+- Carried over from Run 1: audio has not been heard by a human; controller support is untested; there has been no hand-played full run or manual resize test. The editor-run tour still logs "1 resources still in use at exit". The packaged log is clean.
+- itch.io: the page is still a **draft** holding build #2014268 from Run 1. This run's build was not uploaded, because release happens on Saturday 2026-10-03.
+
+### Next action (Run 3)
+
+1. Unit readability: put enemy plates on a stacked screen-space rail with no overlaps. Give the Abbess a face and a candle crown.
+2. Region 2 cards: about 10 new Wren cards that use daze and ward counterplay, with Blender art in `render_card_art.py` that uses the new cloister models. Add rarity frames to `card_view.gd`.
+3. Illustrated map backdrop per region, with a boss portrait at the top. Stage the Grafter NPC in the shrine vignette. Add Region 2 shrine events.
+4. Start Region 3 (Glasswood) if time remains. Rerun the critic on fresh packaged screenshots.

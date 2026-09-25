@@ -88,10 +88,10 @@ func _camp() -> void:
 	var r := Game.run
 	_heading("Campfire", "Candle-wax and wet stone. The Blight will not cross a lit hearth tonight." if r.region_def().get("theme", "") == "cloister" else "The peat smoke keeps the Blight at bay for a night.")
 	var heal := mini(r.max_hp - r.hp, int(ceil(r.max_hp * 0.3)))
-	_button("Rest: heal %d HP" % heal, func():
+	_button("Rest: heal %d HP" % heal if heal > 0 else "Rest: already at full health", func():
 		var got := r.camp_rest()
 		Sfx.play("ward")
-		_done("You sleep beside the embers. [color=#e06a5a]+%d HP[/color]." % got))
+		_done("You sleep beside the embers. [color=#e06a5a]+%d HP[/color]." % got), heal > 0)
 	_button("Tend: upgrade a card", func():
 		var dv := DeckViewer.open(self, "upgrade")
 		dv.chosen.connect(func(i):

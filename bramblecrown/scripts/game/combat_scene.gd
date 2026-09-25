@@ -910,6 +910,8 @@ func _float_text(at: Vector2, text: String, col: Color, fsize: int = 32, life: f
 	float_root.add_child(l)
 	l.reset_size()
 	l.position = at - l.size / 2
+	# Text over back-row or tall units must stay on screen and below the encounter title.
+	l.position.y = maxf(l.position.y, 70.0)
 	var tw := create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(l, "position:y", l.position.y - 60, life).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

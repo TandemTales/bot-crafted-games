@@ -20,7 +20,7 @@ func _ready() -> void:
 	v.alignment = BoxContainer.ALIGNMENT_BEGIN
 	add_child(v)
 	var h := Label.new()
-	h.text = "The clearing is quiet again"
+	h.text = "The bells fall silent" if r.region_def().get("theme", "") == "cloister" else "The clearing is quiet again"
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 52)
 	h.add_theme_color_override("font_color", UITheme.GOLD)
