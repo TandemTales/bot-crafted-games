@@ -54,7 +54,7 @@ No discipline has passed a critic gate, so the game is **not** release-quality.
 
 ### Open issues / debt
 
-- **itch.io**: account name unverified, and no page exists yet. The automated attempt to read the account through the Butler credentials was blocked by the permission classifier, which is correct. A human, or a run with the logged-in itch dashboard, must confirm `<account>/bramblecrown` and create the page before any upload.
+- **itch.io**: `shoejunk/bramblecrown` was verified through the signed-in dashboard and created as a draft on 2026-09-24. Windows build #2014268 is processed. Public publication is pending explicit approval after automatic review rejected making the draft page public.
 - Running the tour through the editor binary logs `ERROR: 1 resources still in use at exit` on quit. It has not been investigated yet (check the packaged log, probably a Label3D/SystemFont reference).
 - Audio has not been listened to by a human. The waveforms were generated without errors, and loudness and mix are unverified.
 - Controller support is coded (stick hex cursor, A/B/Y, d-pad card cycling) but not tested with a pad.
@@ -67,3 +67,11 @@ No discipline has passed a critic gate, so the game is **not** release-quality.
 2. Combat HUD: clickable draw/discard pile viewers, labeled charm bar with icons, and a Ward overlay on the HP bar. Then ask the critic to re-judge all disciplines with fresh packaged screenshots.
 3. Content: Region 2 (Sunken Cloister) with a new board palette, 3–4 enemies, an elite, a boss, 6 encounters, and ~10 new cards.
 4. Hand-play one full region in the packaged exe and record the outcome.
+
+## 2026-09-24 — itch.io draft upload
+
+- Re-exported the Windows x64 preset from clean commit `10aa561ee3c33c46927b8ee8c595611373183b72` with Godot 4.7.2. SHA-256 of `build/windows/Bramblecrown.exe`: `E8C2627837E2FEFF9DC1211EB51746214566A3F4F8C5B36BD0A2A8D40C501D89`.
+- Rule suite: 650 passed, 0 failed. The exported executable wrote all nine 1280x720 screenshot-tour images; its log recorded tour completion.
+- Created https://shoejunk.itch.io/bramblecrown with in-development status, first-region scope, controls, cover/gameplay screenshots, free download pricing, and AI-content disclosure. It remains a **draft**.
+- Butler uploaded `build/windows` to `shoejunk/bramblecrown:windows` as version `2026.09.24-10aa561`. `butler status` confirmed processed build #2014268 (upload #19390429).
+- Public visibility and a player-facing download/install check remain pending. Automatic approval review rejected saving Public visibility because the request to push a build did not explicitly authorize publishing the page to everyone.

@@ -79,16 +79,17 @@ exist. They are not on `PATH`, so use these absolute paths:
 | Blender | 5.1.2 | `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` |
 | Butler | v15.27.0 (a local login exists) | `C:\dev\bayou\dist\tools\butler\butler.exe` |
 
-Git: the repository's only branch is `claude/nifty-hawking-ge8te7`, which is also the
-default branch. There is no `dev` or `main` branch, so work stays on this branch.
+Git: `dev` is the development branch (created 2026-09-24 from `claude/nifty-hawking-ge8te7`,
+which is still the GitHub default branch). Future runs work on `dev`.
 
-Open item: the itch.io account name is not recorded anywhere in the repo. Confirm it through
-the authenticated itch.io account before the first page is created or a build is uploaded.
+The itch.io account is `shoejunk`, verified through the signed-in dashboard on 2026-09-24.
+`bramblecrown` has a draft page and processed Windows build #2014268; see
+`.arcade-agent/itch-projects.md`. Public publication is pending.
 
 Proceeding to STEP 2 (new game).
 
 ## 2026-09-24 (Pacific) — Run 1 result
 
 New game started: **bramblecrown** (see `bramblecrown/PROGRESS.md`). There is a playable region-1 build with an exported
-Windows exe, verified at 3 resolutions through the packaged screenshot tour. Not released. The itch.io account and page are
-unverified, and this remains a blocker for release night (Saturday 2026-10-03).
+Windows exe, verified at 3 resolutions through the packaged screenshot tour. A draft itch.io page
+and Windows upload now exist; public publication and a player-facing download check remain pending.
