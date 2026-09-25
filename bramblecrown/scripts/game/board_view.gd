@@ -3,6 +3,19 @@ extends Node3D
 ## 3D diorama for a CombatState: tiles, growth props, units, overlays, and intent paths.
 
 const HEX_SIZE := 1.0
+const UNIT_SCALE := 1.45
+const OUTLINE_SHADER := """
+shader_type spatial;
+render_mode unshaded, cull_front, shadows_disabled;
+uniform vec4 color : source_color = vec4(0.02, 0.02, 0.02, 1.0);
+uniform float width = 0.022;
+void vertex() {
+	VERTEX += NORMAL * width;
+}
+void fragment() {
+	ALBEDO = color.rgb;
+}
+"""
 const MODELS := "res://assets/models/%s.glb"
 const OVERLAY_SHADER := """
 shader_type spatial;
@@ -30,6 +43,8 @@ var _path_root: Node3D
 var _time := 0.0
 var _unit_base := {}  # node -> base y
 var player_light: OmniLight3D
+var _outline_mat: ShaderMaterial
+var _incoming: Label3D
 
 
 func _ready() -> void:
@@ -38,6 +53,21 @@ func _ready() -> void:
 	_overlay_mesh = _make_hex_mesh(0.93)
 	_path_root = Node3D.new()
 	add_child(_path_root)
+	var osh := Shader.new()
+	osh.code = OUTLINE_SHADER
+	_outline_mat = ShaderMaterial.new()
+	_outline_mat.shader = osh
+	_incoming = Label3D.new()
+	_incoming.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_incoming.font = UITheme.font("title")
+	_incoming.font_size = 96
+	_incoming.pixel_size = 0.006
+	_incoming.outline_size = 24
+	_incoming.modulate = Color(1, 0.35, 0.28)
+	_incoming.outline_modulate = Color(0.05, 0, 0, 1)
+	_incoming.no_depth_test = true
+	_incoming.visible = false
+	add_child(_incoming)
 
 
 ## Moody marsh lighting shared by combat and title: warm key, cold violet rim, fog, glow.
@@ -129,6 +159,8 @@ func build(c: CombatState, region_seed: int = 1) -> void:
 	add_child(p)
 	units["player"] = p
 	p.position = world(c.player["pos"])
+	p.scale = Vector3.ONE * UNIT_SCALE
+	_decorate_unit(p, Color(0.55, 1.0, 0.4))
 	player_light = OmniLight3D.new()
 	player_light.light_color = Color(0.7, 1.0, 0.45)
 	player_light.light_energy = 1.4
@@ -145,10 +177,11 @@ func build(c: CombatState, region_seed: int = 1) -> void:
 func add_enemy(e: Dictionary, animate: bool) -> Node3D:
 	var n: Node3D = scene(e["def"]["model"]).instantiate()
 	add_child(n)
-	var s := float(e["def"].get("size", 1.0))
+	var s := float(e["def"].get("size", 1.0)) * UNIT_SCALE
 	n.position = world(e["pos"])
 	units[e["uid"]] = n
 	_start_anims(n)
+	_decorate_unit(n, Color(1.0, 0.3, 0.22) if not e["def"].get("boss", false) else Color(1.0, 0.55, 0.15))
 	if animate:
 		n.scale = Vector3.ONE * 0.01
 		var tw := create_tween()
@@ -156,6 +189,39 @@ func add_enemy(e: Dictionary, animate: bool) -> Node3D:
 	else:
 		n.scale = Vector3.ONE * s
 	return n
+
+
+## Dark silhouette outline plus a glowing team ring under the unit.
+func _decorate_unit(n: Node3D, ring_col: Color) -> void:
+	for node in n.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var m: Mesh = mi.mesh
+		if m == null:
+			continue
+		for si in m.get_surface_count():
+			var base := mi.get_active_material(si)
+			if base and base.next_pass == null:
+				var dup: Material = base.duplicate()
+				dup.next_pass = _outline_mat
+				mi.set_surface_override_material(si, dup)
+	var ring := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.5
+	tm.outer_radius = 0.58
+	tm.rings = 32
+	tm.ring_segments = 6
+	ring.mesh = tm
+	var rm := StandardMaterial3D.new()
+	rm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	rm.albedo_color = ring_col
+	ring.material_override = rm
+	# Rings are children of the scaled unit; undo the unit scale so every ring matches the hex.
+	var us := maxf(0.05, n.scale.x)
+	ring.scale = Vector3(1.0 / us, 0.12 / us, 1.0 / us)
+	ring.position.y = 0.06 / us
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ring.name = "TeamRing"
+	n.add_child(ring)
 
 
 func _start_anims(n: Node) -> void:
@@ -214,6 +280,9 @@ func _build_surroundings(rng: RandomNumberGenerator) -> void:
 				prop = "menhir"
 			elif prop_roll < 0.7:
 				prop = "blight"
+			# Tall props in front of the board would cover the hand and End Turn button.
+			if prop in ["willow", "menhir"] and (t.position.z > -1.0 or ring_r < r + 2):
+				prop = "reeds" if t.position.z < combat.radius * 1.5 else ""
 			if prop != "":
 				var pn: Node3D = scene(prop).instantiate()
 				pn.position = t.position + Vector3(rng.randf_range(-0.3, 0.3), 0.05, rng.randf_range(-0.3, 0.3))
@@ -420,14 +489,40 @@ func set_paths(previews: Array) -> void:
 			continue
 		var col: Color = pv["color"]
 		for i in range(pts.size() - 1):
-			var a := world(pts[i]) + Vector3(0, 0.18, 0)
-			var b := world(pts[i + 1]) + Vector3(0, 0.18, 0)
-			for k in 3:
-				var t := (k + 1) / 4.0
-				_path_dot(a.lerp(b, t), col, 0.06)
+			var a := world(pts[i]) + Vector3(0, 0.2, 0)
+			var b := world(pts[i + 1]) + Vector3(0, 0.2, 0)
+			if i == 0:
+				a = a.lerp(b, 0.3)
+			if i == pts.size() - 2:
+				b = a.lerp(b, 0.72)
+			_path_segment(a, b, col)
 		var end := world(pts.back()) + Vector3(0, 0.2, 0)
 		var prev := world(pts[pts.size() - 2]) + Vector3(0, 0.2, 0)
 		_path_arrow(end, (end - prev).normalized(), col)
+
+
+func _path_segment(a: Vector3, b: Vector3, col: Color) -> void:
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.11, 0.03, a.distance_to(b))
+	mi.mesh = bm
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = col
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_path_root.add_child(mi)
+	mi.look_at_from_position((a + b) / 2.0, b, Vector3.UP)
+
+
+## Floating red number over the hex that will be hit this enemy turn.
+func set_incoming(dmg: int, h: Variant) -> void:
+	if dmg <= 0 or h == null:
+		_incoming.visible = false
+		return
+	_incoming.visible = true
+	_incoming.text = "-%d" % dmg
+	_incoming.position = world(h) + Vector3(0, 3.0, 0)
 
 
 func _path_dot(at: Vector3, col: Color, r: float) -> void:
@@ -451,8 +546,8 @@ func _path_arrow(at: Vector3, dir: Vector3, col: Color) -> void:
 	var mi := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
 	cm.top_radius = 0.0
-	cm.bottom_radius = 0.16
-	cm.height = 0.3
+	cm.bottom_radius = 0.24
+	cm.height = 0.42
 	cm.radial_segments = 3
 	mi.mesh = cm
 	var m := StandardMaterial3D.new()

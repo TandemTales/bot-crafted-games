@@ -31,8 +31,8 @@ func _ready() -> void:
 func frame_radius(r: int) -> void:
 	# Look at a point toward the camera so the board sits above the hand of cards.
 	pitch_deg = 57.0
-	look_point = Vector3(0, 0, 1.2 + r * 0.35)
-	distance = 10.0 + r * 1.8
+	look_point = Vector3(0, 0, 1.0 + r * 0.3)
+	distance = 10.5 + r * 2.25
 	_dist_goal = distance
 	min_distance = distance * 0.6
 	max_distance = distance * 1.3

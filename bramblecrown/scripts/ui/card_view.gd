@@ -61,7 +61,9 @@ func _build() -> void:
 	_desc.fit_content = false
 	_desc.scroll_active = false
 	_desc.add_theme_color_override("default_color", Color(0.17, 0.12, 0.07))
-	_desc.add_theme_font_size_override("normal_font_size", 18)
+	_desc.add_theme_font_size_override("normal_font_size", 19)
+	_desc.add_theme_font_size_override("bold_font_size", 19)
+	_desc.add_theme_font_override("bold_font", UITheme.font("heading"))
 	_desc.add_theme_font_override("normal_font", UITheme.font("body"))
 	_desc.position = Vector2(20, 196)
 	_desc.size = Vector2(SIZE.x - 40, 112)

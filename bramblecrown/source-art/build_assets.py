@@ -219,6 +219,10 @@ def palette():
         "thorn": mat("thorn", (0.55, 0.47, 0.30), 0.6),
         "blight": mat("blight", (0.20, 0.14, 0.22), 0.45),
         "blight_goo": mat("blight_goo", (0.10, 0.06, 0.12), 0.15),
+        "rotflesh": mat("rotflesh", (0.42, 0.12, 0.10), 0.55),
+        "rotflesh_dark": mat("rotflesh_dark", (0.16, 0.05, 0.05), 0.5),
+        "sporecap": mat("sporecap", (0.66, 0.32, 0.10), 0.6),
+        "mire": mat("mire", (0.13, 0.17, 0.10), 0.35),
         "blight_glow": mat("blight_glow", (0.55, 0.2, 0.7), 0.4, emit=(0.62, 0.22, 0.9), emit_strength=3.0),
         "fungus": mat("fungus", (0.52, 0.47, 0.50), 0.7),
         "cloth": mat("cloth_green", (0.14, 0.27, 0.17), 0.95),
@@ -226,11 +230,11 @@ def palette():
         "skin": mat("skin", (0.78, 0.60, 0.47), 0.7),
         "seed_glow": mat("seed_glow", (0.6, 0.9, 0.3), 0.4, emit=(0.65, 1.0, 0.35), emit_strength=6.0),
         "eye": mat("eye_glow", (1.0, 0.7, 0.2), 0.3, emit=(1.0, 0.62, 0.15), emit_strength=8.0),
-        "husk": mat("husk", (0.33, 0.29, 0.25), 0.9),
+        "husk": mat("husk", (0.45, 0.36, 0.28), 0.9),
         "husk_dark": mat("husk_dark", (0.17, 0.14, 0.13), 0.95),
         "iron": mat("iron", (0.3, 0.3, 0.32), 0.45, metal=0.8),
-        "moth": mat("moth_wing", (0.62, 0.58, 0.50), 0.8),
-        "moth_body": mat("moth_body", (0.28, 0.23, 0.2), 0.8),
+        "moth": mat("moth_wing", (0.78, 0.55, 0.16), 0.75),
+        "moth_body": mat("moth_body", (0.2, 0.12, 0.08), 0.8),
         "water": mat("water", (0.05, 0.09, 0.08), 0.05),
         "reed": mat("reed", (0.46, 0.43, 0.24), 0.85),
         "gold": mat("gold", (0.8, 0.6, 0.25), 0.35, metal=1.0),
@@ -458,14 +462,14 @@ def build_blightling():
     parts = []
     body = ico("body", 0.32, (0, 0, 0.3), scale=(1, 1.15, 0.85), sub=3)
     noise_displace(body, 0.08, 0.25)
-    assign(body, P["blight"])
+    assign(body, P["rotflesh"])
     smooth(body)
     head = ico("head", 0.2, (0, -0.28, 0.42), scale=(1.1, 1, 0.85), sub=3)
     noise_displace(head, 0.04, 0.2)
-    assign(head, P["blight"])
+    assign(head, P["rotflesh"])
     smooth(head)
     jaw = ico("jaw", 0.14, (0, -0.4, 0.3), scale=(1.2, 0.9, 0.5), sub=2)
-    assign(jaw, P["blight_goo"])
+    assign(jaw, P["rotflesh_dark"])
     _eyes(parts, P, [(-0.08, -0.44, 0.47), (0.08, -0.44, 0.47), (0.0, -0.46, 0.53)], 0.035)
     for i in range(6):
         sp = cyl("spine", 0.05, 0.22, (random.uniform(-0.15, 0.15), 0.05 + i * 0.05, 0.55 - i * 0.02), verts=5,
@@ -591,7 +595,7 @@ def build_sporecaller():
     neck = cyl("neck", 0.06, 0.3, (0, 0, 1.2), verts=8)
     assign(neck, P["husk_dark"])
     cap = sphere("cap", 0.34, (0, 0, 1.42), scale=(1, 1, 0.5))
-    assign(cap, P["blight"])
+    assign(cap, P["sporecap"])
     smooth(cap)
     gills = cyl("gills", 0.3, 0.04, (0, 0, 1.36), verts=24)
     assign(gills, P["blight_glow"])
@@ -663,7 +667,7 @@ def build_mire_mother():
     parts = []
     mass = ico("mass", 0.9, (0, 0, 0.75), scale=(1.1, 1.0, 0.95), sub=4)
     noise_displace(mass, 0.25, 0.45)
-    assign(mass, P["blight"])
+    assign(mass, P["mire"])
     smooth(mass)
     under = ico("under", 1.0, (0, 0, 0.15), scale=(1.2, 1.2, 0.3), sub=3)
     noise_displace(under, 0.1, 0.3)

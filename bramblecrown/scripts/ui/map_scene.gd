@@ -20,7 +20,7 @@ func _ready() -> void:
 	hud = RunHud.new()
 	add_child(hud)
 	var legend := Label.new()
-	legend.text = "Choose your path. The Mire Mother waits at the top of Ashfen Marsh."
+	legend.text = "Choose your path upward.   X Fight   Horned skull: Elite   Arch: Shrine   Flame: Camp   Coin: Pedlar   Crown: The Mire Mother"
 	legend.add_theme_color_override("font_color", UITheme.INK_DIM)
 	legend.add_theme_font_size_override("font_size", 20)
 	UITheme.anchor(legend, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -50), Vector2(1000, 30))
@@ -66,9 +66,13 @@ func _draw() -> void:
 	draw_style_box(UITheme.box(Color(0.72, 0.64, 0.49), Color(0.35, 0.25, 0.14), 4, 18, 0), sr)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = r.seed_value
-	for i in 60:
+	# Paper fibres and a darkened vignette edge.
+	for i in 140:
 		var p := sr.position + Vector2(rng.randf() * sr.size.x, rng.randf() * sr.size.y)
-		draw_circle(p, rng.randf_range(20, 90), Color(0.45, 0.36, 0.22, 0.07))
+		var d := Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(8, 30)
+		draw_line(p, p + d, Color(0.45, 0.36, 0.22, 0.12), 1.0, true)
+	for k in 10:
+		draw_style_box(UITheme.box(Color(0, 0, 0, 0), Color(0.35, 0.25, 0.14, 0.05), 4 + k * 3, 18, 0), sr.grow(-k * 3))
 	# Marsh water blotches and reeds as decoration.
 	for i in 18:
 		var p := sr.position + Vector2(rng.randf() * sr.size.x, rng.randf() * sr.size.y)
@@ -126,7 +130,13 @@ func _icon(t: String, p: Vector2, rad: float, alpha: float) -> void:
 			draw_line(p + Vector2(-14, 14), p + Vector2(14, -14), ink, 5, true)
 			draw_line(p + Vector2(-14, -14), p + Vector2(14, 14), ink, 5, true)
 		"elite":
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-18, 14), p + Vector2(-18, -6), p + Vector2(-8, 4), p + Vector2(0, -18), p + Vector2(8, 4), p + Vector2(18, -6), p + Vector2(18, 14)]), Color(0.85, 0.3, 0.25, alpha))
+			var red := Color(0.9, 0.32, 0.25, alpha)
+			draw_circle(p + Vector2(0, 2), 13, red)
+			draw_colored_polygon(PackedVector2Array([p + Vector2(-11, -6), p + Vector2(-22, -20), p + Vector2(-6, -12)]), red)
+			draw_colored_polygon(PackedVector2Array([p + Vector2(11, -6), p + Vector2(22, -20), p + Vector2(6, -12)]), red)
+			draw_circle(p + Vector2(-5, 0), 3.5, Color(0.1, 0.05, 0.04, alpha))
+			draw_circle(p + Vector2(5, 0), 3.5, Color(0.1, 0.05, 0.04, alpha))
+			draw_rect(Rect2(p + Vector2(-6, 9), Vector2(12, 5)), Color(0.1, 0.05, 0.04, alpha))
 		"shrine":
 			draw_arc(p + Vector2(0, 4), 14, PI, TAU, 16, ink, 4, true)
 			draw_line(p + Vector2(-14, 4), p + Vector2(-14, 16), ink, 4)

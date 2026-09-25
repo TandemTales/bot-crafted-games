@@ -2,7 +2,7 @@ class_name UnitPlate
 extends Control
 ## Floating HP / ward / status / intent plate that follows a unit on screen.
 
-const W := 150.0
+const W := 176.0
 
 var title := ""
 var hp := 0
@@ -17,7 +17,7 @@ var highlight := false
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	size = Vector2(W, 78)
+	size = Vector2(W, 104)
 
 
 func update_from(data: Dictionary) -> void:
@@ -37,12 +37,14 @@ func _draw() -> void:
 	# Intent row above the bar.
 	if not intent.is_empty():
 		var icons: Array = intent.get("icons", [])
-		var total_w := icons.size() * 52.0
+		var total_w := icons.size() * 66.0
 		var x := (W - total_w) / 2.0
+		if not icons.is_empty():
+			draw_style_box(UITheme.box(Color(0.03, 0.03, 0.03, 0.78), Color(0.4, 0.3, 0.2, 0.8), 1, 12, 0), Rect2(x - 4, 0, total_w + 8, 50))
 		for ic in icons:
-			_intent_icon(Vector2(x + 26, 18), ic)
-			x += 52.0
-		y = 38.0
+			_intent_icon(Vector2(x + 26, 25), ic)
+			x += 66.0
+		y = 54.0
 	# Name.
 	var name_size := f.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 17)
 	draw_string(f, Vector2((W - name_size.x) / 2 + 1, y + 16), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color(0, 0, 0, 0.8))
@@ -83,7 +85,7 @@ func _draw() -> void:
 func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 	var kind: String = ic.get("kind", "")
 	var hot: bool = ic.get("hot", false)
-	draw_circle(c, 17, Color(0, 0, 0, 0.7))
+	draw_circle(c, 21, Color(0, 0, 0, 0.7))
 	var col := Color(0.95, 0.35, 0.28) if hot else Color(0.8, 0.72, 0.6)
 	match kind:
 		"attack":
@@ -104,14 +106,12 @@ func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 		"strength":
 			col = Color(1, 0.55, 0.3)
 			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -10), c + Vector2(9, 2), c + Vector2(3, 2), c + Vector2(3, 10), c + Vector2(-3, 10), c + Vector2(-3, 2), c + Vector2(-9, 2)]), col)
-	draw_arc(c, 17, 0, TAU, 24, col, 2, true)
+	draw_arc(c, 21, 0, TAU, 24, col, 2.5, true)
 	if ic.has("n"):
 		var f := UITheme.font("title")
 		var t := str(ic["n"])
-		var ts := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
-		draw_string_outline(f, c + Vector2(10, 16), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 5, Color(0, 0, 0, 0.9))
-		draw_string(f, c + Vector2(10, 16), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(1, 0.9, 0.8) if not hot else Color(1, 0.55, 0.45))
-		var _unused := ts
+		draw_string_outline(f, c + Vector2(13, 20), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 27, 6, Color(0, 0, 0, 0.95))
+		draw_string(f, c + Vector2(13, 20), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 27, Color(1, 0.9, 0.8) if not hot else Color(1, 0.5, 0.4))
 
 
 func _shield(c: Vector2, r: float, col: Color) -> void:

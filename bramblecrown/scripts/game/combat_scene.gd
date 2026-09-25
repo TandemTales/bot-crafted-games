@@ -93,9 +93,9 @@ func _build_ui() -> void:
 	hud_hp = UnitPlate.new()
 	hud_hp.is_player = true
 	hud_hp.custom_minimum_size = Vector2(UnitPlate.W, 60)
-	hud_hp.scale = Vector2(1.6, 1.6)
+	hud_hp.scale = Vector2(1.4, 1.4)
 	var hp_holder := Control.new()
-	hp_holder.custom_minimum_size = Vector2(250, 70)
+	hp_holder.custom_minimum_size = Vector2(250, 58)
 	hp_holder.add_child(hud_hp)
 	tlv.add_child(hp_holder)
 	grove_label = Label.new()
@@ -187,7 +187,7 @@ func _build_ui() -> void:
 	hint_label.scroll_active = false
 	hint_label.fit_content = true
 	hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UITheme.anchor(hint_label, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -300), Vector2(1000, 36))
+	UITheme.anchor(hint_label, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -348), Vector2(1000, 36))
 	hint_label.add_theme_font_size_override("normal_font_size", 22)
 	hint_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	hint_label.add_theme_constant_override("outline_size", 6)
@@ -333,6 +333,7 @@ func _sync_plates() -> void:
 func _refresh_board_overlays() -> void:
 	var ov := {}
 	var paths: Array = []
+	var incoming := 0
 	# Telegraphs.
 	for e in c.enemies:
 		for a in e["intent"].get("actions", []):
@@ -340,11 +341,12 @@ func _refresh_board_overlays() -> void:
 				for h in a.get("hexes", []):
 					ov[h] = [COL_SPREAD, true]
 		var pv := c.enemy_preview(e)
-		var col := Color(1, 0.35, 0.3, 0.9) if pv["attack"] else Color(0.75, 0.4, 1.0, 0.9)
+		var col := Color(1, 0.3, 0.24, 0.95) if pv["attack"] else Color(0.8, 0.45, 1.0, 0.95)
 		if not pv["path"].is_empty():
 			paths.append({"from": e["pos"], "path": pv["path"], "color": col})
 		if pv["hits"]:
 			ov[c.player["pos"]] = [COL_DANGER, true]
+			incoming += int(pv["dmg"])
 	var inst := _selected_inst()
 	var pending := {}
 	if not busy and c.phase == "player":
@@ -377,6 +379,7 @@ func _refresh_board_overlays() -> void:
 		ov[hover_hex] = [COL_HOVER, false]
 	board.set_overlays(ov)
 	board.set_paths(paths)
+	board.set_incoming(0 if busy else maxi(0, incoming - int(c.player["ward"])), c.player["pos"])
 	for uid in plates:
 		plates[uid].pending_damage = int(pending.get(uid, 0))
 		plates[uid].highlight = pending.has(uid)
@@ -428,7 +431,7 @@ func _layout_hand(delta: float) -> void:
 		return
 	var vp := get_viewport().get_visible_rect().size
 	var ui_scale := vp.y / 1080.0
-	hand_root.scale = Vector2.ONE * ui_scale * 0.9
+	hand_root.scale = Vector2.ONE * ui_scale * 0.86
 	var spacing := minf(196.0, 1100.0 / maxf(1, n))
 	var total := spacing * (n - 1)
 	for i in n:
@@ -436,13 +439,13 @@ func _layout_hand(delta: float) -> void:
 		var t := (i - (n - 1) / 2.0)
 		var x := -total / 2.0 + i * spacing - CardView.SIZE.x / 2
 		# Resting cards tuck partly below the screen edge; hovered cards rise fully into view.
-		var y := -CardView.SIZE.y * 0.74 + absf(t) * absf(t) * 4.0
+		var y := -CardView.SIZE.y - 4 + absf(t) * absf(t) * 4.0
 		var rot := t * 0.035
 		var sc := 1.0
 		if cv == hover_card or cv.inst["uid"] == selected_uid:
-			y = -CardView.SIZE.y - 40
+			y = -CardView.SIZE.y - 70
 			rot = 0.0
-			sc = 1.12
+			sc = 1.22
 			cv.z_index = 10
 		else:
 			cv.z_index = i
@@ -571,10 +574,10 @@ func _place_plates() -> void:
 			continue
 		var n: Node3D = board.units[uid]
 		var e = c.enemy_by_uid(uid)
-		var hgt := 1.5 * float(e["def"].get("size", 1.0)) + 0.4 if e != null else 1.8
+		var hgt := 1.5 * float(e["def"].get("size", 1.0)) * BoardView.UNIT_SCALE + 0.3 if e != null else 2.4
 		var sp := cam.unproject_position(n.position + Vector3(0, hgt, 0))
 		var pl: UnitPlate = plates[uid]
-		pl.position = sp - Vector2(UnitPlate.W / 2, 60)
+		pl.position = sp - Vector2(UnitPlate.W / 2, pl.size.y)
 	if info_panel.visible:
 		var mp := get_viewport().get_mouse_position()
 		info_panel.position = mp + Vector2(24, 24)
