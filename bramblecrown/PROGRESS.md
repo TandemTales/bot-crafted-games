@@ -75,3 +75,12 @@ No discipline has passed a critic gate, so the game is **not** release-quality.
 - Created https://shoejunk.itch.io/bramblecrown with in-development status, first-region scope, controls, cover/gameplay screenshots, free download pricing, and AI-content disclosure. It remains a **draft**.
 - Butler uploaded `build/windows` to `shoejunk/bramblecrown:windows` as version `2026.09.24-10aa561`. `butler status` confirmed processed build #2014268 (upload #19390429).
 - Public visibility and a player-facing download/install check remain pending. Automatic approval review rejected saving Public visibility because the request to push a build did not explicitly authorize publishing the page to everyone.
+
+## 2026-09-25 — Run 2 (polish night, Friday; day 2 of 10)
+
+Plan for this run (from Run 1's next action):
+1. Room/reward screens get staged 3D backdrops instead of text on a void; reward shown over the dimmed battle board.
+2. Combat HUD: clickable draw/discard pile viewers, labeled charm bar with tooltips.
+3. Content: Region 2 (Sunken Cloister) board, roster, elite, boss, encounters, new cards.
+
+Housekeeping: stopped tracking Blender `.blend1` backup files (added to `.gitignore`).
