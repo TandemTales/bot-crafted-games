@@ -1,0 +1,7 @@
+[reopen] engine_of_rot_body verts 1421 mats ['black_iron', 'flaking_rust', 'furnace_glow', 'furnace_eye', 'rail_iron', 'iron_blight'] dims (0.84, 1.22, 1.35)
+[reopen] piston_left verts 320 mats ['rail_iron', 'black_iron'] dims (0.28, 0.52, 0.6)
+[reopen] piston_right verts 320 mats ['rail_iron', 'black_iron'] dims (0.28, 0.52, 0.6)
+[reopen] action piston_stroke frames (1.0, 25.0)
+[reopen] action piston_stroke.001 frames (1.0, 25.0)
+[reopen] hex_rubble verts 424 mats ['ironroot_earth', 'packed_spoil', 'rail_iron', 'tarred_timber', 'coal_gravel', 'verdigris_ore'] dims (1.7, 1.96, 2.23)
+[reopen] tunneler verts 2748 mats ['miners_canvas', 'grub_fold', 'grub_flesh', 'tarnished_brass', 'furnace_glow', 'furnace_eye'] dims (0.7, 0.63, 0.87)

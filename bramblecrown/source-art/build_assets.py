@@ -1780,7 +1780,7 @@ def ironroot_palette():
     """Soot, rust and old timber, lit by warm lamps. Copper ore gives the only cool accent."""
     return {
         "earth": mat("ironroot_earth", (0.07, 0.055, 0.045), 0.97),
-        "floor": mat("packed_spoil", (0.20, 0.15, 0.11), 0.93),
+        "floor": mat("packed_spoil", (0.115, 0.11, 0.105), 0.93),
         "gravel": mat("coal_gravel", (0.075, 0.07, 0.07), 0.9),
         "timber": mat("pit_timber", (0.28, 0.17, 0.09), 0.86),
         "timber_dark": mat("tarred_timber", (0.13, 0.08, 0.05), 0.8),
@@ -1794,7 +1794,7 @@ def ironroot_palette():
         "scum": mat("rust_scum", (0.42, 0.18, 0.06), 0.7),
         "flesh": mat("grub_flesh", (0.62, 0.46, 0.36), 0.62),
         "flesh_dark": mat("grub_fold", (0.36, 0.22, 0.17), 0.7),
-        "canvas": mat("miners_canvas", (0.38, 0.33, 0.22), 0.95),
+        "canvas": mat("miners_canvas", (0.55, 0.47, 0.3), 0.9),
         "brass": mat("tarnished_brass", (0.55, 0.40, 0.16), 0.38, metal=0.8),
         "blight": mat("iron_blight", (0.30, 0.10, 0.36), 0.7),
         "eye": mat("furnace_eye", (1.0, 0.55, 0.18), 0.4, emit=(1.0, 0.42, 0.08), emit_strength=0.8),

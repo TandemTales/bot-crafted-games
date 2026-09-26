@@ -25,7 +25,7 @@ const THEMES := {
 		"props": [["timber_frame", 0.10], ["ore_spoil", 0.26], ["ore_cart", 0.05], ["blight", 0.10]],
 		"tall": ["timber_frame"], "filler": "ore_spoil", "tall_scale": {"timber_frame": 1.0},
 		"bg": Color(0.05, 0.04, 0.035), "ambient": Color(0.5, 0.44, 0.4), "fog": Color(0.13, 0.09, 0.07),
-		"key": Color(1.0, 0.8, 0.58), "key_energy": 1.55, "rim": Color(0.35, 0.62, 0.58),
+		"key": Color(1.0, 0.9, 0.78), "key_energy": 1.6, "rim": Color(0.35, 0.62, 0.58),
 		"pool": Color(0.04, 0.035, 0.03),
 		"water_color": Color(0.1, 0.09, 0.08),
 		"lamp_prop": "timber_frame",

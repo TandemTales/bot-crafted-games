@@ -74,6 +74,40 @@ original to this project.
 
 ## Presentation
 
+### Implemented Ironroot Deeps region (2026-09-26, Run 5)
+
+The fourth region adds six authored fights, the Foundry Heart elite and the two-phase Engine of
+Rot. There are now 24 normal encounters, four elites and four bosses across four of five regions.
+Clearing Ironroot shows the development continuation screen; the Crown of Thorns is still owed.
+
+New rule, **cave-in** (`collapse` action): an enemy marks open hexes near the Grovewalker when
+it chooses its intent (amber overlay, rail glyph and "Cave-in N" label). On the enemy turn each
+marked hex becomes rubble (impassable, growth cleared) unless a unit stands on it. A Grovewalker
+still standing there takes 6 damage (Ward applies) and the hex stays open. A cave-in never splits
+the walkable board into more regions, and stops once 40% of the board is rubble.
+
+| Encounter | Spatial decision |
+|---|---|
+| The Rusted Shaft | Kill Rustgrubs off open ground so their death-blight lands away from your path. |
+| Runaway Rails | Plant thicket across the rails before the trampling Cart Golem charges. |
+| Undermined | Two Tunnelers collapse the room from range: close on one flank. |
+| Collapsed Gallery | Start mid-board between a western cart and a northern Tunneler. |
+| The Flooded Sump | Take the single dry crossing before it becomes a cave-in target. |
+| The Ore Depot | Three different threats (charge, cave-in, rot) in one room. |
+| The Foundry Heart | The stationary elite shields its grubs and drops ceilings; cross the rubble to it. |
+| The Engine of Rot | Phase 1 builds rubble and summons grubs; phase 2 charges through with Full Steam. |
+
+Rustgrubs gnaw and trail blight, and blight their hex on death. Cart Golems trample thicket, charge,
+then stoke (Ward and Strength). Tunnelers keep range, undermine, throw picks and shore up. Enemy
+forecasts simulate the whole enemy phase on a copy, so paths, hits and damage shown include allies
+that act first and cave-ins that change the board mid-phase.
+
+All eleven Ironroot models are original Blender sources: mine, rubble and sump tiles; a lamp-lit
+timber frame, ore cart and ore spoil; and the five enemies. The Engine has an alternating piston
+animation. The map margins, room staging, reward headline and camp text follow the region.
+Region-specific shrine events remain owed. Run 5 used no editing sub-agents: the main runner owned
+every file; the independent critic edited none.
+
 ### Implemented Glasswood region (2026-09-26, Run 4)
 
 The third region adds six authored fights, Lantern Hart elite, and two-phase Splintered Queen.

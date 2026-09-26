@@ -8,6 +8,9 @@ No commercial reference images, extracted models, or third-party game assets are
 The Glasswood set was generated with installed Blender 5.1.2 by `build_assets.py`:
 `hex_glass`, `hex_crystal`, `hex_mirror`, `crystal_tree`, `glass_fern`, `fallen_prism`,
 `shardling`, `prism_stag`, `glass_mite`, `lantern_hart`, and `splintered_queen`.
+The Ironroot Deeps set (Run 5) was generated the same way: `hex_mine`, `hex_rubble`,
+`hex_sump`, `timber_frame`, `ore_cart`, `ore_spoil`, `rustgrub`, `cart_golem`, `tunneler`,
+`foundry_heart`, and `engine_of_rot`.
 Godot imports GLB material, mesh and animation data; players do not need Blender.
 
 Audio is original oscillator/noise synthesis from `tools/make_audio.py`. Fonts are selected

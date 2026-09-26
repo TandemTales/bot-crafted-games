@@ -204,7 +204,7 @@ const ENEMIES := {
 	# different spatial question: stand off the marked hexes, keep thicket between you and
 	# the carts, and reach the Tunnelers before the room closes in.
 	"rustgrub": {
-		"name": "Rustgrub", "hp": [15, 18], "move": 2, "model": "rustgrub", "size": 0.8,
+		"name": "Rustgrub", "hp": [15, 18], "move": 2, "model": "rustgrub", "size": 0.98,
 		"death_blight": true,
 		"moves": [
 			{"name": "Gnaw", "actions": [{"t": "attack", "dmg": 7, "range": 1}]},
@@ -224,7 +224,7 @@ const ENEMIES := {
 		"pattern": [0, 1, 2],
 	},
 	"tunneler": {
-		"name": "Tunneler", "hp": [20, 23], "move": 2, "keep_range": 2, "model": "tunneler", "size": 0.9,
+		"name": "Tunneler", "hp": [20, 23], "move": 2, "keep_range": 2, "model": "tunneler", "size": 1.05,
 		"moves": [
 			{"name": "Undermine", "stay": true, "actions": [{"t": "collapse", "count": 2, "radius": 1}]},
 			{"name": "Pick Throw", "actions": [{"t": "attack", "dmg": 6, "range": 2}]},
