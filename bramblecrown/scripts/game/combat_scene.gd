@@ -416,6 +416,7 @@ func _sync_plates() -> void:
 func _refresh_board_overlays() -> void:
 	var ov := {}
 	var paths: Array = []
+	var marks: Array = []
 	var incoming := 0
 	# Telegraphs.
 	for e in c.enemies:
@@ -426,6 +427,7 @@ func _refresh_board_overlays() -> void:
 			elif a["t"] == "collapse":
 				for h in a.get("hexes", []):
 					ov[h] = [COL_COLLAPSE, true]
+					marks.append({"hex": h, "from": e["pos"], "text": "-%d" % CombatState.COLLAPSE_DMG, "color": Color(1.0, 0.66, 0.25)})
 				if a.get("hexes", []).has(c.player["pos"]):
 					incoming += CombatState.COLLAPSE_DMG
 		var pv := c.enemy_preview(e)
@@ -469,6 +471,7 @@ func _refresh_board_overlays() -> void:
 		ov[hover_hex] = [COL_HOVER, false]
 	board.set_overlays(ov)
 	board.set_paths(paths)
+	board.set_marks(marks)
 	board.set_incoming(0 if busy else maxi(0, incoming - int(c.player["ward"])), c.player["pos"])
 	for uid in plates:
 		plates[uid].pending_damage = int(pending.get(uid, 0))

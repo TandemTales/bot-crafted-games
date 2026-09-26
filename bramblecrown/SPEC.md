@@ -84,7 +84,8 @@ New rule, **cave-in** (`collapse` action): an enemy marks open hexes near the Gr
 it chooses its intent (amber overlay, rail glyph and "Cave-in N" label). On the enemy turn each
 marked hex becomes rubble (impassable, growth cleared) unless a unit stands on it. A Grovewalker
 still standing there takes 6 damage (Ward applies) and the hex stays open. A cave-in never splits
-the walkable board into more regions, and stops once 40% of the board is rubble.
+the walkable board into more regions, and stops once 40% of the board is rubble. Each marked hex
+shows its damage ("-6") and a dashed tether to the enemy that marked it.
 
 | Encounter | Spatial decision |
 |---|---|

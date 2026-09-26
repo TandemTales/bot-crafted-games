@@ -119,3 +119,23 @@ runner. Independent critic confirms scoped readability fixes; whole-game quality
 No upload/publication; forced release remains 2026-10-03. Bramblecrown remains active on `dev`.
 See the top of `bramblecrown/PROGRESS.md` and `bramblecrown/evidence/2026-09-26-run4/` for exact
 package hash, evidence limits, debt and next actions (forecast regression, Ironroot, shrine content).
+
+## 2026-09-26 (Pacific) — Run 5 result
+
+Ironroot Deeps adds the fourth of five regions:
+- Six fights, the Foundry Heart elite and the two-phase Engine of Rot.
+- A new telegraphed cave-in rule, and twelve original Blender models.
+
+Two fixes apply to every region:
+- Enemy forecasts now simulate allies acting in order. Drift went from 81 of 1,107 to 0.
+- Pulsing telegraphs no longer fade to invisible.
+
+Evidence:
+- Full Godot gate: 1,658 passed, 0 failed.
+- The Windows x64 package passed 22 native captures at each of 720p, 1080p and 1440p, with
+  0 failures. The main runner inspected them.
+- The independent critic improved four disciplines from "loses badly" to "loses". The cave-in
+  telegraph still lost badly before the final labels/tethers unit, which has not been re-judged.
+
+Release status: no upload or publication. Forced release remains 2026-10-03. See the top of
+`bramblecrown/PROGRESS.md` and `bramblecrown/evidence/2026-09-26-run5/`.

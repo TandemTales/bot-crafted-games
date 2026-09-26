@@ -1792,8 +1792,8 @@ def ironroot_palette():
         "ore": mat("verdigris_ore", (0.16, 0.52, 0.44), 0.35, metal=0.4),
         "water": mat("rust_sump", (0.045, 0.05, 0.05), 0.06, metal=0.35),
         "scum": mat("rust_scum", (0.42, 0.18, 0.06), 0.7),
-        "flesh": mat("grub_flesh", (0.78, 0.56, 0.42), 0.55),
-        "flesh_dark": mat("grub_fold", (0.36, 0.22, 0.17), 0.7),
+        "flesh": mat("grub_flesh", (0.7, 0.72, 0.58), 0.55),
+        "flesh_dark": mat("grub_fold", (0.36, 0.38, 0.3), 0.7),
         "canvas": mat("miners_canvas", (0.55, 0.47, 0.3), 0.9),
         "brass": mat("tarnished_brass", (0.55, 0.40, 0.16), 0.38, metal=0.8),
         "blight": mat("iron_blight", (0.30, 0.10, 0.36), 0.7),
@@ -1930,8 +1930,8 @@ def build_rustgrub():
         r = 0.16 - abs(i - 1.5) * 0.02
         parts.append(assign(ico("segment", r, (0, y, r * 0.9), scale=(1.0, 0.85, 0.85), sub=2),
                             P["flesh"] if i % 2 == 0 else P["flesh_dark"]))
-        parts.append(assign(cube("rust_plate", 1.0, (0, y, r * 1.7), scale=(r * 1.5, 0.09, 0.04),
-                                 rot=(0.2, 0, 0)), P["rust"]))
+        parts.append(assign(cube("shell_plate", 1.0, (0, y, r * 1.7), scale=(r * 1.6, 0.1, 0.05),
+                                 rot=(0.2, 0, 0)), P["ore"]))
         for s in (-1, 1):
             parts.append(tube("stub_leg", [(s * r * 0.8, y, r * 0.5), (s * r * 1.25, y - 0.02, 0.02)],
                               0.02, P["flesh_dark"], taper=False))

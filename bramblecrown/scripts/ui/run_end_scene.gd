@@ -25,8 +25,9 @@ func _ready() -> void:
 	v.add_child(h)
 	var s := Label.new()
 	if r:
-		s.text = "Floor %d reached · %d fights won · %d elites · %d cards played\nDeck of %d cards · %d charms" % [
-			r.floor_num, r.stats["fights"], r.stats["elites"], r.stats["cards_played"], r.deck.size(), r.charms.size()]
+		s.text = "Floor %d reached · %d fights won · %d elites · %d cards played\nDeck of %d cards · %d %s" % [
+			r.floor_num, r.stats["fights"], r.stats["elites"], r.stats["cards_played"], r.deck.size(), r.charms.size(),
+			"charm" if r.charms.size() == 1 else "charms"]
 	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	s.add_theme_font_size_override("font_size", 26)
 	v.add_child(s)

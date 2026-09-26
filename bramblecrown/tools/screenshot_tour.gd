@@ -208,6 +208,7 @@ func _ironroot() -> void:
 			var panel: UnitPlate = sc.plates[tun["uid"]]
 			_check(panel.intent["icons"].any(func(ic): return ic["kind"] == "collapse"), "cave-in intent has its own icon")
 			_check(marked.size() > 0 and sc.board.overlays[marked[0]].visible, "cave-in hexes are highlighted")
+			_check(sc.board._mark_root.get_child_count() >= marked.size(), "cave-in marks show damage and a tether to the source")
 			await _shot("52_cave_in_telegraph")
 			sc._on_end_turn()
 			for frame in 100:

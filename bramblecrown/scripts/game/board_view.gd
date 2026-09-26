@@ -88,6 +88,7 @@ var _unit_base := {}  # node -> base y
 var player_light: OmniLight3D
 var _outline_mat: ShaderMaterial
 var _incoming: Label3D
+var _mark_root: Node3D
 var _candle_lights := 0
 var theme: Dictionary = THEMES["marsh"]
 
@@ -98,6 +99,8 @@ func _ready() -> void:
 	_overlay_mesh = _make_hex_mesh(0.93)
 	_path_root = Node3D.new()
 	add_child(_path_root)
+	_mark_root = Node3D.new()
+	add_child(_mark_root)
 	var osh := Shader.new()
 	osh.code = OUTLINE_SHADER
 	_outline_mat = ShaderMaterial.new()
@@ -601,6 +604,51 @@ func _path_segment(a: Vector3, b: Vector3, col: Color) -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_path_root.add_child(mi)
 	mi.look_at_from_position((a + b) / 2.0, b, Vector3.UP)
+
+
+## Per-hex hazard marks: a damage label over each marked hex and a dashed tether back to the
+## enemy that placed it. marks: [{hex: Vector2i, from: Vector2i, text: String, color: Color}]
+func set_marks(marks: Array) -> void:
+	for n in _mark_root.get_children():
+		n.queue_free()
+	for mk in marks:
+		var col: Color = mk["color"]
+		var h: Vector2i = mk["hex"]
+		if combat == null or h != combat.player["pos"]:
+			var lb := Label3D.new()
+			lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			lb.font = UITheme.font("title")
+			lb.font_size = 64
+			lb.pixel_size = 0.0055
+			lb.outline_size = 18
+			lb.modulate = col
+			lb.outline_modulate = Color(0.08, 0.03, 0.0, 1)
+			lb.no_depth_test = true
+			lb.text = mk["text"]
+			lb.position = world(h) + Vector3(0, 0.55, 0)
+			_mark_root.add_child(lb)
+		# Dashed tether, so each mark is traceable to its source.
+		var a := world(mk["from"]) + Vector3(0, 0.3, 0)
+		var b := world(h) + Vector3(0, 0.3, 0)
+		var dist := a.distance_to(b)
+		var steps := int(dist / 0.42)
+		for i in steps:
+			var t0 := (i * 0.42 + 0.25) / dist
+			var t1 := minf((i * 0.42 + 0.47) / dist, 0.92)
+			if t0 >= t1:
+				break
+			var mi := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = Vector3(0.05, 0.02, (t1 - t0) * dist)
+			mi.mesh = bm
+			var m := StandardMaterial3D.new()
+			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			m.albedo_color = Color(col, 0.85)
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mi.material_override = m
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_mark_root.add_child(mi)
+			mi.look_at_from_position(a.lerp(b, (t0 + t1) / 2.0), b, Vector3.UP)
 
 
 ## Floating red number over the hex that will be hit this enemy turn.

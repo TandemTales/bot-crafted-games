@@ -8,6 +8,74 @@
   (2) Region 4 Ironroot Deeps (board, roster, elite, boss, encounters, original Blender assets).
 - Next action: write the forecast regression, then Ironroot content.
 
+### Run 5 final result and next action
+
+- **Forecast fix (all regions):** a new sweep of every authored encounter found 81 of 1,107
+  enemy forecasts disagreeing with the actual enemy phase: wrong end hex, or a telegraphed hit that
+  missed and vice versa. Forecasts now run the whole enemy phase on a throwaway copy (the real
+  state and RNG are untouched). Drift is 0 of 1,461, including damage and Ironroot cave-ins.
+- **Telegraph visibility (all regions):** pulsing overlays (blight spread, cave-in, danger) faded
+  to alpha 0 at every pulse trough, so marks could vanish from the board. They now stay at 60% or more.
+- **Ironroot Deeps (region 4 of 5):**
+  - Six fights, the Foundry Heart elite and the two-phase Engine of Rot.
+  - Rustgrub, Cart Golem and Tunneler.
+  - New telegraphed **cave-in** rule: marked hexes become rubble, and standing on a mark costs
+    6 HP. Cave-ins never split the walkable board and are capped at 40% rubble.
+  - Twelve original Blender models, including a separate rail tile, and an animated Engine.
+  - Each cave-in hex shows a "-6" label with a dashed tether to the enemy that marked it.
+  - Lamp-lit board theme, one continuous rail line, per-encounter prop layouts.
+  - Themed map motif, rooms, reward headline, camp text and four-region clear text.
+- **Gate:** 1,658 passed / 0 failed (installed Godot import, scene smokes, rules).
+- **Package:** `build/windows/Bramblecrown.exe`, SHA-256 `42B77CA94A8618256BEFF51740939C26578C542FAF70957A4170F72A1FE6E633`
+  (118,581,368 bytes). The `--tour-only run5` tour passed at 1280x720, 1920x1080 and 2560x1440:
+  22 images each, 0 failures, normal saves unchanged. The main runner read all 66 images.
+  Evidence is in `evidence/2026-09-26-run5/`.
+- **Critic** (independent, read-only; two rounds; vs Into the Breach and StS2/Monster Train 2):
+  - Round 1: room/reward screens at parity; everything else "loses" or "loses badly".
+  - Round 2, after fixes:
+    - Board art: loses (was loses badly).
+    - New-enemy readability: loses (was loses badly).
+    - Cave-in telegraph: loses badly.
+    - HUD/rail: loses.
+    - Map: loses (was loses badly).
+    - Rooms: parity.
+    - Coherence: loses.
+    - Region 4 identity: loses (was loses badly).
+  - The final unit (per-hex labels, source tethers, Rustgrub recolour) answers the critic's top two
+    items but has **not** been re-judged.
+  - No discipline passes, so there is no quality release.
+- **Limits:**
+  - Tours stage fights and synthetic input; no genuine playthrough.
+  - Not verified: human play, audio listening, a physical controller, fullscreen/focus,
+    4K/ultrawide, sustained performance, or other hardware.
+  - Balance is unverified (the bot still clears Marsh in 2 of 20 seeds).
+  - Combat resume restarts the node.
+- **Release:** nothing uploaded. No `.aaa-complete`. Forced release remains **2026-10-03 Pacific**.
+  The only Butler binary found here (`C:\dev\bayou\...`) is not authenticated for this project,
+  so itch.io status was not rechecked. The last recorded state is a Draft page with build #2014268.
+
+Exact next action for Run 6:
+1. Ask the critic to re-judge the cave-in telegraph and Rustgrub on the final package.
+   Then fix the remaining HUD items it named:
+   - Intent icons and target counts on the enemy rail.
+   - A boss phase-2 notch and banner in real play.
+   - Move the "Your Turn" banner off enemies.
+   - Taproot's clipped card text.
+2. Improve the cave-in aftermath:
+   - A flatter, darker rubble model with a crash effect, so it is not read as decoration.
+   - Vary the rail row per encounter (encounter key `rail_row`).
+   - Show sump water in at least two Ironroot fights.
+3. Start Region 5 (Crown of Thorns) or region-specific shrine events. Also do a real (non-staged)
+   run to the clear screen and check the stats there.
+
+Full remaining contract:
+- Region 5 (Crown of Thorns: mixed elite pairs, The Last Gardener, The Withered Crown).
+- Cassia and Thatch, with at least 20 cards each.
+- Charms (10 of 20), and events (5 global of 12, none region-specific).
+- Withering tiers, and human balance and discipline acceptance.
+
+Content now: 24 fights, 4 elites, 4 bosses, 34 Wren cards, 10 charms, 5 events.
+
 ## 2026-09-26 — Run 4 checkpoint (Pacific Saturday, age 2 days)
 
 - STOP absent; clean documented `dev` at `977a7d9`, equal to remote `dev`.

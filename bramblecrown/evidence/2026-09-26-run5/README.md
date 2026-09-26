@@ -30,6 +30,7 @@ The main runner read all 66 images through the six `sheet5-*.jpg` contact sheets
 full-size 1280x720 originals retained here. The first 720p pass showed rust-coloured enemies and
 the amber cave-in overlay blending into an orange floor. The floor and key light were cooled and
 the Rustgrub and Tunneler scaled up, then everything was re-exported and all three tours were rerun.
+Each later fix unit repeated the same export and three-resolution tour.
 
 ## Critic round 1 and fixes
 
@@ -52,6 +53,27 @@ native tours were rerun: 22 images each, 0 failures, saves unchanged. The final 
 
 "Floor 0" and the zeroed clear-screen stats in the tour images come from staging each encounter
 directly. They are not play results.
+
+## Critic round 2 and final fix unit
+
+The critic re-inspected the regenerated images:
+
+- Resolved: the overlay fade, the per-encounter layouts, the Foundry silhouette and the map motif.
+- Partly resolved: the rail (same row in every fight, crossed by rock piles, and a new plank decal
+  adds floor noise) and the Rustgrub (still too close to Blight in hue).
+- Verdicts: board art, enemy readability, map and Region 4 identity improved from "loses badly" to
+  "loses". The cave-in telegraph still "loses badly": no per-hex damage and no link to its source.
+
+Final unit, verified natively:
+
+- Each cave-in hex carries a "-6" label, with a dashed amber tether to the enemy that marked it.
+  The tour now asserts the marks exist.
+- The Rustgrub has a pale bone-green body and verdigris shell plates, so it separates from Blight.
+- The clear screen pluralises "charm" correctly.
+
+The gate passed again (1,658 / 0). The build was re-exported, and the tours passed at all three
+sizes (22 images each, 0 failures). The files here come from this final package. The critic has
+not re-judged this last unit.
 
 ## Limits
 
