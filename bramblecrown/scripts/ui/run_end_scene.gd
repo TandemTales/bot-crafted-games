@@ -17,7 +17,7 @@ func _ready() -> void:
 	v.add_theme_constant_override("separation", 24)
 	add_child(v)
 	var h := Label.new()
-	h.text = "The Marsh is Cleansed" if won else "The Blight Takes Root"
+	h.text = "The Road Continues" if won else "The Blight Takes Root"
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 64)
 	h.add_theme_color_override("font_color", UITheme.LEAF if won else UITheme.BLIGHT)
@@ -31,7 +31,7 @@ func _ready() -> void:
 	s.add_theme_font_size_override("font_size", 26)
 	v.add_child(s)
 	var note := Label.new()
-	note.text = "Wren replants the seed where the Mire Mother fell. The road north to the Sunken Cloister opens in a future update." if won else "Another Grovewalker will take up the seed."
+	note.text = "The Splintered Queen falls, and the Glasswood holds its own light again. You have cleared the three regions in this development build. Ironroot Deeps and the Crown of Thorns are still to come." if won else "Another Grovewalker will take up the seed."
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	note.add_theme_color_override("font_color", UITheme.INK_DIM)

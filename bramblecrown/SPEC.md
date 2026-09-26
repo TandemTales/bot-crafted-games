@@ -74,6 +74,38 @@ original to this project.
 
 ## Presentation
 
+### Implemented Glasswood region (2026-09-26, Run 4)
+
+The third region adds six authored fights, Lantern Hart elite, and two-phase Splintered Queen.
+There are now 18 normal encounters, three elites and three bosses across three of five regions.
+This remains an incomplete development campaign; clearing Glasswood shows a continuation screen.
+
+| Encounter | Spatial decision |
+|---|---|
+| The Silver Crossing | Hold the single dry bridge or cross before the Shardlings converge. |
+| The Prism Orchard | Route around a crystal copse toward the Stag or exposed support Mite. |
+| Mites on the Mirrors | Reach flying ranged supports across broken pools using the middle passages. |
+| A Thousand Splinters | Defend a central Grove or commit to one of three exits. |
+| The Forked Runoff | Choose the distant Grove or the exposed Mite around opposite channel ends. |
+| Court of Broken Boughs | Split the mixed enemy formation between two dry lanes. |
+| The Lantern Hart | Remove its shielding support or close on the ranged elite. |
+| The Splintered Queen | Reposition on the causeway/flanks during defensive turns; manage capped summons. |
+
+Shardlings alternate defense and attack. Prism Stags charge, brace and then sweep without moving.
+Glass Mites shield allies while remaining exposed themselves. The Hart protects its herd. Queen
+phase two adds a stationary Crownfall and gradual Strength, with at most two Shardlings and one
+Mite summoned. All actions use existing, telegraphed rules. Root, movement and Ward-breaking
+cards remain useful. These mechanics have automated rule evidence; human balance is unverified.
+
+Glasswood uses original Blender source models for its reflective ground, blocking crystals,
+mirror pools, forest props and five enemies. Map margins, room staging and text follow the region.
+The map legend draws the same icons as its nodes. Region-specific shrine events remain owed.
+
+Run 4 collaborators each edited one file: glasswood_enemies owned `scripts/core/enemy_db.gd`,
+glasswood_encounters owned `scripts/core/encounter_db.gd`, glasswood_art owned
+`source-art/build_assets.py`. The main runner generated assets and owned integration/tests/Git;
+glasswood_critic edited no files.
+
 ### Implemented Cloister card set (2026-09-26)
 
 These ten Wren cards enter reward and market pools at region index 1 (Sunken Cloister),

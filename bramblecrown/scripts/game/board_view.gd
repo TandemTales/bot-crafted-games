@@ -19,6 +19,15 @@ void fragment() {
 const MODELS := "res://assets/models/%s.glb"
 ## Per-region look: tile models, surrounding props, and lighting.
 const THEMES := {
+	"glasswood": {
+		"plain": "hex_glass", "stone": "hex_crystal", "water": "hex_mirror",
+		"outer": [["hex_glass", 0.85], ["hex_mirror", 0.15]],
+		"props": [["crystal_tree", 0.09], ["glass_fern", 0.20], ["fallen_prism", 0.06]],
+		"tall": ["crystal_tree"], "filler": "glass_fern", "tall_scale": {"crystal_tree": 1.0},
+		"bg": Color(0.035, 0.055, 0.075), "ambient": Color(0.40, 0.52, 0.59), "fog": Color(0.08, 0.15, 0.19),
+		"key": Color(1.0, 0.86, 0.69), "key_energy": 1.35, "rim": Color(0.28, 0.58, 0.72),
+		"pool": Color(0.025, 0.06, 0.075),
+	},
 	"marsh": {
 		"plain": "hex_peat", "stone": "hex_stone", "water": "hex_water",
 		"outer": [["hex_peat", 0.8], ["hex_stone", 0.2]],

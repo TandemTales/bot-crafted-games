@@ -19,6 +19,7 @@ func _init() -> void:
 		"test_region_transition",
 		"test_cloister_card_progression", "test_cloister_ward_cards", "test_cloister_daze_cards",
 		"test_cloister_growth_and_reach",
+		"test_glasswood_progression", "test_glasswood_patterns", "test_glasswood_counterplay",
 	]
 	for t in tests:
 		_current = t
@@ -39,6 +40,114 @@ func check(cond: bool, msg: String) -> void:
 	else:
 		_fails += 1
 		printerr("FAIL [%s] %s" % [_current, msg])
+
+
+func test_glasswood_progression() -> bool:
+	var r := RunState.new()
+	r.new_run(926)
+	r.region = 1
+	r.generate_map()
+	for n in r.map:
+		if n["type"] == "boss":
+			r.node_id = n["id"]
+	r.status = "reward"
+	r.used_encounters = ["clo_abbess"]
+	r.hp = 10
+	r.leave_reward()
+	check(r.region == 2 and r.status == "map", "Cloister boss unlocks Glasswood rather than ending the run")
+	check(r.region_def()["id"] == "glasswood", "third region is Glasswood")
+	check(r.used_encounters.is_empty() and r.node_id == -1, "new region resets encounter pool and path")
+	check(r.hp == 10 + int(r.max_hp * 0.5), "region transition keeps the intended partial heal")
+	var restored := RunState.from_json(r.to_json())
+	check(restored.to_json() == r.to_json(), "Glasswood map save roundtrip")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		var c := r.make_combat()
+		var loaded := RunState.from_json(r.to_json())
+		var again := loaded.make_combat()
+		check(again.encounter["id"] == enc, "saved Glasswood node restarts same encounter: " + enc)
+		check(again.player == c.player and again.enemies == c.enemies, "saved encounter restarts deterministic units/intents: " + enc)
+		check(again.hand == c.hand and again.growth == c.growth, "saved encounter restarts deterministic cards/growth: " + enc)
+	for seed_value in range(10):
+		var rr := RunState.new()
+		rr.new_run(seed_value)
+		rr.region = 2
+		rr.generate_map()
+		rr.enter_node(rr.available_nodes()[0])
+		rr.make_combat()
+		check(reg["easy"].has(rr.current_encounter), "Glasswood starts from its easy pool")
+	return true
+
+
+func test_glasswood_patterns() -> bool:
+	# Execute every authored move under real rules, including both boss phases.
+	# Extra HP makes this a rules/summon-bound test, never a balance or playthrough claim.
+	for id in ["shardling", "prism_stag", "glass_mite", "lantern_hart", "splintered_queen"]:
+		var c := _blank_combat({"radius": 4, "player": [0, 3], "enemies": [[id, 0, -2]]})
+		c.player["hp"] = 9999
+		c.player["max_hp"] = 9999
+		var e: Dictionary = c.enemies[0]
+		for phase in [false, true] if e["def"].has("pattern2") else [false]:
+			if phase:
+				var old_intent: Dictionary = e["intent"].duplicate(true)
+				e["ward"] = 0
+				c._damage_enemy(e, int(e["hp"]) - int(e["max_hp"] * e["def"]["phase2_at"]))
+				check(e["phase2"], "Queen enters her second phase at the threshold")
+				check(e["intent"] == old_intent, "phase change preserves this turn's promised intent")
+			e["pattern_idx"] = 0
+			var pattern: Array = e["def"]["pattern2"] if phase else e["def"]["pattern"]
+			for mi in pattern:
+				c._choose_intent(e)
+				check(e["intent"]["name"] == e["def"]["moves"][mi]["name"], "%s authored pattern order" % id)
+				c._enemy_act(e)
+				check(c.player["hp"] > 0 and c.enemies.has(e), "%s move resolves without corrupting units" % id)
+			# Repeated turns must respect per-species summon limits.
+			for turn in 12:
+				c.end_turn()
+			for move in e["def"]["moves"]:
+				for action in move["actions"]:
+					if action["t"] == "summon":
+						var count := c.enemies.filter(func(en): return en["id"] == action["enemy"]).size()
+						check(count <= int(action["max"]), "%s summons remain capped" % id)
+	return true
+
+
+func test_glasswood_counterplay() -> bool:
+	var c := _blank_combat({"radius": 4, "player": [0, 2], "enemies": [["prism_stag", 0, -1]]})
+	var stag: Dictionary = c.enemies[0]
+	stag["pattern_idx"] = 0
+	c._choose_intent(stag)
+	check(c.enemy_preview(stag)["hits"], "Stag charge threatens a distant player")
+	stag["statuses"]["rooted"] = 1
+	check(not c.enemy_preview(stag)["hits"], "Root cancels the Stag's closing charge")
+	var hp: int = c.player["hp"]
+	c._enemy_act(stag)
+	check(c.player["hp"] == hp, "rooted charge cannot reach the player in actual resolution")
+	stag["pattern_idx"] = 2
+	c._choose_intent(stag)
+	c.player["pos"] = Vector2i(0, 0)
+	check(c.enemy_preview(stag)["hits"], "stationary sweep threatens adjacent hex")
+	c.player["pos"] = Vector2i(0, 1)
+	check(not c.enemy_preview(stag)["hits"], "one hex retreat escapes stationary sweep")
+	c._enemy_act(stag)
+	check(c.player["hp"] == hp, "sweep respects the retreat preview")
+	c = _blank_combat({"player": [0, 2], "enemies": [["glass_mite", -1, -1], ["shardling", 1, -1]]})
+	var mite: Dictionary = c.enemies[0]
+	var shard: Dictionary = c.enemies[1]
+	mite["pattern_idx"] = 0
+	c._choose_intent(mite)
+	c._enemy_act(mite)
+	check(shard["ward"] == 4 and mite["ward"] == 0, "Mite shields its ally while leaving itself exposed")
+	c.player["pos"] = Vector2i(1, 0)
+	var uid := _give(c, "bellbreaker")
+	var pv := c.preview_card(c.hand[c.hand_index(uid)], shard["pos"])
+	var before: int = shard["hp"]
+	c.play_card(uid, shard["pos"])
+	check(shard["ward"] == 0 and int(shard["hp"]) < before, "Cloister Ward-break card counters Glasswood support")
+	check(before - int(shard["hp"]) == pv["damage"][shard["uid"]], "Ward-break damage matches the preview")
+	return true
 
 
 func test_cloister_card_progression() -> bool:

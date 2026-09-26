@@ -16,6 +16,24 @@
   Blender source, export Windows and inspect native captures at 720p/1080p/1440p.
 
 
+### Run 4 working unit
+
+- Integrated Glasswood: six authored fights, Lantern Hart elite, two-phase Splintered Queen,
+  eleven original Blender model sources/exports, region-themed rooms and map, matching-icon
+  map legend, and truthful three-region development completion text.
+- Installed Godot full import/scene/rule gate: **1,373 passed / 0 failed**. New checks cover
+  progression, all eight deterministic encounter restarts, boss phases/summon caps and tactical
+  counters. Campaign balance is not established; existing bot still clears Marsh 2/20 times.
+- Windows package ran a first 720p tour: 20 images, zero assertions/errors, normal player saves
+  unchanged. Initial visual inspection found captures during banner fade; tour now waits for the
+  banner to clear and asserts that state. Crystal blocker silhouettes need another art review.
+- Blender Queen source reopened: three meshes (915/39/39 vertices), materials present, two
+  1–49 frame mantle actions. Initial generation succeeded but sandbox denied thumbnail-cache
+  writes; source and GLB outputs exist, import and export pass. Thumbnail warnings are not asset QA.
+- Fixed export hygiene: `build/.gdignore` plus explicit build/evidence/source-art preset exclusions
+  prevent local screenshots and editable assets being imported/shipped in later packages.
+- Next: finish bounded visual corrections, re-export, inspect all three required resolutions,
+  obtain independent critic follow-up, retain evidence and push final handoff. No itch upload.
 ## 2026-09-26 — Run 3 checkpoint (Pacific Saturday, age 2 days)
 
 - STOP absent. Clean `dev` at `9a4220b`, confirmed equal to remote `dev` before changes.

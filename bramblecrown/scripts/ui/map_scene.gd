@@ -19,13 +19,6 @@ func _ready() -> void:
 		return
 	hud = RunHud.new()
 	add_child(hud)
-	var legend := Label.new()
-	legend.text = "Choose your path upward.   X Fight   Horned skull: Elite   Arch: Shrine   Flame: Camp   Coin: Pedlar   Crown: %s" % _boss_name()
-	legend.add_theme_color_override("font_color", UITheme.INK_DIM)
-	legend.add_theme_font_size_override("font_size", 20)
-	UITheme.anchor(legend, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -50), Vector2(1000, 30))
-	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(legend)
 	Sfx.play_music("map")
 	resized.connect(_layout)
 	_layout()
@@ -57,13 +50,22 @@ func _draw() -> void:
 	var r := Game.run
 	if r == null or _pos.is_empty():
 		return
-	# Backdrop: deep marsh gradient, fog bands, parchment scroll.
+	var theme_id: String = r.region_def().get("theme", "marsh")
+	var paper := Color(0.72, 0.64, 0.49)
+	var backdrop := Color(0.05, 0.07, 0.06)
+	if theme_id == "glasswood":
+		paper = Color(0.62, 0.72, 0.72)
+		backdrop = Color(0.025, 0.065, 0.09)
+	elif theme_id == "cloister":
+		paper = Color(0.66, 0.67, 0.63)
+		backdrop = Color(0.04, 0.045, 0.075)
+	# Region-tinted parchment. Decorative landmarks stay in its margins.
 	for i in 24:
 		var t := i / 23.0
-		draw_rect(Rect2(0, size.y * t, size.x, size.y / 23.0 + 1), Color(0.05, 0.07, 0.06).lerp(Color(0.1, 0.09, 0.07), t))
+		draw_rect(Rect2(0, size.y * t, size.x, size.y / 23.0 + 1), backdrop.lerp(Color(0.1, 0.09, 0.07), t))
 	var scroll_w := minf(size.x * 0.7, 1240.0)
 	var sr := Rect2(size.x / 2 - scroll_w / 2, 110, scroll_w, size.y - 170)
-	draw_style_box(UITheme.box(Color(0.72, 0.64, 0.49), Color(0.35, 0.25, 0.14), 4, 18, 0), sr)
+	draw_style_box(UITheme.box(paper, Color(0.35, 0.25, 0.14), 4, 18, 0), sr)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = r.seed_value
 	# Paper fibres and a darkened vignette edge.
@@ -73,11 +75,23 @@ func _draw() -> void:
 		draw_line(p, p + d, Color(0.45, 0.36, 0.22, 0.12), 1.0, true)
 	for k in 10:
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0), Color(0.35, 0.25, 0.14, 0.05), 4 + k * 3, 18, 0), sr.grow(-k * 3))
-	# Marsh water blotches and reeds as decoration.
-	for i in 18:
-		var p := sr.position + Vector2(rng.randf() * sr.size.x, rng.randf() * sr.size.y)
-		for k in 5:
-			draw_line(p + Vector2(k * 4, 0), p + Vector2(k * 4 + rng.randf_range(-3, 3), -rng.randf_range(12, 26)), Color(0.35, 0.3, 0.18, 0.5), 2)
+	for side in [-1, 1]:
+		for i in 5:
+			var p := Vector2(size.x / 2 + side * (scroll_w / 2 - 52), 220 + i * (sr.size.y - 220) / 5.0)
+			var ink := Color(0.19, 0.29, 0.28, 0.42)
+			if theme_id == "glasswood":
+				for k in 3:
+					var root := p + Vector2(k * 15 - 15, 10)
+					var tip := root + Vector2(k * 5 - 7, -45 - k * 9)
+					draw_colored_polygon(PackedVector2Array([root + Vector2(-9, 0), tip, root + Vector2(9, -5)]), ink)
+					draw_line(root, tip, Color(0.8, 0.9, 0.88, 0.6), 2, true)
+			elif theme_id == "cloister":
+				draw_arc(p, 25, PI, TAU, 20, ink, 5, true)
+				draw_line(p + Vector2(-25, 0), p + Vector2(-25, 45), ink, 5)
+				draw_line(p + Vector2(25, 0), p + Vector2(25, 45), ink, 5)
+			else:
+				for k in 5:
+					draw_line(p + Vector2(k * 4, 0), p + Vector2(k * 4 + rng.randf_range(-3, 3), -rng.randf_range(12, 26)), ink, 2)
 	var avail := r.available_nodes()
 	# Links.
 	for n in r.map:
@@ -106,6 +120,13 @@ func _draw() -> void:
 		_icon(n["type"], p, rad, 0.45 if (visited and n["id"] != r.node_id) else 1.0)
 		if n["id"] == r.node_id:
 			draw_circle(p + Vector2(rad * 0.8, -rad * 0.8), 10, UITheme.LEAF)
+	# Use the very same drawn symbols as the nodes, with short readable labels.
+	var legend_types := ["fight", "elite", "shrine", "camp", "market", "boss"]
+	var legend_labels := ["Fight", "Elite", "Shrine", "Camp", "Pedlar", "Boss"]
+	for i in legend_types.size():
+		var p := Vector2(size.x / 2 - 510 + i * 185, size.y - 32)
+		_icon(legend_types[i], p, ICON_R, 1.0)
+		draw_string(UITheme.font("heading"), p + Vector2(32, 8), legend_labels[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 24, UITheme.INK)
 	if _hover >= 0:
 		var n := r.node(_hover)
 		var txt: String = NAMES.get(n["type"], n["type"])

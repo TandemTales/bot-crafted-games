@@ -35,6 +35,12 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "run4":
+		await _glasswood()
+		await _rooms(2)
+		await _rail_input()
+		_finish()
+		return
 	if only == "run3":
 		await _region2()
 		await _cloister_cards()
@@ -108,6 +114,56 @@ func _check(ok: bool, message: String) -> void:
 	if not ok:
 		failures += 1
 		printerr("[tour] FAIL: ", message)
+
+
+func _glasswood() -> void:
+	Game.new_run(926)
+	var r := Game.run
+	r.region = 2
+	r.generate_map()
+	Game.goto_map()
+	await _wait(1.2)
+	await _shot("40_glasswood_map")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		Game.goto_combat()
+		await _wait(3.2)
+		var sc = get_tree().current_scene
+		_check(sc.banner.modulate.a < 0.01, "encounter title has cleared before capture")
+		_check(sc.board.theme == BoardView.THEMES["glasswood"], "Glasswood theme is active")
+		_check(sc.board.units.size() == sc.c.enemies.size() + 1, "every Glasswood unit has a model")
+		await _shot("41_" + enc)
+		if enc == reg["boss"]:
+			# Deliberately stage the phase boundary. This tests actual turn handling, not a boss win.
+			var boss: Dictionary = sc.c.enemies[0]
+			sc.c._damage_enemy(boss, int(boss["hp"]) / 2 + 1)
+			_check(boss["phase2"], "Queen switches phase")
+			sc.c._choose_intent(boss)
+			sc._refresh_all()
+			await _shot("42_queen_phase2_intent")
+			sc._on_end_turn()
+			for frame in 100:
+				await _wait(0.1)
+				if not sc.busy:
+					break
+			_check(not sc.busy and sc.c.turn >= 2, "Queen phase-two enemy turn finishes")
+			await _wait(1.4)
+			await _shot("43_queen_phase2_resolved")
+		# A checkpoint resume restarts the authored encounter, preserving normal files.
+		var expected: String = enc
+		Game.run = RunState.from_json(r.to_json())
+		Game.goto_combat()
+		await _wait(0.4)
+		_check(Game.combat.encounter["id"] == expected, "native checkpoint resume: " + expected)
+		r = Game.run
+	r.status = "victory"
+	Game.route_to_status()
+	await _wait(0.7)
+	await _shot("44_development_clear")
+	Game.goto_title()
+	await _wait(0.4)
 
 
 func _finish() -> void:

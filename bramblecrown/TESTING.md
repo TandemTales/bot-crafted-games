@@ -80,3 +80,27 @@ fixed delay and can land after the animation; do not cite those images as animat
 Focused rule tests cover all ten base/upgraded cards, prevention/expiry of Clarity, one-time
 Daze refunds, spent and capped Ward reserves, Ward stealing/destruction, attack previews,
 Grove reach, actual reward availability, and deck/progression/RNG save round trips.
+
+## 7. Glasswood regression (Run 4)
+
+Generate only Glasswood assets with the installed Blender:
+`blender -b -P source-art/build_assets.py -- only=glasswood_tiles,glasswood_props,shardling,prism_stag,glass_mite,lantern_hart,splintered_queen`.
+Reopen representative source files and check meshes, materials, dimensions, and animation actions.
+Then run the full `tools/check.sh` gate with installed Godot and its normal editor-settings access.
+
+Rules cover the Cloister-to-Glasswood transition, all eight checkpoint encounter restarts,
+deterministic enemy/card setup, easy-pool selection, both Queen patterns and bounded summons.
+Counterplay tests check charge interruption by Root, retreat from a stationary sweep, exposed
+Mite support, and Ward-breaking previews versus actual card resolution. Existing data checks
+cover reachability and imported models for every region. High-HP pattern execution is a rules
+test, not campaign balance evidence. Saves restart a combat node; they do not restore mid-turn state.
+
+Export and run `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH --tour-only run4`.
+It captures the region map, all eight encounters, Queen phase-two intent/resolution, development
+clear screen, four room screens, and four existing input/resize regression views (20 images).
+Run at 1280x720, 1920x1080, and 2560x1440 and inspect every image. Assertions cover actual region
+models/theme, checkpoint restarts, turn animation completion, and prior input/save-preservation
+checks. The end screen is staged; this does not certify defeating the Queen or a full playthrough.
+
+Build outputs are ignored by Godot via `build/.gdignore` and excluded in the export preset,
+alongside evidence and editable source art. Keep that guard when exporting into the project.

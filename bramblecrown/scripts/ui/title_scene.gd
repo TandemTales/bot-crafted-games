@@ -88,7 +88,7 @@ func _build_ui() -> void:
 	_btn(v, "Quit", func(): get_tree().quit())
 	(_continue_btn if _continue_btn.visible else nb).grab_focus()
 	var foot := Label.new()
-	foot.text = "v%s · Runs %d · Wins %d" % [ProjectSettings.get_setting("application/config/version"), Game.profile["runs"], Game.profile["wins"]]
+	foot.text = "Development build · %d of 5 regions · Runs %d · Clears %d" % [EncounterDB.REGIONS.size(), Game.profile["runs"], Game.profile["wins"]]
 	foot.add_theme_color_override("font_color", UITheme.INK_DIM)
 	foot.add_theme_font_size_override("font_size", 18)
 	UITheme.anchor(foot, Control.PRESET_BOTTOM_LEFT, Vector2(110, -60))

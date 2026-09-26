@@ -86,7 +86,11 @@ func _done(msg: String) -> void:
 
 func _camp() -> void:
 	var r := Game.run
-	_heading("Campfire", "Candle-wax and wet stone. The Blight will not cross a lit hearth tonight." if r.region_def().get("theme", "") == "cloister" else "The peat smoke keeps the Blight at bay for a night.")
+	var camp_text := "The peat smoke keeps the Blight at bay for a night."
+	match r.region_def().get("theme", ""):
+		"cloister": camp_text = "Candle-wax and wet stone. The Blight will not cross a lit hearth tonight."
+		"glasswood": camp_text = "A thousand quiet reflections hold the firelight. For once, none of them move."
+	_heading("Campfire", camp_text)
 	var heal := mini(r.max_hp - r.hp, int(ceil(r.max_hp * 0.3)))
 	_button("Rest: heal %d HP" % heal if heal > 0 else "Rest: already at full health", func():
 		var got := r.camp_rest()

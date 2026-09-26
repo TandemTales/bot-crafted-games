@@ -136,6 +136,67 @@ const ENEMIES := {
 		"phase2_at": 0.5,
 		"pattern2": [4, 3, 5, 1],
 	},
+	# ---------------- Region 3: Glasswood ----------------
+	# Faceted bodies trade attacking turns for ward. Crack the ward or spend those
+	# turns building a grove; none of these creatures suppresses player energy.
+	"shardling": {
+		"name": "Shardling", "hp": [16, 19], "move": 2, "model": "shardling", "size": 0.85,
+		"moves": [
+			{"name": "Close the Facets", "stay": true, "actions": [{"t": "ward", "n": 6}]},
+			{"name": "Shard Bite", "actions": [{"t": "attack", "dmg": 7, "range": 1}]},
+		],
+		"pattern": [0, 1],
+	},
+	"prism_stag": {
+		"name": "Prism Stag", "hp": [36, 40], "move": 1, "model": "prism_stag", "size": 1.1,
+		# The charge closes distance, then two stationary turns reward repositioning.
+		# It does not trample: a planted thicket still slows its approach.
+		"moves": [
+			{"name": "Prism Charge", "move_bonus": 2, "actions": [{"t": "attack", "dmg": 10, "range": 1}]},
+			{"name": "Brace the Antlers", "stay": true, "actions": [{"t": "ward", "n": 8}]},
+			{"name": "Antler Sweep", "stay": true, "actions": [{"t": "attack", "dmg": 14, "range": 1}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"glass_mite": {
+		"name": "Glass Mite", "hp": [13, 16], "move": 2, "keep_range": 2, "flying": true,
+		"model": "glass_mite", "size": 0.75,
+		"moves": [
+			{"name": "Borrowed Facets", "stay": true, "actions": [{"t": "shield_allies", "n": 4}]},
+			{"name": "Glass Needle", "actions": [{"t": "attack", "dmg": 5, "range": 2}]},
+			{"name": "Scatter Splinters", "actions": [{"t": "spread", "count": 2, "radius": 1}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"lantern_hart": {
+		"name": "Lantern Hart", "hp": [78, 82], "move": 2, "keep_range": 2,
+		"model": "lantern_hart", "size": 1.2, "elite": true,
+		"moves": [
+			{"name": "Light the Herd", "stay": true, "actions": [{"t": "ward", "n": 6}, {"t": "shield_allies", "n": 6}]},
+			{"name": "Lantern Lance", "actions": [{"t": "attack", "dmg": 14, "range": 2}]},
+			{"name": "Dimming Paths", "stay": true, "actions": [{"t": "spread", "count": 4, "radius": 2}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"splintered_queen": {
+		"name": "The Splintered Queen", "hp": [174, 174], "move": 1, "keep_range": 2,
+		"model": "splintered_queen", "size": 1.15, "boss": true,
+		# Keep defensive turns separate from summons: capped summons skip the entire
+		# move, so combining them would erase the player's reliable recovery window.
+		"moves": [
+			{"name": "Court of Mirrors", "stay": true, "actions": [{"t": "ward", "n": 8}, {"t": "shield_allies", "n": 5}]},
+			{"name": "Royal Refraction", "actions": [{"t": "attack", "dmg": 12, "range": 3}]},
+			{"name": "Gather the Shards", "stay": true, "actions": [{"t": "summon", "enemy": "shardling", "count": 1, "max": 2}]},
+			{"name": "Fracture the Grove", "stay": true, "actions": [{"t": "spread", "count": 4, "radius": 2}]},
+			{"name": "Reforge the Crown", "stay": true, "actions": [{"t": "ward", "n": 6}, {"t": "strength", "n": 1}]},
+			{"name": "Crownfall", "stay": true, "actions": [{"t": "attack", "dmg": 20, "range": 2}]},
+			{"name": "Splinterstorm", "actions": [{"t": "attack", "dmg": 9, "range": 3}, {"t": "spread", "count": 3, "radius": 2}]},
+			{"name": "Wake the Mirrorwing", "stay": true, "actions": [{"t": "summon", "enemy": "glass_mite", "count": 1, "max": 1}]},
+		],
+		"pattern": [0, 1, 2, 3],
+		"phase2_at": 0.5,
+		"pattern2": [4, 5, 7, 6],
+	},
 }
 
 

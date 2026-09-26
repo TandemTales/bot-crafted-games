@@ -1505,6 +1505,265 @@ def build_altar():
     finish("altar")
 
 
+# ------------------------------------------------------------------ Glasswood
+
+def glasswood_palette():
+    """Opaque cut glass reads at board distance without bloom or transparency noise."""
+    return {
+        "earth": mat("glasswood_earth", (0.075, 0.095, 0.10), 0.96),
+        "floor": mat("glasswood_floor", (0.13, 0.20, 0.20), 0.32, metal=0.12),
+        "moss": mat("glasswood_moss", (0.14, 0.23, 0.18), 0.92),
+        "bark": mat("glasswood_bark", (0.085, 0.115, 0.12), 0.84),
+        "glass": mat("smoked_teal_glass", (0.16, 0.32, 0.34), 0.23, metal=0.20),
+        "edge": mat("glass_cut_edge", (0.32, 0.47, 0.47), 0.27, metal=0.12),
+        "dark": mat("obsidian_joint", (0.045, 0.065, 0.08), 0.55),
+        "stone": mat("glasswood_stone", (0.19, 0.24, 0.26), 0.86),
+        "water": mat("mirror_pool", (0.065, 0.12, 0.15), 0.08, metal=0.28),
+        "mask": mat("amber_porcelain", (0.68, 0.37, 0.15), 0.52),
+        "crown": mat("tarnished_crown", (0.43, 0.29, 0.12), 0.4, metal=0.65),
+        "eye": mat("glasswood_amber_eye", (0.95, 0.52, 0.16), 0.4,
+                   emit=(1.0, 0.42, 0.09), emit_strength=0.55),
+    }
+
+
+def glass_shard(name, base, tip, radius, material, edge=None):
+    """Six-sided crystal with a long cut shoulder and an asymmetric pointed crown."""
+    direction = Vector(tip) - Vector(base)
+    length = direction.length
+    vertices = []
+    for z, r in [(0, radius * 0.75), (length * 0.7, radius)]:
+        for i in range(6):
+            a = i * math.tau / 6
+            vertices.append((r * math.cos(a), r * math.sin(a), z))
+    vertices.append((radius * 0.14, -radius * 0.1, length))
+    faces = [tuple(reversed(range(6)))]
+    for i in range(6):
+        j = (i + 1) % 6
+        faces.extend([(i, j, j + 6, i + 6), (i + 6, j + 6, 12)])
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.location = base
+    obj.rotation_euler = direction.to_track_quat("Z", "Y").to_euler()
+    assign(obj, material)
+    if edge:
+        obj.data.materials.append(edge)
+        for polygon in obj.data.polygons:
+            if polygon.index in (4, 8, 12):
+                polygon.material_index = 1
+    return obj
+
+
+def glasswood_floor(P):
+    parts = [assign(hex_prism("root_soil", 0.98, 0.94, -1.0, 0), P["earth"]),
+             assign(hex_prism("polished_ground", 0.98, 0.09, -0.07, 0.025), P["floor"])]
+    # Broad dark roots and low leaf litter retain a forest floor, not a gem field.
+    for i in range(3):
+        a = i * 2.1 + 0.3
+        parts.append(tube("buried_root", [(0.78 * math.cos(a), 0.78 * math.sin(a), 0.023),
+                                          (0.4 * math.cos(a + 0.3), 0.4 * math.sin(a + 0.3), 0.025),
+                                          (0.1, 0.05, 0.027)], 0.018, P["bark"]))
+        parts.append(assign(ico("moss_island", 0.14, (0.6 * math.cos(a), 0.6 * math.sin(a), 0.025),
+                                scale=(1.2, 0.7, 0.15), sub=1), P["moss"]))
+    return parts
+
+
+def build_glasswood_tiles():
+    for name in ("hex_glass", "hex_crystal", "hex_mirror"):
+        reset()
+        P = glasswood_palette()
+        if name == "hex_mirror":
+            parts = [assign(hex_prism("sunken_bed", 0.98, 0.58, -0.8, 0.025), P["earth"]),
+                     assign(hex_prism("still_water", 0.96, 0.018, -0.215, 0.015), P["water"])]
+            for x, y, r in [(-0.60, 0.22, 0.17), (0.58, 0.30, 0.13), (0.40, -0.57, 0.10)]:
+                parts.append(assign(ico("drowned_stone", r, (x, y, -0.19), scale=(1, 1.2, 0.55), sub=1), P["stone"]))
+        else:
+            parts = glasswood_floor(P)
+            if name == "hex_crystal":
+                parts.append(assign(ico("blocking_boulder", 0.55, (0, 0.08, 0.32),
+                                        scale=(1.1, 0.9, 0.8), sub=2), P["stone"]))
+                for x, y, h, r, lean in [(0.0, 0.12, 1.15, 0.17, -0.06),
+                                         (-0.31, -0.13, 0.77, 0.14, -0.18),
+                                         (0.28, -0.19, 0.66, 0.13, 0.17)]:
+                    parts.append(glass_shard("rooted_crystal", (x, y, 0.13),
+                                             (x + lean, y + 0.04, h), r, P["glass"], P["edge"]))
+        join(parts, name)
+        finish(name)
+
+
+def build_glasswood_props():
+    reset()
+    P = glasswood_palette()
+    parts = [tube("crooked_trunk", [(0, 0, 0), (-0.1, 0.03, 0.65), (0.05, 0.06, 1.3),
+                                    (-0.03, 0.12, 1.9)], 0.15, P["bark"])]
+    for side, y, h in [(-1, 0.08, 1.1), (1, 0.10, 1.38), (-1, 0.16, 1.68)]:
+        end = (side * 0.52, y, h + 0.22)
+        parts.append(tube("bare_bough", [(0, 0.06, h - 0.5), (side * 0.3, y, h - 0.05), end], 0.055, P["bark"]))
+        for i in range(3):
+            parts.append(glass_shard("crystalline_bud", (end[0] + (i - 1) * 0.09, y, h + 0.10),
+                                     (end[0] + side * 0.09 + (i - 1) * 0.15, y + 0.025, h + 0.45 - abs(i - 1) * 0.13),
+                                     0.065, P["glass"], P["edge"]))
+    for i in range(4):
+        a = i * math.pi / 2
+        parts.append(tube("root", [(0, 0, 0.15), (0.23 * math.cos(a), 0.23 * math.sin(a), 0.035),
+                                   (0.45 * math.cos(a + 0.2), 0.45 * math.sin(a + 0.2), 0.01)], 0.055, P["bark"]))
+    join(parts, "crystal_tree")
+    finish("crystal_tree")
+
+    reset()
+    P = glasswood_palette()
+    parts = []
+    for k in range(5):
+        a = k * math.tau / 5
+        direction = Vector((math.cos(a), math.sin(a), 0))
+        cross = Vector((-math.sin(a), math.cos(a), 0))
+        parts.append(tube("fern_stem", [(0, 0, 0), tuple(direction * 0.24 + Vector((0, 0, 0.32))),
+                                       tuple(direction * 0.5 + Vector((0, 0, 0.26)))], 0.013, P["bark"]))
+        for j in range(4):
+            u = (j + 1) / 5
+            base = direction * (0.44 * u) + Vector((0, 0, 0.26 * math.sin(u * 2)))
+            for side in (-1, 1):
+                tip = base + direction * 0.07 + cross * side * (0.15 - 0.08 * u) + Vector((0, 0, 0.035))
+                parts.append(glass_shard("fern_pinna", base, tip, 0.018, P["glass"], P["edge"]))
+    join(parts, "glass_fern")
+    finish("glass_fern")
+
+    reset()
+    P = glasswood_palette()
+    parts = [glass_shard("fallen_trunk", (-0.55, 0.0, 0.12), (0.52, 0.15, 0.22), 0.17, P["glass"], P["edge"]),
+             assign(ico("moss", 0.20, (-0.25, 0.08, 0.11), scale=(1.6, 0.75, 0.3), sub=1), P["moss"])]
+    for x, y in [(0.35, -0.22), (0.6, 0.02), (-0.38, -0.18)]:
+        parts.append(glass_shard("fallen_chip", (x, y, 0.015), (x + 0.1, y + 0.02, 0.07), 0.04, P["edge"]))
+    join(parts, "fallen_prism")
+    finish("fallen_prism")
+
+
+def glasswood_face(parts, P, center, radius):
+    x, y, z = center
+    parts.append(assign(ico("amber_mask", radius, center, scale=(0.9, 0.42, 1.05), sub=2), P["mask"]))
+    for side in (-1, 1):
+        parts.append(assign(ico("dark_socket", radius * 0.24, (x + side * radius * 0.36, y - radius * 0.35, z + radius * 0.1),
+                                scale=(1.0, 0.45, 0.65), sub=1), P["dark"]))
+    _eyes(parts, P, [(x - radius * 0.36, y - radius * 0.46, z + radius * 0.1),
+                     (x + radius * 0.36, y - radius * 0.46, z + radius * 0.1)], radius * 0.09)
+
+
+def build_shardling():
+    reset()
+    P = glasswood_palette()
+    parts = [assign(ico("angular_body", 0.22, (0, 0.03, 0.32), scale=(0.8, 0.8, 1.15), sub=1), P["glass"])]
+    for s in (-1, 1):
+        parts.append(tube("bent_leg", [(s * 0.10, 0.02, 0.30), (s * 0.20, -0.02, 0.16),
+                                      (s * 0.15, -0.12, 0.025)], 0.038, P["dark"], taper=False))
+        parts.append(glass_shard("claw_arm", (s * 0.15, 0.01, 0.40), (s * 0.34, -0.21, 0.22), 0.05, P["edge"]))
+        parts.append(glass_shard("ear", (s * 0.10, 0.015, 0.57), (s * 0.18, 0.04, 0.78), 0.055, P["glass"], P["edge"]))
+    glasswood_face(parts, P, (0, -0.12, 0.54), 0.15)
+    parts.append(glass_shard("back_spur", (0, 0.15, 0.27), (0.07, 0.32, 0.51), 0.075, P["glass"]))
+    join(parts, "shardling")
+    finish("shardling")
+
+
+def glasswood_stag(P, lantern=False):
+    parts = [assign(ico("ribcage", 0.25, (0, 0.03, 0.43), scale=(0.7, 1.5, 0.86), sub=2), P["glass"]),
+             tube("arched_neck", [(0, -0.18, 0.45), (0, -0.30, 0.59), (0, -0.32, 0.77)], 0.10, P["glass"], taper=False)]
+    for side in (-1, 1):
+        for y in (-0.18, 0.25):
+            parts.append(tube("articulated_leg", [(side * 0.13, y, 0.44), (side * 0.14, y + 0.06, 0.22),
+                                                 (side * 0.15, y - 0.04, 0.045)], 0.03, P["dark"], taper=False))
+            parts.append(assign(cube("hoof", 0.075, (side * 0.15, y - 0.06, 0.038), scale=(0.7, 1.25, 0.65)), P["crown"]))
+        parts.append(glass_shard("ear", (side * 0.08, -0.31, 0.76), (side * 0.22, -0.26, 0.83), 0.044, P["edge"]))
+        for k in range(3):
+            x = side * (0.11 + k * 0.075)
+            z = 0.85 + k * 0.045
+            parts.append(tube("antler_tine", [(side * 0.07, -0.28, 0.79), (x, -0.21, z),
+                                             (x + side * 0.035, -0.19, z + 0.12)], 0.016, P["crown"] if lantern else P["edge"]))
+        if lantern:
+            x = side * 0.24
+            parts.append(tube("lantern_hanger", [(x, -0.20, 1.0), (x, -0.21, 0.88)], 0.009, P["dark"], taper=False))
+            parts.append(assign(cyl("lantern_frame", 0.066, 0.11, (x, -0.21, 0.81), verts=6), P["crown"]))
+            parts.append(assign(ico("amber_lantern", 0.050, (x, -0.235, 0.81), scale=(0.7, 0.7, 1.0), sub=1), P["eye"]))
+    parts.append(assign(ico("long_muzzle", 0.105, (0, -0.39, 0.72), scale=(0.8, 1.5, 0.8), sub=1), P["mask"]))
+    _eyes(parts, P, [(-0.065, -0.39, 0.78), (0.065, -0.39, 0.78)], 0.013)
+    parts.append(glass_shard("tail", (0, 0.35, 0.48), (0, 0.43, 0.60), 0.047, P["edge"]))
+    if lantern:
+        for k in range(4):
+            parts.append(glass_shard("saddle_plate", (0, 0.30 - k * 0.12, 0.50), (0, 0.34 - k * 0.12, 0.72), 0.075, P["glass"], P["edge"]))
+    return parts
+
+
+def build_prism_stag():
+    reset()
+    join(glasswood_stag(glasswood_palette()), "prism_stag")
+    finish("prism_stag")
+
+
+def build_lantern_hart():
+    reset()
+    join(glasswood_stag(glasswood_palette(), lantern=True), "lantern_hart")
+    finish("lantern_hart")
+
+
+def build_glass_mite():
+    reset()
+    P = glasswood_palette()
+    parts = [assign(ico("beetle_abdomen", 0.25, (0, 0.09, 0.27), scale=(1, 1.15, 0.66), sub=2), P["dark"])]
+    for side in (-1, 1):
+        parts.append(assign(ico("split_elytron", 0.24, (side * 0.105, 0.09, 0.30), scale=(0.53, 1.12, 0.68), sub=1), P["glass"]))
+        for k in range(3):
+            y = -0.15 + k * 0.16
+            parts.append(tube("six_jointed_legs", [(side * 0.16, y, 0.26), (side * (0.33 + (k % 2) * 0.06), y + (k - 1) * 0.08, 0.20),
+                                                (side * 0.4, y + (k - 1) * 0.13, 0.02)], 0.026, P["dark"], taper=False))
+        parts.append(tube("antenna", [(side * 0.07, -0.25, 0.30), (side * 0.17, -0.38, 0.40),
+                                     (side * 0.19, -0.43, 0.45)], 0.012, P["edge"]))
+        parts.append(glass_shard("mandible", (side * 0.06, -0.27, 0.20), (side * 0.07, -0.40, 0.15), 0.035, P["crown"]))
+    glasswood_face(parts, P, (0, -0.25, 0.27), 0.13)
+    join(parts, "glass_mite")
+    finish("glass_mite")
+
+
+def build_splintered_queen():
+    reset()
+    P = glasswood_palette()
+    # 1.30m authored height: ~2.07m at the game's 1.1 * 1.45 boss scale.
+    parts = [assign(cyl("gown", 0.30, 0.65, (0, 0.055, 0.36), verts=10, r2=0.10), P["dark"]),
+             assign(ico("bodice", 0.18, (0, 0, 0.79), scale=(0.8, 0.75, 1.25), sub=1), P["glass"])]
+    for side in (-1, 1):
+        parts.append(tube("queen_arm", [(side * 0.12, 0, 0.88), (side * 0.30, -0.07, 0.76),
+                                       (side * 0.36, -0.21, 0.91)], 0.032, P["crown"], taper=False))
+        parts.append(assign(ico("hand", 0.045, (side * 0.36, -0.21, 0.92), scale=(0.7, 0.8, 1.25), sub=1), P["mask"]))
+    glasswood_face(parts, P, (0, -0.10, 1.06), 0.14)
+    # Crown remains a readable warm silhouette, with no emissive crystal halo.
+    parts.append(assign(cyl("crown_band", 0.12, 0.055, (0, -0.055, 1.18), verts=10), P["crown"]))
+    for i in range(5):
+        a = i * math.tau / 5
+        base = (0.105 * math.cos(a), -0.055 + 0.105 * math.sin(a), 1.19)
+        parts.append(glass_shard("crown_point", base, (base[0] * 1.12, base[1], 1.30 - (i % 2) * 0.035),
+                                 0.025, P["mask"]))
+    join(parts, "splintered_queen_body")
+    # Each mantle panel has its own shoulder pivot. Animation is restrained and
+    # preserves the large dark gaps between panels at a tactical camera distance.
+    for side in (-1, 1):
+        panels = []
+        for k in range(3):
+            panels.append(glass_shard("mantle_shingle", (side * (0.13 + k * 0.075), 0.12, 0.91 - k * 0.04),
+                                      (side * (0.24 + k * 0.13), 0.16, 0.21 + k * 0.06),
+                                      0.082 - k * 0.009, P["glass"], P["edge"]))
+        mantle = join(panels, "mantle_left" if side < 0 else "mantle_right")
+        pivot = Vector((side * 0.13, 0.12, 0.91))
+        mantle.data.transform(Matrix.Translation(-pivot))
+        mantle.location = pivot
+        for frame, angle in [(1, -0.025), (25, 0.025), (49, -0.025)]:
+            mantle.rotation_euler.y = side * angle
+            mantle.keyframe_insert("rotation_euler", frame=frame)
+        mantle.animation_data.action.name = "mantle_breath"
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = 49
+    bpy.context.scene.frame_set(1)
+    finish("splintered_queen")
+
+
 BUILDERS = {
     "hex": build_hex_tiles,
     "thicket": build_thicket,
@@ -1528,6 +1787,13 @@ BUILDERS = {
     "campfire": build_campfire,
     "pedlar": build_pedlar,
     "altar": build_altar,
+    "glasswood_tiles": build_glasswood_tiles,
+    "glasswood_props": build_glasswood_props,
+    "shardling": build_shardling,
+    "prism_stag": build_prism_stag,
+    "glass_mite": build_glass_mite,
+    "lantern_hart": build_lantern_hart,
+    "splintered_queen": build_splintered_queen,
 }
 
 

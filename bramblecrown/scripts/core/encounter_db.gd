@@ -23,6 +23,15 @@ const REGIONS := [
 		"easy": ["clo_nave", "clo_bells", "clo_aisle"],
 		"theme": "cloister",
 	},
+	{
+		"id": "glasswood", "name": "Glasswood",
+		"blurb": "Crystal boughs and silver channels beneath a fractured crown.",
+		"fights": ["gls_crossing", "gls_orchard", "gls_mirrors", "gls_splinters", "gls_runoff", "gls_court"],
+		"elites": ["gls_hart"],
+		"boss": "gls_queen",
+		"easy": ["gls_crossing", "gls_orchard", "gls_mirrors"],
+		"theme": "glasswood",
+	},
 ]
 
 const ENCOUNTERS := {
@@ -124,6 +133,69 @@ const ENCOUNTERS := {
 		"water": [[-4, 1], [-4, 2], [4, -4], [4, -3], [0, 0], [-1, 1]], "stone": [[-3, 0], [3, -1], [-2, 3], [2, 1], [-1, -2], [2, -3]],
 		"blight": [[0, -3], [-1, -3], [1, -4], [0, -4], [1, -3], [-2, -2], [2, -4]],
 		"thicket": [[0, 4], [1, 3]],
+	},
+	# ---------------- Region 3: Glasswood ----------------
+	# One dry bridge: hold the approach while the two Shardlings alternate Ward and strikes.
+	"gls_crossing": {
+		"name": "The Silver Crossing", "radius": 3, "player": [0, 3],
+		"enemies": [["shardling", -2, -1], ["shardling", 2, -3]],
+		"water": [[-3, 0], [-2, 0], [-1, 0], [1, 0], [2, 0], [3, 0]], "stone": [[-1, 2], [1, 1]],
+		"blight": [[-2, -1], [-1, -2], [2, -3], [1, -2]], "thicket": [[0, 3], [0, 2], [0, 1]],
+	},
+	# A crystal copse splits the Stag's approach; the western growth patch tempts a Mite-first flank.
+	"gls_orchard": {
+		"name": "The Prism Orchard", "radius": 3, "player": [0, 3],
+		"enemies": [["prism_stag", 1, -3], ["glass_mite", -2, 0]],
+		"water": [[3, -2], [3, -1], [-3, 3]], "stone": [[-1, 0], [0, 0], [0, -1]],
+		"blight": [[1, -3], [0, -2], [2, -3], [-2, 0]], "thicket": [[0, 3], [-1, 3], [-2, 1]],
+	},
+	# Flying Mites cross the broken channels; the clear middle offers access to either bank.
+	"gls_mirrors": {
+		"name": "Mites on the Mirrors", "radius": 3, "player": [0, 2],
+		"enemies": [["glass_mite", -3, 0], ["glass_mite", 3, -3], ["shardling", 0, -2]],
+		"water": [[-2, 0], [-1, 0], [1, -1], [2, -1]], "stone": [[-1, -2], [1, 2]],
+		"blight": [[-3, 0], [-2, -1], [3, -3], [2, -2], [0, -2]], "thicket": [[0, 2], [0, 1]],
+	},
+	# Start inside a Grove, surrounded on three sides: commit to one exit before Ward becomes attack.
+	"gls_splinters": {
+		"name": "A Thousand Splinters", "radius": 3, "player": [0, 0],
+		"enemies": [["shardling", -3, 1], ["shardling", 3, -1], ["shardling", 0, -3]],
+		"water": [[-2, 2], [-1, 2], [2, -3], [1, -3]], "stone": [[-2, 0], [2, 0], [-1, -1]],
+		"blight": [[-3, 1], [-3, 2], [3, -1], [2, -1], [0, -3], [0, -2]],
+		"thicket": [[0, 0], [-1, 1], [1, 0]],
+	},
+	# A diagonal channel has two distant ends: take the western Grove or pursue the exposed Mite east.
+	"gls_runoff": {
+		"name": "The Forked Runoff", "radius": 3, "player": [-3, 3],
+		"enemies": [["prism_stag", 2, -2], ["glass_mite", 1, -3]],
+		"water": [[-1, 1], [0, 0], [1, -1]], "stone": [[-2, 1], [2, 0]],
+		"blight": [[2, -2], [3, -3], [1, -3], [0, -2], [-1, -1]],
+		"thicket": [[-3, 3], [-2, 3], [-2, 0], [-3, 1]],
+	},
+	# The Mite shields across the western pool while Stag and Shardling divide the two dry lanes.
+	"gls_court": {
+		"name": "Court of Broken Boughs", "radius": 3, "player": [0, 3],
+		"enemies": [["prism_stag", -1, -2], ["shardling", 2, -3], ["glass_mite", -3, 0]],
+		"water": [[1, 1], [2, 0], [3, -1], [-3, 1], [-3, 2]], "stone": [[-1, 0], [-1, -1], [0, -1]],
+		"blight": [[-1, -2], [0, -2], [2, -3], [1, -3], [-3, 0], [-2, 0]],
+		"thicket": [[0, 3], [0, 2], [1, 0]],
+	},
+	# The crystal screen breaks the approach, not ranged attacks: flank toward a support or close on Hart.
+	"gls_hart": {
+		"name": "The Lantern Hart", "radius": 3, "player": [-1, 3], "elite": true,
+		"enemies": [["lantern_hart", 0, -2], ["glass_mite", -2, -1], ["shardling", 2, -3]],
+		"water": [[-3, 0], [3, -3], [-2, 3], [2, 1]], "stone": [[-1, 0], [0, 0], [1, -1]],
+		"blight": [[0, -2], [-1, -2], [1, -2], [-2, -1], [2, -3], [0, -3]],
+		"thicket": [[-1, 3], [0, 2], [1, 1]],
+	},
+	# Central causeway and two wide flanks leave space to reposition when the Queen calls her court.
+	"gls_queen": {
+		"name": "The Splintered Queen", "radius": 4, "player": [0, 4], "boss": true,
+		"enemies": [["splintered_queen", 0, -3]],
+		"water": [[-2, 0], [-1, 0], [1, -1], [2, -1], [-3, 2], [3, 0]],
+		"stone": [[-2, -1], [-1, -2], [1, -3], [2, -3], [-1, 3], [2, 1]],
+		"blight": [[0, -3], [0, -4], [-1, -3], [1, -4], [0, -2], [2, -4], [-2, -2]],
+		"thicket": [[0, 4], [1, 3], [0, 3]],
 	},
 }
 
