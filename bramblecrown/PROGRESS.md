@@ -1,5 +1,13 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-26 — Run 5 checkpoint (Pacific Saturday 09:35, age 2 days)
+
+- STOP absent; worktree fast-forwarded to remote `dev` `4f65d1c` (Run 4 final). Work pushes to `dev`.
+- Polish night: forced release remains 2026-10-03 Pacific; no quality pass exists for early release.
+- Bounded plan from Run 4's next action: (1) sequential-enemy forecast vs resolution regression,
+  (2) Region 4 Ironroot Deeps (board, roster, elite, boss, encounters, original Blender assets).
+- Next action: write the forecast regression, then Ironroot content.
+
 ## 2026-09-26 — Run 4 checkpoint (Pacific Saturday, age 2 days)
 
 - STOP absent; clean documented `dev` at `977a7d9`, equal to remote `dev`.
