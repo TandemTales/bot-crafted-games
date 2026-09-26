@@ -37,6 +37,9 @@ func _ready() -> void:
 	g.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	g.add_theme_constant_override("outline_size", 6)
 	g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	g.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	g.custom_minimum_size = Vector2(180, 40)
+	g.add_theme_stylebox_override("normal", UITheme.box(Color(0.035, 0.045, 0.04, 0.96), UITheme.GOLD, 1, 6, 4))
 	v.add_child(g)
 	# The Grovewalker stands in the clearing in this gap.
 	var gap := Control.new()

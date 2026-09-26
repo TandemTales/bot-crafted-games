@@ -27,6 +27,7 @@ const THEMES := {
 		"bg": Color(0.035, 0.055, 0.075), "ambient": Color(0.40, 0.52, 0.59), "fog": Color(0.08, 0.15, 0.19),
 		"key": Color(1.0, 0.86, 0.69), "key_energy": 1.35, "rim": Color(0.28, 0.58, 0.72),
 		"pool": Color(0.025, 0.06, 0.075),
+		"water_color": Color(0.16, 0.32, 0.39),
 	},
 	"marsh": {
 		"plain": "hex_peat", "stone": "hex_stone", "water": "hex_water",
@@ -275,6 +276,11 @@ func _water_disc() -> MeshInstance3D:
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.roughness = 0.04
 	m.metallic_specular = 0.9
+	if theme.has("water_color"):
+		m.albedo_color = theme["water_color"]
+		m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+		m.roughness = 0.28
+		m.metallic_specular = 0.5
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mi.material_override = m
 	mi.position.y = -0.1

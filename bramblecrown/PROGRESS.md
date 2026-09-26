@@ -34,6 +34,44 @@
   prevent local screenshots and editable assets being imported/shipped in later packages.
 - Next: finish bounded visual corrections, re-export, inspect all three required resolutions,
   obtain independent critic follow-up, retain evidence and push final handoff. No itch upload.
+### Run 4 final result and next action
+
+- **Delivered:** Glasswood (six fights, elite, two-phase boss), eleven editable Blender models
+  and runtime GLBs, animated Queen mantle, thematic room/map presentation and completion text.
+  Corrected crystal visibility and Hart identity after native inspection. Critic-driven UI fixes
+  distinguish self/ally Ward and back gold/prices with dark panels.
+- **Final gate:** 1,373 passed / 0 failed; installed Godot import, scene smokes and export clean.
+  Corrected package ran at **1280x720, 1920x1080, 2560x1440**, with 20 screenshots per size,
+  zero assertions/errors, exit 0, and unchanged normal player files. Main runner read all 60
+  images through contact sheets plus representative originals. Queen animation is imported/playing.
+- **Package:** `build/windows/Bramblecrown.exe`, embedded PCK, 117,920,216 bytes.
+  SHA-256 `244FDD2CAC12D5E15D5C74409C872E26DF512F4CD4FF80DB628CE3CD5838B275`.
+  Raw logs, nine contact sheets, representative originals, source reopen evidence and independent
+  critic scope are retained in `evidence/2026-09-26-run4/`.
+- **Critic:** narrow readability corrections pass; no new blocking visual regression.
+  Overall **ours loses / no AAA or shipping pass**: sparse void/flat terrain, dark small enemies,
+  repeated map stamps, overbright room lights, rudimentary faces and missing regional event scenes.
+  Three regions and one walker still do not satisfy the full SPEC.
+- **Limits:** tours use staged encounters/endings and synthetic input. No genuine full-region
+  keyboard/mouse playthrough, listening, physical controller, focus/fullscreen, 4K/ultrawide this
+  run, sustained performance, other hardware or player-path download/install verification.
+  Combat save/resume restarts the node; it does not retain mid-turn combat state.
+- **Release:** nothing uploaded/published. No `.aaa-complete`; Bramblecrown remains active.
+  Forced release remains **2026-10-03 Pacific**. Butler's old processed build is unchanged;
+  Draft is the last recorded page visibility, not freshly browser-verified this run.
+
+Exact next action for Run 5:
+1. Add a focused sequential-enemy preview versus actual resolution regression. The critic flagged
+   current-occupancy forecasts versus ordered enemy movement as an unverified pre-existing risk.
+   Fix only if reproduced, preserving the authoritative combat rules.
+2. Continue full content with Ironroot Deeps: six encounters, Rustgrub/Cart Golem/Tunneler,
+   Foundry Heart elite, Engine of Rot boss, and original Blender environment/roster assets.
+3. Author region-specific Cloister/Glasswood shrine choices and matching scenes; retain the
+   current readability gains. Schedule genuine play/audio/controller evidence when available.
+
+Full remaining contract: regions 4–5; Cassia and Thatch with at least 20 cards each; additional
+charms/events; Withering tiers; human balance and all discipline quality acceptance. Existing
+content is 18 normal fights + 3 elites + 3 bosses, 34 Wren cards, 10 charms and 5 global events.
 ## 2026-09-26 — Run 3 checkpoint (Pacific Saturday, age 2 days)
 
 - STOP absent. Clean `dev` at `9a4220b`, confirmed equal to remote `dev` before changes.

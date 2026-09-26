@@ -398,7 +398,7 @@ func _sync_plates() -> void:
 				"daze":
 					icons.append({"kind": "daze", "n": a["n"]})
 				"shield_allies":
-					icons.append({"kind": "ward", "n": a["n"]})
+					icons.append({"kind": "ally_ward", "n": a["n"]})
 				"heal_allies":
 					icons.append({"kind": "heal", "n": a["n"]})
 		plates[e["uid"]].update_from({"title": e["def"]["name"], "hp": e["hp"], "max_hp": e["max_hp"],

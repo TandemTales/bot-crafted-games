@@ -1582,12 +1582,14 @@ def build_glasswood_tiles():
         else:
             parts = glasswood_floor(P)
             if name == "hex_crystal":
-                parts.append(assign(ico("blocking_boulder", 0.55, (0, 0.08, 0.32),
-                                        scale=(1.1, 0.9, 0.8), sub=2), P["stone"]))
-                for x, y, h, r, lean in [(0.0, 0.12, 1.15, 0.17, -0.06),
-                                         (-0.31, -0.13, 0.77, 0.14, -0.18),
-                                         (0.28, -0.19, 0.66, 0.13, 0.17)]:
-                    parts.append(glass_shard("rooted_crystal", (x, y, 0.13),
+                # Keep the rock below the long crystal shafts. The previous .76m
+                # boulder swallowed them, leaving only tiny tips at board distance.
+                parts.append(assign(ico("blocking_boulder", 0.44, (0, 0.08, 0.19),
+                                        scale=(1.1, 0.9, 0.48), sub=2), P["stone"]))
+                for x, y, h, r, lean in [(0.0, 0.12, 1.15, 0.19, -0.06),
+                                         (-0.31, -0.13, 0.85, 0.17, -0.18),
+                                         (0.28, -0.19, 0.72, 0.15, 0.17)]:
+                    parts.append(glass_shard("rooted_crystal", (x, y, 0.06),
                                              (x + lean, y + 0.04, h), r, P["glass"], P["edge"]))
         join(parts, name)
         finish(name)
@@ -1666,7 +1668,7 @@ def build_shardling():
 
 
 def glasswood_stag(P, lantern=False):
-    parts = [assign(ico("ribcage", 0.25, (0, 0.03, 0.43), scale=(0.7, 1.5, 0.86), sub=2), P["glass"]),
+    parts = [assign(ico("ribcage", 0.25, (0, 0.03, 0.43), scale=(0.9 if lantern else 0.7, 1.5, 0.86), sub=2), P["glass"]),
              tube("arched_neck", [(0, -0.18, 0.45), (0, -0.30, 0.59), (0, -0.32, 0.77)], 0.10, P["glass"], taper=False)]
     for side in (-1, 1):
         for y in (-0.18, 0.25):
@@ -1675,15 +1677,23 @@ def glasswood_stag(P, lantern=False):
             parts.append(assign(cube("hoof", 0.075, (side * 0.15, y - 0.06, 0.038), scale=(0.7, 1.25, 0.65)), P["crown"]))
         parts.append(glass_shard("ear", (side * 0.08, -0.31, 0.76), (side * 0.22, -0.26, 0.83), 0.044, P["edge"]))
         for k in range(3):
-            x = side * (0.11 + k * 0.075)
+            x = side * (0.14 + k * 0.13) if lantern else side * (0.11 + k * 0.075)
             z = 0.85 + k * 0.045
             parts.append(tube("antler_tine", [(side * 0.07, -0.28, 0.79), (x, -0.21, z),
                                              (x + side * 0.035, -0.19, z + 0.12)], 0.016, P["crown"] if lantern else P["edge"]))
         if lantern:
-            x = side * 0.24
-            parts.append(tube("lantern_hanger", [(x, -0.20, 1.0), (x, -0.21, 0.88)], 0.009, P["dark"], taper=False))
-            parts.append(assign(cyl("lantern_frame", 0.066, 0.11, (x, -0.21, 0.81), verts=6), P["crown"]))
-            parts.append(assign(ico("amber_lantern", 0.050, (x, -0.235, 0.81), scale=(0.7, 0.7, 1.0), sub=1), P["eye"]))
+            # Wide forked antlers and open hanging lanterns distinguish the elite.
+            # A solid cylinder hid the old lens; caps and narrow posts leave it visible.
+            x = side * 0.38
+            parts.append(tube("lantern_hanger", [(x, -0.20, 0.98), (x, -0.21, 0.87)], 0.009, P["dark"], taper=False))
+            for z in (0.70, 0.87):
+                parts.append(assign(cyl("lantern_cap", 0.09, 0.025, (x, -0.21, z), verts=6), P["crown"]))
+            for dx in (-0.07, 0.07):
+                parts.append(tube("lantern_post", [(x + dx, -0.21, 0.71), (x + dx, -0.21, 0.86)],
+                                  0.009, P["crown"], taper=False))
+            parts.append(assign(ico("amber_lantern", 0.068, (x, -0.21, 0.785), scale=(0.8, 0.8, 1.0), sub=1), P["eye"]))
+            parts.append(glass_shard("shoulder_ruff", (side * 0.12, -0.13, 0.56),
+                                     (side * 0.28, -0.08, 0.70), 0.065, P["glass"], P["edge"]))
     parts.append(assign(ico("long_muzzle", 0.105, (0, -0.39, 0.72), scale=(0.8, 1.5, 0.8), sub=1), P["mask"]))
     _eyes(parts, P, [(-0.065, -0.39, 0.78), (0.065, -0.39, 0.78)], 0.013)
     parts.append(glass_shard("tail", (0, 0.35, 0.48), (0, 0.43, 0.60), 0.047, P["edge"]))

@@ -152,6 +152,9 @@ func _market() -> void:
 			price.text = "SOLD" if it["sold"] else "%d gold" % it["price"]
 			price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			price.add_theme_color_override("font_color", UITheme.GOLD if r.gold >= int(it["price"]) else UITheme.BLOOD)
+			price.add_theme_stylebox_override("normal", UITheme.box(Color(0.035, 0.045, 0.04, 0.97), UITheme.BARK_LIGHT, 1, 4, 3))
+			price.add_theme_color_override("font_outline_color", Color.BLACK)
+			price.add_theme_constant_override("outline_size", 4)
 			col.add_child(price)
 			row.add_child(col)
 		else:

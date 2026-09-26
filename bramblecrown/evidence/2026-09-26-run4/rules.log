@@ -1,0 +1,25 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  seed 11: defeat on floor 5, hp 0, deck 15
+  seed 12: defeat on floor 4, hp 0, deck 14
+  seed 13: defeat on floor 8, hp 0, deck 15
+  autoplay bot region wins: 0/3
+    boss fight seed 100: entered hp ?, ended phase lost after 10 turns, player hp 0, boss hp 66, deck 15
+    boss fight seed 101: entered hp ?, ended phase lost after 10 turns, player hp 0, boss hp 31, deck 15
+    boss fight seed 102: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 61, deck 15
+    boss fight seed 103: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 56, deck 15
+    boss fight seed 104: entered hp ?, ended phase won after 12 turns, player hp 10, boss hp 0, deck 15
+    boss fight seed 105: entered hp ?, ended phase lost after 7 turns, player hp 0, boss hp 73, deck 14
+    boss fight seed 106: entered hp ?, ended phase lost after 17 turns, player hp 0, boss hp 13, deck 13
+    boss fight seed 107: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 59, deck 15
+    boss fight seed 108: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 71, deck 15
+    boss fight seed 109: entered hp ?, ended phase won after 8 turns, player hp 17, boss hp 0, deck 14
+    boss fight seed 110: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 88, deck 13
+    boss fight seed 112: entered hp ?, ended phase lost after 15 turns, player hp 0, boss hp 45, deck 14
+    boss fight seed 115: entered hp ?, ended phase lost after 10 turns, player hp 0, boss hp 75, deck 14
+    boss fight seed 116: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 92, deck 13
+    boss fight seed 117: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 74, deck 15
+    boss fight seed 119: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 12, deck 15
+  smart bot: 2/20 region-1 clears, 0 full-run wins, floors reached [8, 8, 8, 8, 14, 8, 8, 8, 8, 11, 8, 6, 8, 6, 6, 8, 8, 8, 5, 8]
+---- 1373 passed, 0 failed ----
+ALL TESTS PASSED

@@ -134,10 +134,17 @@ func _glasswood() -> void:
 		_check(sc.banner.modulate.a < 0.01, "encounter title has cleared before capture")
 		_check(sc.board.theme == BoardView.THEMES["glasswood"], "Glasswood theme is active")
 		_check(sc.board.units.size() == sc.c.enemies.size() + 1, "every Glasswood unit has a model")
+		for enemy in sc.c.enemies:
+			var panel: UnitPlate = sc.plates[enemy["uid"]]
+			for action in enemy["intent"].get("actions", []):
+				if action["t"] == "shield_allies":
+					_check(panel.intent["icons"].any(func(ic): return ic["kind"] == "ally_ward"), "ally Ward is distinguished from self Ward")
 		await _shot("41_" + enc)
 		if enc == reg["boss"]:
 			# Deliberately stage the phase boundary. This tests actual turn handling, not a boss win.
 			var boss: Dictionary = sc.c.enemies[0]
+			var animation: AnimationPlayer = sc.board.units[boss["uid"]].find_child("AnimationPlayer", true, false)
+			_check(animation != null and animation.is_playing(), "Queen mantle animation imported and playing")
 			sc.c._damage_enemy(boss, int(boss["hp"]) / 2 + 1)
 			_check(boss["phase2"], "Queen switches phase")
 			sc.c._choose_intent(boss)

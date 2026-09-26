@@ -106,7 +106,7 @@ func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 			col = UITheme.BLIGHT.lightened(0.2)
 			draw_line(c + Vector2(-8, 0), c + Vector2(8, 0), col, 4)
 			draw_line(c + Vector2(0, -8), c + Vector2(0, 8), col, 4)
-		"ward":
+		"ward", "ally_ward":
 			col = UITheme.WARD
 			_shield(c, 11, col)
 		"daze":
@@ -151,7 +151,7 @@ func _draw_rail() -> void:
 	var bits: PackedStringArray = []
 	var danger := false
 	for ic in intent.get("icons", []):
-		var labels := {"attack": "Hit", "spread": "Rot", "ward": "Ward", "summon": "Summon", "daze": "Daze", "heal": "Heal", "strength": "Strength"}
+		var labels := {"attack": "Hit", "spread": "Rot", "ward": "Ward", "ally_ward": "Ally Ward", "summon": "Summon", "daze": "Daze", "heal": "Heal", "strength": "Strength"}
 		var s: String = labels.get(ic["kind"], ic["kind"])
 		if ic.has("n"):
 			s += " %s" % ic["n"]

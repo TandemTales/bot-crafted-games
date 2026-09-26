@@ -109,3 +109,13 @@ Independent static readability review passes the revised interfaces; art/map/ove
 gates remain unmet. Campaign content and human play/audio/controller validation remain
 incomplete. Next action: Glasswood content, then region-specific events and further art work.
 Read the latest Run 3 section at the top of `bramblecrown/PROGRESS.md` for exact scope and limits.
+
+## 2026-09-26 (Pacific) — Run 4 result
+
+Glasswood adds the third of five planned regions: six fights, elite, two-phase boss and eleven
+original Blender assets. Full Godot gate: 1,373 passed, zero failed. Windows x64 package passed
+20 native regression captures at each of 720p/1080p/1440p; all 60 images inspected by the main
+runner. Independent critic confirms scoped readability fixes; whole-game quality still fails.
+No upload/publication; forced release remains 2026-10-03. Bramblecrown remains active on `dev`.
+See the top of `bramblecrown/PROGRESS.md` and `bramblecrown/evidence/2026-09-26-run4/` for exact
+package hash, evidence limits, debt and next actions (forecast regression, Ironroot, shrine content).
