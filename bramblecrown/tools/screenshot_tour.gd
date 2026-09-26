@@ -7,6 +7,8 @@ var out_dir := ""
 var res := Vector2i(1920, 1080)
 var _shots: Array = []
 var only := ""
+var failures := 0
+var save_hashes := {}
 
 
 func _ready() -> void:
@@ -21,6 +23,8 @@ func _ready() -> void:
 		if args[i] == "--tour-only" and i + 1 < args.size():
 			only = args[i + 1]
 	DirAccess.make_dir_recursive_absolute(out_dir)
+	for path in [Game.RUN_PATH, Game.PROFILE_PATH, Game.SETTINGS_PATH]:
+		save_hashes[path] = FileAccess.get_sha256(path) if FileAccess.file_exists(path) else ""
 	_run.call_deferred()
 
 
@@ -31,14 +35,20 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "run3":
+		await _region2()
+		await _cloister_cards()
+		await _rail_input()
+		_finish()
+		return
 	if only == "r2":
 		await _region2()
-		get_tree().quit(0)
+		_finish()
 		return
 	if only == "rooms":
 		for reg in [0, 1]:
 			await _rooms(reg)
-		get_tree().quit(0)
+		_finish()
 		return
 	await _shot("01_title")
 	Game.clear_run()
@@ -91,7 +101,105 @@ func _run() -> void:
 		await _wait(1.2)
 		await _shot("07_%s" % st)
 	await _region2()
-	get_tree().quit(0)
+	_finish()
+
+
+func _check(ok: bool, message: String) -> void:
+	if not ok:
+		failures += 1
+		printerr("[tour] FAIL: ", message)
+
+
+func _finish() -> void:
+	for path in save_hashes:
+		var now := FileAccess.get_sha256(path) if FileAccess.file_exists(path) else ""
+		_check(now == save_hashes[path], "normal player save/profile/settings unchanged: " + path)
+	print("[tour] completed: %d screenshots, %d failures; normal saves unchanged=%s" % [_shots.size(), failures, failures == 0])
+	get_tree().quit(0 if failures == 0 else 1)
+
+
+func _cloister_cards() -> void:
+	var ids := CardDB.reward_pool("wren", 1).filter(func(id): return CardDB.CARDS[id].get("min_region", 0) == 1)
+	for up in [false, true]:
+		for page in 2:
+			var cards: Array = []
+			for id in ids.slice(page * 5, page * 5 + 5):
+				cards.append({"id": id, "up": up})
+			var dv := DeckViewer.open_pile(get_tree().current_scene, "Cloister cards%s · %d / 2" % [" upgraded" if up else "", page + 1], cards, "Unlocked in Sunken Cloister rewards and markets")
+			await _wait(0.7)
+			for cv in dv.find_children("*", "Control", true, false):
+				if cv is CardView:
+					_check(cv._desc.get_content_height() <= cv._desc.size.y + 1, "card rules fit: " + cv.def["name"])
+			await _shot("30_cards_%s_%d" % ["up" if up else "base", page])
+			dv.queue_free()
+			await _wait(0.2)
+
+
+func _rail_input() -> void:
+	Game.new_run(326)
+	Game.run.region = 1
+	Game.run.current_encounter = "clo_abbess"
+	Game.goto_combat()
+	await _wait(2.0)
+	var sc = get_tree().current_scene
+	# A controlled encounter checks UI input without pretending to complete the campaign.
+	var e: Dictionary = sc.c.enemies[0]
+	sc.c.player["pos"] = e["pos"] + Vector2i(1, 0)
+	sc.c.terrain[sc.c.player["pos"]] = "plain"
+	sc.c.hand = [{"id": "bellbreaker", "up": false, "uid": 9001}]
+	e["ward"] = 12
+	sc.board.units["player"].position = sc.board.world(sc.c.player["pos"])
+	sc._refresh_all()
+	await _wait(0.8)
+	var key := InputEventKey.new()
+	key.keycode = KEY_1
+	key.pressed = true
+	get_viewport().push_input(key, true)
+	await _wait(0.2)
+	_check(sc.selected_uid == 9001, "keyboard selects card")
+	key = InputEventKey.new()
+	key.keycode = KEY_1
+	key.pressed = false
+	get_viewport().push_input(key, true)
+	var pl: UnitPlate = sc.plates[e["uid"]]
+	var pos := pl.position + Vector2(80, 30)
+	var motion := InputEventMouseMotion.new()
+	motion.position = pos
+	get_viewport().push_input(motion, true)
+	await _wait(0.2)
+	_check(sc.hover_hex == e["pos"], "enemy rail hover selects matching hex")
+	await _shot("31_rail_target_preview")
+	var hp := int(e["hp"])
+	for down in [true, false]:
+		var mouse := InputEventMouseButton.new()
+		mouse.position = pos
+		mouse.button_index = MOUSE_BUTTON_LEFT
+		mouse.pressed = down
+		get_viewport().push_input(mouse, true)
+		await _wait(0.1)
+	await _wait(1.2)
+	_check(e["ward"] == 0 and int(e["hp"]) < hp, "rail click plays selected card through normal input and rules")
+	_check(sc.c.player["energy"] == 2, "rail click spends card energy once")
+	await _shot("32_rail_after_play")
+	# Stress the rail with a boss and five summons; no labels may overlap or reach End Turn.
+	for hex in [Vector2i(-2, 0), Vector2i(-1, 0), Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)]:
+		if sc.c.occupied(hex):
+			continue
+		sc.c.terrain[hex] = "plain"
+		var add: Dictionary = sc.c._spawn_enemy("drowned_novice", hex, false)
+		sc.c._choose_intent(add)
+		sc.board.add_enemy(add, false)
+	sc._refresh_all()
+	await _wait(0.5)
+	var rects: Array[Rect2] = []
+	for plate in sc.plates.values():
+		var rect := Rect2(plate.position, plate.size)
+		_check(rect.end.y < sc.end_btn.position.y, "rail remains above End Turn")
+		for other in rects:
+			_check(not rect.intersects(other), "enemy rail plates do not overlap")
+		rects.append(rect)
+	await _shot("33_summoned_rail")
+	Game.clear_run()
 
 
 ## Reward (with a charm) and every room screen for one region's theme.

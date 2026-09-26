@@ -196,10 +196,18 @@ func path_to(dest: Vector2i) -> Array[Vector2i]:
 ## What a card would do at `target`, without changing state: hexes that change and damage per enemy uid.
 func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
 	var def := card_def(inst)
-	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}}
+	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}, "ward_break": {}}
 	var g := grove()
 	for fx in def["effects"]:
 		match fx["op"]:
+			"break_ward", "steal_ward":
+				var e = enemy_at(target)
+				if e != null:
+					out["ward_break"][e["uid"]] = int(e["ward"]) if fx["op"] == "break_ward" else mini(int(e["ward"]), CardDB.val(def, fx["n"]))
+			"ward_strike":
+				var e = enemy_at(target)
+				if e != null:
+					out["damage"][e["uid"]] = CardDB.val(def, fx["amount"]) + g.size() / 3 + mini(int(player["ward"]), CardDB.val(def, fx["cap"]))
 			"damage":
 				var e = enemy_at(target)
 				if e != null:
@@ -342,6 +350,33 @@ func end_turn() -> Array:
 func _apply_effect(def: Dictionary, fx: Dictionary, target: Vector2i, is_attack: bool) -> void:
 	var g := grove()
 	match fx["op"]:
+		"break_ward", "steal_ward":
+			var e = enemy_at(target)
+			if e != null:
+				var n := int(e["ward"]) if fx["op"] == "break_ward" else mini(int(e["ward"]), CardDB.val(def, fx["n"]))
+				e["ward"] = int(e["ward"]) - n
+				_emit({"type": "ward", "target": e["uid"], "n": e["ward"], "gain": -n})
+				if fx["op"] == "steal_ward":
+					_gain_ward(n)
+		"ward_strike":
+			var e = enemy_at(target)
+			if e != null:
+				var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + mini(int(player["ward"]), CardDB.val(def, fx["cap"]))
+				player["ward"] = 0
+				_emit({"type": "ward", "target": "player", "n": 0, "gain": 0})
+				_damage_enemy(e, amt)
+				if is_attack and attacks_this_turn == 0 and charms.has("ember_fang") and enemies.has(e):
+					_add_status(e, "bleed", 2)
+		"clarity":
+			player["statuses"]["clarity"] = 1
+			_emit({"type": "status", "target": "player", "status": "clarity", "n": 1})
+		"reserve_ward":
+			player["statuses"]["ward_keep"] = maxi(int(player["statuses"].get("ward_keep", 0)), CardDB.val(def, fx["n"]))
+		"recover_daze":
+			var refund := int(player.get("daze_lost", 0))
+			player["energy"] = int(player["energy"]) + refund
+			player["daze_lost"] = 0
+			_emit({"type": "energy", "n": player["energy"]})
 		"damage":
 			var e = enemy_at(target)
 			if e == null:
@@ -599,11 +634,15 @@ func _check_victory() -> void:
 func _start_player_turn(first: bool) -> void:
 	turn += 1
 	attacks_this_turn = 0
-	player["ward"] = 0
+	player["ward"] = mini(int(player["ward"]), int(player["statuses"].get("ward_keep", 0)))
+	player["statuses"].erase("ward_keep")
+	player["statuses"].erase("clarity")
 	player["energy"] = BASE_ENERGY
+	player["daze_lost"] = 0
 	var dazed := int(player["statuses"].get("dazed", 0))
 	if dazed > 0:
 		player["energy"] = maxi(1, BASE_ENERGY - dazed)
+		player["daze_lost"] = BASE_ENERGY - int(player["energy"])
 		player["statuses"].erase("dazed")
 		_emit({"type": "dazed", "target": "player", "n": dazed})
 	player["move"] = BASE_MOVE + (1 if charms.has("heron_feather") else 0)
@@ -783,6 +822,9 @@ func _enemy_act(e: Dictionary) -> void:
 				_emit({"type": "status", "target": e["uid"], "status": "strength", "n": e["strength"]})
 			"daze":
 				var st: Dictionary = player["statuses"]
+				if int(st.get("clarity", 0)) > 0:
+					_emit({"type": "status", "target": "player", "status": "clarity", "n": 1, "source": e["uid"]})
+					continue
 				st["dazed"] = mini(2, int(st.get("dazed", 0)) + int(a["n"]))
 				_emit({"type": "status", "target": "player", "status": "dazed", "n": st["dazed"], "source": e["uid"]})
 			"shield_allies":

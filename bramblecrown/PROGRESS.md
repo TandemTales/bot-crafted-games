@@ -10,6 +10,32 @@
 - Verification planned: focused rules and save/preview regressions, installed-Godot import and complete suite, Blender reopen/import, Windows export and native screenshot checks at three resolutions, then independent harsh critique and a pushed handoff. Human play, audio listening, and physical controller coverage must remain explicitly unverified unless performed.
 - Next action: implement and verify enemy readability first.
 
+### Working unit checkpoint
+
+- Implemented ten Cloister cards (34 total), region-gated rewards/markets, base/upgrades, Ward
+  destruction/stealing/reserve/spend and Daze prevention/recovery. Every illustration was
+  generated with installed Blender; ten editable card scenes and the remodeled Abbess are tracked.
+- Enemy plates now form a numbered side rail; matching board badges and hover links associate
+  each enemy. Rail clicks use normal targeting. Revised camera framing preserves boss headroom,
+  rarity is labeled/framed, and deck-viewer backgrounds are opaque.
+- Strict import/scene/rule checks: **1,055 passed, 0 failed**, all process exits checked and no
+  engine errors. Tightening the harness exposed the old shutdown error: verbose output identifies
+  active AudioStreamPlaybackWAV/music under Godot's Dummy audio driver. Headless mode now loads
+  audio assets without starting playback; native builds retain normal playback.
+- Blender reopen: Abbess is one joined mesh with 5,796 vertices; Borrowed Vow's editable scene
+  opens with eight objects, a camera, and 396x224 output. Updated GLB and all card textures import.
+- First new packaged regression at 1280x720: 13 images, zero assertion failures, keyboard card
+  selection and mouse rail targeting resolve correctly, six panels do not overlap, all new
+  base/upgraded descriptions fit, normal save/profile/settings hashes unchanged. Sandbox native
+  log has a certificate-store environment error; repeat final native checks outside that boundary.
+- Independent critic inspected six earlier packaged screenshots alongside official Into the Breach
+  and Slay the Spire 2 screenshots. Verdict: **no quality pass**. It recognized improved enemy
+  association but rejected camera/hand collision, small forecast text, noisy battlefield contrast,
+  underused pile-viewer space, and unreadable text over terrain. Camera/font/hint revisions are
+  implemented; final re-review is still pending.
+- Next action: final art/framing touch-ups, re-export, three-resolution native checks, critic
+  follow-up, and the final pushed handoff. No release or complete marker.
+
 Started: 2026-09-24 (Pacific). Forced release date: Saturday 2026-10-03.
 
 ## Toolchain (verified 2026-09-24)

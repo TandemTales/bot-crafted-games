@@ -12,7 +12,10 @@ var statuses := {}
 var intent := {}  # {name, icons:[{kind, n, hot}]}
 var is_player := false
 var pending_damage := 0
+var pending_ward_break := 0
 var highlight := false
+var rail_number := 0
+const RAIL_SIZE := Vector2(278, 112)
 
 
 func _init() -> void:
@@ -31,6 +34,9 @@ func update_from(data: Dictionary) -> void:
 
 
 func _draw() -> void:
+	if rail_number > 0:
+		_draw_rail()
+		return
 	var f := UITheme.font("heading")
 	var fb := UITheme.font("body")
 	var y := 0.0
@@ -75,7 +81,7 @@ func _draw() -> void:
 		if n <= 0:
 			continue
 		var col: Color = {"bleed": UITheme.BLOOD, "rooted": UITheme.LEAF, "weak": Color(0.9, 0.85, 0.4), "strength": Color(1, 0.55, 0.3), "dazed": UITheme.GOLD}.get(s, UITheme.INK)
-		var label := "%s %d" % [s.capitalize(), n]
+		var label := "%s %d" % ["Reserve" if s == "ward_keep" else s.capitalize(), n]
 		var lw := fb.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 10
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0.7), col, 1, 5, 0), Rect2(sx, y, lw, 18))
 		draw_string(fb, Vector2(sx + 5, y + 14), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, col)
@@ -121,6 +127,43 @@ func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 		var t := str(ic["n"])
 		draw_string_outline(f, c + Vector2(13, 20), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 27, 6, Color(0, 0, 0, 0.95))
 		draw_string(f, c + Vector2(13, 20), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 27, Color(1, 0.9, 0.8) if not hot else Color(1, 0.5, 0.4))
+
+
+func _draw_rail() -> void:
+	var f := UITheme.font("heading")
+	var fb := UITheme.font("body")
+	var edge := UITheme.GOLD if highlight else Color(0.35, 0.39, 0.33)
+	draw_style_box(UITheme.box(Color(0.035, 0.055, 0.049, 0.97), edge, 2, 10, 0), Rect2(Vector2.ZERO, RAIL_SIZE))
+	draw_circle(Vector2(20, 21), 13, edge)
+	draw_string(f, Vector2(14, 27), str(rail_number), HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color(0.07, 0.08, 0.06))
+	draw_string(f, Vector2(40, 27), title, HORIZONTAL_ALIGNMENT_LEFT, 230, 21, UITheme.INK)
+	var bar := Rect2(12, 38, 254, 16)
+	draw_rect(bar, Color(0.12, 0.07, 0.06))
+	var frac := clampf(float(hp) / max_hp, 0, 1)
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, 16)), UITheme.BLOOD.darkened(0.18))
+	var after := clampf(float(maxi(0, hp - maxi(0, pending_damage - maxi(0, ward - pending_ward_break)))) / max_hp, 0, 1)
+	if pending_damage > 0:
+		draw_rect(Rect2(bar.position + Vector2(bar.size.x * after, 0), Vector2(bar.size.x * (frac - after), 16)), UITheme.GOLD)
+	var hp_text := "%d / %d HP" % [hp, max_hp]
+	if ward > 0:
+		hp_text += "   |   %d Ward" % ward
+	draw_string(fb, Vector2(18, 52), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+	var bits: PackedStringArray = []
+	var danger := false
+	for ic in intent.get("icons", []):
+		var labels := {"attack": "Hit", "spread": "Rot", "ward": "Ward", "summon": "Summon", "daze": "Daze", "heal": "Heal", "strength": "Strength"}
+		var s: String = labels.get(ic["kind"], ic["kind"])
+		if ic.has("n"):
+			s += " %s" % ic["n"]
+		bits.append(s)
+		danger = danger or ic.get("hot", false)
+	draw_string(f, Vector2(12, 78), " / ".join(bits) if not bits.is_empty() else "Reposition", HORIZONTAL_ALIGNMENT_LEFT, 254, 20, Color(1, 0.49, 0.36) if danger else UITheme.INK)
+	var states: PackedStringArray = []
+	for s in statuses:
+		if int(statuses[s]) > 0:
+			states.append("%s %d" % [s.capitalize(), statuses[s]])
+	var detail: String = "  /  ".join(states) if not states.is_empty() else intent.get("name", "")
+	draw_string(fb, Vector2(12, 100), detail, HORIZONTAL_ALIGNMENT_LEFT, 254, 18, UITheme.INK_DIM)
 
 
 func _shield(c: Vector2, r: float, col: Color) -> void:

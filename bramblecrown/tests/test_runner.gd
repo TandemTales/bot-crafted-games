@@ -17,6 +17,8 @@ func _init() -> void:
 		"test_autoplay_region", "test_preview_matches_play", "test_smart_bot_balance",
 		"test_region_data", "test_daze", "test_shield_and_heal_allies", "test_region2_boss_phase2",
 		"test_region_transition",
+		"test_cloister_card_progression", "test_cloister_ward_cards", "test_cloister_daze_cards",
+		"test_cloister_growth_and_reach",
 	]
 	for t in tests:
 		_current = t
@@ -37,6 +39,135 @@ func check(cond: bool, msg: String) -> void:
 	else:
 		_fails += 1
 		printerr("FAIL [%s] %s" % [_current, msg])
+
+
+func test_cloister_card_progression() -> bool:
+	var pool := CardDB.reward_pool("wren", 1)
+	var old_pool := CardDB.reward_pool("wren", 0)
+	var new_ids := pool.filter(func(id): return not old_pool.has(id))
+	check(new_ids.size() == 10, "ten additional region-2 reward cards")
+	check(CardDB.reward_pool("cassia", 1).is_empty(), "Wren cards do not leak to another walker")
+	var r := RunState.new()
+	r.new_run(326)
+	r.region = 1
+	for id in new_ids:
+		check(ResourceLoader.exists("res://assets/textures/cards/%s.png" % id), "%s original illustration imported" % id)
+		r.deck.append({"id": id, "up": true})
+	var restored := RunState.from_json(r.to_json())
+	check(restored.deck == r.deck and restored.region == 1, "new upgraded cards survive save/load")
+	check(restored.roll_cards(3, 1.6) == r.roll_cards(3, 1.6), "region-2 reward RNG survives save/load")
+	var seen := {}
+	for _i in 100:
+		for id in r.roll_cards(3, 1.0):
+			seen[id] = true
+	for id in new_ids:
+		check(seen.has(id), "%s obtainable from real rewards" % id)
+	return true
+
+
+func test_cloister_ward_cards() -> bool:
+	for up in [false, true]:
+		var c := _blank_combat({"enemies": [["moss_knight", 1, 0]], "thicket": [[0, 0], [0, 1], [-1, 1]]})
+		var e: Dictionary = c.enemies[0]
+		e["ward"] = 30
+		var before := int(e["hp"])
+		var uid := _give(c, "bellbreaker", up)
+		var pv := c.preview_card(c.hand[c.hand_index(uid)], e["pos"])
+		check(e["ward"] == 30 and e["hp"] == before, "ward-break preview is read-only")
+		check(pv["ward_break"][e["uid"]] == 30, "preview includes all removed Ward")
+		c.play_card(uid, e["pos"])
+		check(e["ward"] == 0 and before - int(e["hp"]) == (9 if up else 6), "Bellbreaker strips before rooted-bonus damage")
+		check(before - int(e["hp"]) == pv["damage"][e["uid"]], "Bellbreaker damage preview exact")
+		c.player["energy"] = 10
+		e["ward"] = 20
+		c.play_card(_give(c, "borrowed_vow", up), e["pos"])
+		var stolen := 12 if up else 8
+		check(e["ward"] == 20 - stolen and c.player["ward"] == stolen, "Borrowed Vow transfers exact capped Ward, without Grove bonus")
+		check(e["statuses"]["weak"] == 1, "Borrowed Vow weakens")
+		e["ward"] = 2
+		c.play_card(_give(c, "borrowed_vow", up), e["pos"])
+		check(e["ward"] == 0 and c.player["ward"] == stolen + 2, "cannot steal more Ward than exists")
+		c.play_card(_give(c, "borrowed_vow", up), e["pos"])
+		check(c.player["ward"] == stolen + 2, "unwarded target creates no Ward")
+		c.player["ward"] = 40
+		e["hp"] = 100
+		e["max_hp"] = 100
+		e["ward"] = 5
+		uid = _give(c, "candle_lance", up)
+		pv = c.preview_card(c.hand[c.hand_index(uid)], e["pos"])
+		check(c.player["ward"] == 40, "lance preview does not spend Ward")
+		c.play_card(uid, e["pos"])
+		check(c.player["ward"] == 0, "lance spends ALL Ward even over cap")
+		check(100 - int(e["hp"]) == (20 if up else 12), "lance cap, Grove bonus and enemy Ward resolve correctly")
+		check(pv["damage"][e["uid"]] - 5 == 100 - int(e["hp"]), "lance preview matches damage through Ward")
+		var reserve := _blank_combat({"enemies": [["moss_knight", 3, 0]]})
+		reserve.play_card(_give(reserve, "last_lantern", up), Vector2i.ZERO)
+		reserve._start_player_turn(false)
+		check(reserve.player["ward"] == (6 if up else 4), "reserve carries only capped unused Ward")
+		reserve._start_player_turn(false)
+		check(reserve.player["ward"] == 0, "reserve expires after one turn")
+		reserve.play_card(_give(reserve, "last_lantern", up), Vector2i.ZERO)
+		reserve._damage_player(50, null)
+		reserve._start_player_turn(false)
+		check(reserve.player["ward"] == 0, "spent reserve creates no Ward")
+	return true
+
+
+func test_cloister_daze_cards() -> bool:
+	for up in [false, true]:
+		var c := _blank_combat({"enemies": [["bell_ghoul", 0, -2]]})
+		var e: Dictionary = c.enemies[0]
+		e["intent"] = {"name": "Toll", "actions": [{"t": "daze", "n": 2}, {"t": "daze", "n": 2}]}
+		c.play_card(_give(c, "vow_shield", up), Vector2i.ZERO)
+		check(c.player["ward"] == (9 if up else 6), "Vow Shield grants stated Ward")
+		c.end_turn()
+		check(c.player["energy"] == 3 and c.player["daze_lost"] == 0, "Clarity blocks repeated Daze applications")
+		check(not c.player["statuses"].has("clarity"), "Clarity expires on next player turn")
+		e["intent"] = {"name": "Toll", "actions": [{"t": "daze", "n": 5}]}
+		c.end_turn()
+		check(c.player["energy"] == 1 and c.player["daze_lost"] == 2, "Daze after Clarity expiration records actual lost Energy")
+		var before := c.hand.size()
+		var uid := _give(c, "dry_wick", up)
+		c.play_card(uid, Vector2i.ZERO)
+		check(c.player["energy"] == 3 and c.player["daze_lost"] == 0, "Dry Wick restores only this turn's Daze loss")
+		check(c.hand.size() == before + (2 if up else 1), "Dry Wick draw and upgrade")
+		check(c.exhausted.any(func(inst): return inst["uid"] == uid), "Dry Wick exhausts")
+		c.play_card(_give(c, "dry_wick", up), Vector2i.ZERO)
+		check(c.player["energy"] == 3, "cannot double-refund Daze")
+		c._start_player_turn(false)
+		c.play_card(_give(c, "dry_wick", up), Vector2i.ZERO)
+		check(c.player["energy"] == 3, "cannot refund an earlier turn's Daze")
+	return true
+
+
+func test_cloister_growth_and_reach() -> bool:
+	for up in [false, true]:
+		var c := _blank_combat({"enemies": [["moss_knight", 2, 0]]})
+		var e: Dictionary = c.enemies[0]
+		var uid := _give(c, "bellroot", up)
+		var pv := c.preview_card(c.hand[c.hand_index(uid)], e["pos"])
+		c.play_card(uid, e["pos"])
+		check(e["statuses"]["rooted"] == 1, "Bellroot roots target")
+		check(pv["grow"].size() == (4 if up else 2), "Bellroot upgraded growth count")
+		for h in pv["grow"]:
+			check(c.growth[h] == "thicket", "Bellroot grows each previewed hex")
+		c.player["energy"] = 10
+		var before := int(e["hp"])
+		c.play_card(_give(c, "censer_cut", up), e["pos"])
+		check(before - int(e["hp"]) == (6 if up else 4), "Censer Cut ranged damage")
+		check(e["statuses"]["weak"] == (2 if up else 1), "Censer Cut Weak upgrade")
+		var movement := int(c.player["move"])
+		c.play_card(_give(c, "stillwater_step", up), Vector2i.ZERO)
+		check(c.player["move"] == movement + (3 if up else 2), "Stillwater Step movement")
+		check(c.player["ward"] == (4 if up else 2), "Stillwater Step Ward")
+		var choir := _blank_combat({"enemies": [["moss_knight", 1, 0], ["moss_knight", 3, 0]], "thicket": [[0, 0]]})
+		var near_hp := int(choir.enemies[0]["hp"])
+		var far_hp := int(choir.enemies[1]["hp"])
+		choir.play_card(_give(choir, "choir_thorns", up), Vector2i.ZERO)
+		check(near_hp - int(choir.enemies[0]["hp"]) == (9 if up else 6), "Choir of Thorns reaches Grove neighbor")
+		check(choir.enemies[1]["hp"] == far_hp, "Choir of Thorns cannot reach distant enemy")
+		check(choir.player["ward"] == (6 if up else 4), "Choir of Thorns defense")
+	return true
 
 
 func _blank_combat(enc_over: Dictionary = {}, deck: Array = [], charms: Array = []) -> CombatState:

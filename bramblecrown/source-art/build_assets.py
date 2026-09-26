@@ -1264,9 +1264,17 @@ def build_drowned_abbess():
     veil = cyl("veil", 0.26, 0.9, (0, 0.06, 1.55), verts=16, r2=0.18)
     noise_displace(veil, 0.03, 0.12)
     assign(veil, P["ghost_dark"])
-    face = sphere("face", 0.12, (0, -0.14, 1.78), scale=(0.9, 0.45, 1.1))
-    assign(face, P["ghoul"])
-    _eyes(parts, P, [(-0.05, -0.2, 1.8), (0.05, -0.2, 1.8)], 0.03)
+    # Bring the ivory death-mask in front of the veil; the old face was buried inside it.
+    face = sphere("face", 0.19, (0, -0.29, 1.82), scale=(0.95, 0.55, 1.2))
+    assign(face, P["mask"])
+    for x in (-0.073, 0.073):
+        socket = sphere("eye_socket", 0.05, (x, -0.385, 1.86), scale=(1.1, 0.35, 0.7))
+        assign(socket, P["ghost_dark"])
+        parts.append(socket)
+    _eyes(parts, P, [(-0.073, -0.407, 1.86), (0.073, -0.407, 1.86)], 0.022)
+    mouth = sphere("silent_mouth", 0.043, (0, -0.393, 1.72), scale=(0.7, 0.25, 1.2))
+    assign(mouth, P["ghost_dark"])
+    parts.append(mouth)
     for s in (-1, 1):
         sl = cyl("sleeve", 0.1, 0.7, (s * 0.35, -0.1, 1.35), verts=10, r2=0.18, rot=(0.5, s * 0.6, 0))
         assign(sl, P["drowned"])
@@ -1281,12 +1289,12 @@ def build_drowned_abbess():
     halo = bpy.context.active_object
     assign(halo, P["bronze"])
     parts += [pool, skirt, body, scap, head, veil, face, staff, bell, halo]
-    for i in range(9):
-        a = i / 9 * 6.283
-        x, z = 0.45 * math.cos(a), 2.0 + 0.45 * math.sin(a)
-        c = cyl("candle", 0.03, 0.14, (x, 0.2, z + 0.07), verts=8)
+    for i in range(7):
+        a = i / 6 * math.pi
+        x, z = 0.46 * math.cos(a), 2.0 + 0.46 * math.sin(a)
+        c = cyl("candle", 0.048, 0.22, (x, 0.2, z + 0.11), verts=8)
         assign(c, P["wax"])
-        f = sphere("flame", 0.022, (x, 0.2, z + 0.17), scale=(1, 1, 1.8), seg=8, rings=6)
+        f = sphere("flame", 0.032, (x, 0.2, z + 0.27), scale=(1, 1, 1.8), seg=8, rings=6)
         assign(f, P["flame"])
         parts += [c, f]
     # Weeds and chains trailing in the water.

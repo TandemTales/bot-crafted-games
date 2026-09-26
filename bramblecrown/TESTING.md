@@ -15,6 +15,12 @@ Pass: the output contains no `SCRIPT ERROR`, `Parse Error`, or `ERROR:` lines. `
 
 ## 2. Rule test suite
 
+The complete gate is `bash tools/check.sh` from the game folder, using Git Bash on Windows.
+It checks process exit codes as well as script/engine errors and retains raw logs in
+`build/check-logs/`. Headless mode loads audio resources but skips inaudible playback
+because the installed engine's Dummy driver retains an active looping WAV at shutdown.
+Native packaged tests still use normal audio playback; headless checks do not validate audio output.
+
 ```
 "$GODOT" --headless --path bramblecrown -s res://tests/test_runner.gd
 ```
@@ -54,3 +60,21 @@ The export must produce `Bramblecrown.exe` with the embedded PCK (preset `embed_
 - Clean shutdown: the process exits with code 0 and no errors in the log
   (`%APPDATA%\Godot\app_userdata\Bramblecrown\logs`).
 - Controller: only verify if a pad is attached; otherwise record it as unverified.
+
+## 6. Cloister and enemy-panel regression tour
+
+Run the exported executable with `--screenshot-tour <abs-out-dir> --shot-size WxH --tour-only run3`
+at 1280x720, 1920x1080, and 2560x1440. This produces 13 screenshots: six Cloister scenes,
+four sheets covering all ten cards and upgrades, and three targeting/summon images.
+The tour checks description clipping, keyboard selection, synthetic mouse hover/click through
+the viewport input path, legal card resolution, six enemy panels for overlap, and player-file hashes.
+It exits nonzero on failure. Inspect the actual PNGs in addition to checking the log.
+
+The screenshot tour uses in-memory runs and suppresses run/profile/settings writes. It hashes
+normal player files before/after to detect accidental mutation. It is a controlled UI regression,
+not a human playthrough or evidence of campaign balance. Existing boss enemy-turn shots use a
+fixed delay and can land after the animation; do not cite those images as animation coverage.
+
+Focused rule tests cover all ten base/upgraded cards, prevention/expiry of Clarity, one-time
+Daze refunds, spent and capped Ward reserves, Ward stealing/destruction, attack previews,
+Grove reach, actual reward availability, and deck/progression/RNG save round trips.

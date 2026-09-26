@@ -28,6 +28,8 @@ const KEYWORDS := {
 	"Root": "A Rooted enemy cannot move during its next turn.",
 	"Rooted": "A Rooted enemy cannot move during its next turn.",
 	"Weak": "Deals 25% less damage.",
+	"Clarity": "Prevents every Daze application until your next turn. Does not recover Energy already lost.",
+	"Daze": "Lose up to 2 Energy at the start of your next turn (minimum 1 Energy). Dry Wick can recover that loss once.",
 	"Exhaust": "Removed from your deck for the rest of this fight.",
 	"Energy": "Spent to play cards. Refills to 3 each turn.",
 	"Movement": "Spend to walk hex by hex. Refills to 2 each turn.",

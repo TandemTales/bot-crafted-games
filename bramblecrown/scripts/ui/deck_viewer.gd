@@ -37,7 +37,7 @@ static func open_pile(parent: Node, title: String, cards: Array, note: String = 
 
 
 func _ready() -> void:
-	color = Color(0.02, 0.03, 0.03, 0.9)
+	color = Color(0.02, 0.03, 0.03, 1.0)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = UITheme.theme()
 	var v := VBoxContainer.new()

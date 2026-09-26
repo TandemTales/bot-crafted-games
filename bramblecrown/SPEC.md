@@ -74,6 +74,30 @@ original to this project.
 
 ## Presentation
 
+### Implemented Cloister card set (2026-09-26)
+
+These ten Wren cards enter reward and market pools at region index 1 (Sunken Cloister),
+and remain available in later regions. The starter deck and Marsh pool are unchanged.
+This brings implemented cards to 34; it does not complete the 60-card, three-walker contract.
+
+| Card | Tactical decision |
+|---|---|
+| Bellbreaker | Strip all target Ward before a short ranged strike. |
+| Vow Shield | Gain Ward and Clarity, preventing Daze until the next player turn. |
+| Dry Wick | Recover only Energy actually lost to Daze this turn, once; draw and Exhaust. |
+| Last Lantern | Carry a capped amount of unused Ward into exactly the next turn. Repeated copies take the higher cap. |
+| Censer Cut | Trade raw damage for reach and Weak. |
+| Stillwater Step | Move and build a small defense without spending Energy. |
+| Bellroot | Choose a growth center that also roots the enemy on that exact hex. |
+| Choir of Thorns | Damage enemies in/touching the Grove while gaining Ward. |
+| Borrowed Vow | Transfer capped enemy Ward into player Ward and apply Weak. Cannot create Ward from an unwarded target. |
+| Candle Lance | Spend all current Ward for a ranged strike, with a capped damage bonus. |
+
+Every card has an upgrade, its own Blender-staged illustration, and an editable
+`source-art/card_<id>.blend`. Card frames and written ribbons identify rarity independently of card type.
+Enemy information is shown in an ordered right-side panel with matching numbered unit markers;
+hovering a panel locates its unit and clicking targets the selected card using the normal rules.
+
 - **Camera:** 3D perspective looking down at about 55°, framing a hex diorama that floats over
   region-specific surroundings. It can orbit ±30° with Q/E or right-drag, and zoom with the mouse
   wheel.

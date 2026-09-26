@@ -218,7 +218,7 @@ func finish_combat(c: CombatState) -> void:
 
 
 func roll_cards(n: int, luck: float) -> Array:
-	var pool := CardDB.reward_pool(walker)
+	var pool := CardDB.reward_pool(walker, region)
 	var out := []
 	var guard := 0
 	while out.size() < n and guard < 100:

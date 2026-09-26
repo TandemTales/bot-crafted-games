@@ -15,12 +15,13 @@ var tour_dir := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_load_profile()
-	_load_settings()
 	var args := OS.get_cmdline_user_args() + OS.get_cmdline_args()
 	for i in args.size():
 		if args[i] == "--screenshot-tour" and i + 1 < args.size():
 			tour_dir = args[i + 1]
+	if tour_dir.is_empty():
+		_load_profile()
+		_load_settings()
 	if tour_dir != "":
 		var tour: Node = load("res://tools/screenshot_tour.gd").new()
 		tour.name = "ScreenshotTour"
@@ -55,7 +56,7 @@ func continue_run() -> bool:
 
 
 func save_run() -> void:
-	if run == null:
+	if run == null or not tour_dir.is_empty():
 		return
 	if run.status in ["victory", "defeat"]:
 		clear_run()
@@ -65,6 +66,8 @@ func save_run() -> void:
 
 
 func clear_run() -> void:
+	if not tour_dir.is_empty():
+		return
 	if FileAccess.file_exists(RUN_PATH):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(RUN_PATH))
 
@@ -132,6 +135,8 @@ func _load_profile() -> void:
 
 
 func _save_profile() -> void:
+	if not tour_dir.is_empty():
+		return
 	FileAccess.open(PROFILE_PATH, FileAccess.WRITE).store_string(JSON.stringify(profile))
 
 
@@ -141,6 +146,8 @@ func _load_settings() -> void:
 
 
 func _save_settings() -> void:
+	if not tour_dir.is_empty():
+		return
 	FileAccess.open(SETTINGS_PATH, FileAccess.WRITE).store_string(JSON.stringify(settings))
 
 

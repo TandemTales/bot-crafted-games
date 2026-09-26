@@ -6,6 +6,10 @@ signal pressed(card_view: CardView)
 signal hovered(card_view: CardView, on: bool)
 
 const SIZE := Vector2(230, 320)
+const RARITY_COLORS := {
+	"starter": Color(0.48, 0.41, 0.29), "common": Color(0.74, 0.76, 0.67),
+	"uncommon": Color(0.35, 0.69, 0.81), "rare": Color(1.0, 0.73, 0.27),
+}
 
 var def: Dictionary = {}
 var inst: Dictionary = {}
@@ -48,7 +52,7 @@ func _build() -> void:
 	_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_name)
 	_type = Label.new()
-	_type.text = def["type"].capitalize()
+	_type.text = "%s · %s" % [def.get("rarity", "common").capitalize(), def["type"].capitalize()]
 	_type.add_theme_font_size_override("font_size", 15)
 	_type.add_theme_color_override("font_color", Color(0.25, 0.18, 0.1))
 	_type.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -61,8 +65,8 @@ func _build() -> void:
 	_desc.fit_content = false
 	_desc.scroll_active = false
 	_desc.add_theme_color_override("default_color", Color(0.17, 0.12, 0.07))
-	_desc.add_theme_font_size_override("normal_font_size", 19)
-	_desc.add_theme_font_size_override("bold_font_size", 19)
+	_desc.add_theme_font_size_override("normal_font_size", 20)
+	_desc.add_theme_font_size_override("bold_font_size", 20)
 	_desc.add_theme_font_override("bold_font", UITheme.font("heading"))
 	_desc.add_theme_font_override("normal_font", UITheme.font("body"))
 	_desc.position = Vector2(20, 196)
@@ -76,7 +80,7 @@ func _build() -> void:
 
 func _dark_keywords(t: String) -> String:
 	var out := t
-	for k in ["Thicket", "Grove", "Blight", "Ward", "Bleed", "Rooted", "Weak", "Exhaust", "Energy", "Movement"]:
+	for k in ["Thicket", "Grove", "Blight", "Ward", "Bleed", "Rooted", "Weak", "Clarity", "Daze", "Exhaust", "Energy", "Movement"]:
 		out = out.replace(k, "[b]%s[/b]" % k)
 	return out
 
@@ -90,6 +94,7 @@ func set_state(can_play: bool, is_selected: bool) -> void:
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, SIZE)
 	var tc: Color = UITheme.TYPE_COLORS.get(def.get("type", "skill"), Color.GRAY)
+	var rarity: Color = RARITY_COLORS.get(def.get("rarity", "common"), Color.GRAY)
 	# Glow when selected / hovered.
 	if selected:
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0), Color(0.75, 1.0, 0.45, 0.95), 6, 18, 0), r.grow(6))
@@ -97,7 +102,7 @@ func _draw() -> void:
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0), Color(1.0, 0.85, 0.45, 0.8), 4, 16, 0), r.grow(4))
 	# Shadow, bark frame, parchment.
 	draw_style_box(UITheme.box(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0), 0, 16, 0), Rect2(Vector2(4, 8), SIZE))
-	draw_style_box(UITheme.box(UITheme.BARK, tc.darkened(0.2), 3, 14, 0), r)
+	draw_style_box(UITheme.box(UITheme.BARK, rarity, 3, 14, 0), r)
 	draw_style_box(UITheme.box(UITheme.PARCHMENT, Color(0.4, 0.3, 0.18), 2, 10, 0), Rect2(10, 166, SIZE.x - 20, SIZE.y - 176))
 	# Name banner.
 	draw_style_box(UITheme.box(tc, tc.lightened(0.25), 2, 8, 0), Rect2(8, 10, SIZE.x - 16, 38))
@@ -107,9 +112,9 @@ func _draw() -> void:
 		draw_texture_rect(_art_tex, art, false)
 	else:
 		_draw_art(art, tc)
-	draw_rect(art, Color(0.1, 0.07, 0.04), false, 3.0)
+	draw_rect(art, rarity, false, 3.0)
 	# Type ribbon.
-	draw_style_box(UITheme.box(UITheme.PARCHMENT_DARK, Color(0.35, 0.25, 0.14), 1, 6, 0), Rect2(SIZE.x / 2 - 44, 168, 88, 24))
+	draw_style_box(UITheme.box(UITheme.PARCHMENT_DARK, rarity.darkened(0.3), 1, 6, 0), Rect2(18, 168, SIZE.x - 36, 24))
 	# Cost seed.
 	var cc := Vector2(26, 26)
 	draw_circle(cc + Vector2(0, 2), 22, Color(0, 0, 0, 0.5))

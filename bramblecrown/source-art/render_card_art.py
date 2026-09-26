@@ -54,6 +54,20 @@ SCENES = {
 }
 
 
+SCENES.update({
+    "bellbreaker": ([("hex_flag", 0, 0, 0, 1.2), ("bell_fallen", 0, -0.2, 25, 1.4), ("thicket", -0.8, 0.3, 20, 0.9)], GOLD, (0.1, 0.055, 0.025), (4.2, 1.7, 15), ["burst"]),
+    "vow_shield": ([("hex_flag", 0, 0, 0, 1.3), ("altar", 0, 0, 0, 0.8), ("candles", -0.9, -0.2, 0, 1.3)], BLUE, (0.035, 0.07, 0.11), (4.8, 1.9, -15), ["shield"]),
+    "dry_wick": ([("hex_flag", 0, 0, 0, 1.2), ("candles", 0, -0.1, 25, 2.5), ("bell_fallen", 1.0, 0.6, -30, 0.7)], GOLD, (0.09, 0.075, 0.045), (3.5, 1.1, 5), []),
+    "last_lantern": ([("hex_flood", 0, 0, 0, 1.4), ("arch", 0, 0.4, 0, 0.8), ("candles", 0, -0.5, 0, 1.8)], BLUE, (0.025, 0.05, 0.08), (5.2, 1.4, 15), ["shield"]),
+    "censer_cut": ([("hex_flag", 0, 0, 0, 1.2), ("censer_wraith", 0, 0, 170, 1.4), ("thicket", -0.8, -0.5, 20, 0.8)], RED, (0.08, 0.04, 0.07), (4.4, 1.6, -20), ["roots"]),
+    "stillwater_step": ([("hex_flood", -1.7, 0, 0, 1), ("hex_flag", 0, 0, 0, 1), ("hex_flood", 1.7, 0, 0, 1), ("grovewalker", 0, 0, -60, 1.3), ("candles", -1.7, 0.3, 0, 0.8)], BLUE, (0.035, 0.08, 0.1), (5.6, 2.8, 15), []),
+    "bellroot": ([("hex_flag", 0, 0, 0, 1.2), ("bell_ghoul", 0, 0, 165, 1.3), ("thicket", -0.65, -0.3, 20, 1.0), ("thicket", 0.65, 0.2, 110, 0.9)], GREEN, (0.055, 0.08, 0.04), (4.6, 2.1, -10), ["roots"]),
+    "choir_thorns": ([("hex_flag", 0, 0, 0, 1.4), ("choir_of_ash", 0, 0.3, 175, 0.9), ("thicket", -0.9, -0.4, 20, 1.1), ("thicket", 0.9, -0.4, 150, 1.1)], GREEN, (0.04, 0.06, 0.06), (5.4, 2.2, 0), []),
+    "borrowed_vow": ([("hex_flag", -0.8, 0, 0, 1), ("hex_flag", 0.8, 0, 0, 1), ("moss_knight", 0.9, 0, 110, 1.1), ("candles", -0.8, -0.2, 0, 1.8)], BLUE, (0.035, 0.06, 0.1), (5.1, 1.8, -10), ["shield"]),
+    "candle_lance": ([("hex_flag", 0, 0, 0, 1.3), ("candles", -0.65, 0, 0, 1.8), ("candles", 0.65, 0, 20, 1.8), ("altar", 0, 0.6, 0, 0.6)], FIRE, (0.13, 0.06, 0.025), (4.5, 1.5, 0), ["lance"]),
+})
+
+
 def emissive(name, col, strength):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
@@ -79,6 +93,11 @@ def place(model, x, y, rot, s):
 
 def extras(kinds, key):
     for k in kinds:
+        if k == "lance":
+            for i in range(3):
+                bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.06, radius2=0, depth=2.5,
+                    location=(-0.55 + i * 0.55, -0.5, 1.35), rotation=(0, 0.45, 0))
+                bpy.context.active_object.data.materials.append(emissive("candle_lance", GOLD, 4))
         if k == "flames":
             for i, (x, y) in enumerate([(-1.0, 0), (1.0, 0), (0, 0.4), (-0.4, -0.3), (0.5, -0.3)]):
                 bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.25, radius2=0.0, depth=0.9 + 0.2 * (i % 2), location=(x, y, 0.55))
@@ -152,6 +171,8 @@ def render(card_id):
     camo.data.lens = 39
     scene.camera = camo
     scene.render.filepath = os.path.join(OUT, card_id + ".png")
+    # Keep editable lighting, placement and camera sources with the game.
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, "card_" + card_id + ".blend"), compress=True)
     bpy.ops.render.render(write_still=True)
     print("[card-art]", card_id)
 

@@ -41,6 +41,8 @@ var info_text: RichTextLabel
 var title_label: Label
 var pause_layer: Control
 var float_root: Control
+var enemy_links: EnemyLinks
+var rail_hover := -1
 
 
 func _ready() -> void:
@@ -80,6 +82,9 @@ func _build_ui() -> void:
 	float_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	float_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(float_root)
+	enemy_links = EnemyLinks.new()
+	enemy_links.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	float_root.add_child(enemy_links)
 	# Top-left: Grovewalker status.
 	var tl := PanelContainer.new()
 	tl.position = Vector2(24, 20)
@@ -198,6 +203,7 @@ func _build_ui() -> void:
 	hint_label.add_theme_font_size_override("normal_font_size", 22)
 	hint_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	hint_label.add_theme_constant_override("outline_size", 6)
+	hint_label.add_theme_stylebox_override("normal", UITheme.box(Color(0.025, 0.04, 0.03, 0.96), Color(0.25, 0.32, 0.2), 1, 8, 4))
 	root.add_child(hint_label)
 	# Hand.
 	hand_root = Control.new()
@@ -361,6 +367,17 @@ func _sync_plates() -> void:
 		live[e["uid"]] = true
 		if not plates.has(e["uid"]):
 			var pl := UnitPlate.new()
+			var uid: int = e["uid"]
+			pl.mouse_filter = Control.MOUSE_FILTER_STOP
+			pl.size = UnitPlate.RAIL_SIZE
+			pl.mouse_entered.connect(func(): _hover_rail(uid))
+			pl.mouse_exited.connect(func(): _hover_rail(-1))
+			pl.gui_input.connect(func(event):
+				if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+					var enemy = c.enemy_by_uid(uid)
+					if enemy != null and not pause_layer.visible:
+						_click_hex(enemy["pos"])
+					pl.accept_event())
 			float_root.add_child(pl)
 			plates[e["uid"]] = pl
 		var prev := c.enemy_preview(e)
@@ -385,6 +402,7 @@ func _sync_plates() -> void:
 					icons.append({"kind": "heal", "n": a["n"]})
 		plates[e["uid"]].update_from({"title": e["def"]["name"], "hp": e["hp"], "max_hp": e["max_hp"],
 			"ward": e["ward"], "statuses": e["statuses"], "intent": {"name": e["intent"].get("name", ""), "icons": icons}})
+		plates[e["uid"]].tooltip_text = "%s\n%s\nHover to locate this enemy; click to target a selected card.\nRed Hit means the current attack reaches you." % [e["def"]["name"], e["intent"].get("name", "")]
 	for uid in plates.keys():
 		if not live.has(uid):
 			plates[uid].queue_free()
@@ -410,6 +428,7 @@ func _refresh_board_overlays() -> void:
 			incoming += int(pv["dmg"])
 	var inst := _selected_inst()
 	var pending := {}
+	var ward_break := {}
 	if not busy and c.phase == "player":
 		if inst.is_empty():
 			for h in c.reachable():
@@ -434,6 +453,7 @@ func _refresh_board_overlays() -> void:
 				for h in pr["burn"]:
 					ov[h] = [COL_BURN, false]
 				pending = pr["damage"]
+				ward_break = pr.get("ward_break", {})
 				if c.card_def(inst)["target"] != "self":
 					ov[tgt] = [Color(1, 1, 0.8, 0.8), false]
 	if hover_hex != null and not ov.has(hover_hex):
@@ -443,6 +463,7 @@ func _refresh_board_overlays() -> void:
 	board.set_incoming(0 if busy else maxi(0, incoming - int(c.player["ward"])), c.player["pos"])
 	for uid in plates:
 		plates[uid].pending_damage = int(pending.get(uid, 0))
+		plates[uid].pending_ward_break = int(ward_break.get(uid, 0))
 		plates[uid].highlight = pending.has(uid)
 		plates[uid].queue_redraw()
 
@@ -639,19 +660,23 @@ func _process(delta: float) -> void:
 
 func _place_plates() -> void:
 	var cam := rig.camera
-	for uid in plates:
+	var vp_size := get_viewport().get_visible_rect().size
+	var index := 0
+	enemy_links.marks.clear()
+	for e in c.enemies:
+		var uid: int = e["uid"]
 		if not board.units.has(uid):
 			continue
 		var n: Node3D = board.units[uid]
-		var e = c.enemy_by_uid(uid)
-		var hgt := 1.5 * float(e["def"].get("size", 1.0)) * BoardView.UNIT_SCALE + 0.3 if e != null else 2.4
-		var sp := cam.unproject_position(n.position + Vector3(0, hgt, 0))
 		var pl: UnitPlate = plates[uid]
-		pl.position = sp - Vector2(UnitPlate.W / 2, pl.size.y)
-		# Keep plates on screen and clear of the encounter title for back-row and tall units.
-		var vp_w := get_viewport().get_visible_rect().size.x
-		pl.position.y = maxf(pl.position.y, 64.0)
-		pl.position.x = clampf(pl.position.x, 8.0, vp_w - UnitPlate.W - 8.0)
+		pl.rail_number = index + 1
+		pl.position = Vector2(vp_size.x - UnitPlate.RAIL_SIZE.x - 24, 104 + index * (UnitPlate.RAIL_SIZE.y + 8))
+		pl.highlight = pl.pending_damage > 0 or rail_hover == uid or hover_hex == e["pos"]
+		pl.queue_redraw()
+		var sp := cam.unproject_position(n.position + Vector3(0, 0.15, 0)) + Vector2(0, 20)
+		enemy_links.marks.append({"pos": sp, "number": index + 1, "hot": pl.highlight, "end": pl.position + Vector2(0, 22)})
+		index += 1
+	enemy_links.queue_redraw()
 	if info_panel.visible:
 		var mp := get_viewport().get_mouse_position()
 		info_panel.position = mp + Vector2(24, 24)
@@ -660,6 +685,29 @@ func _place_plates() -> void:
 			info_panel.position.x = mp.x - info_panel.size.x - 24
 		if info_panel.position.y + info_panel.size.y > vp.y - 340:
 			info_panel.position.y = mp.y - info_panel.size.y - 24
+
+
+func _hover_rail(uid: int) -> void:
+	rail_hover = uid
+	var e = c.enemy_by_uid(uid)
+	hover_hex = e["pos"] if e != null else null
+	hover_card = null
+	info_panel.visible = false
+	_refresh_board_overlays()
+
+
+class EnemyLinks extends Control:
+	var marks: Array = []
+	func _draw() -> void:
+		var f := UITheme.font("heading")
+		for m in marks:
+			var p: Vector2 = m["pos"]
+			var col := UITheme.GOLD if m["hot"] else UITheme.INK
+			if m["hot"]:
+				draw_line(p, m["end"], Color(0.9, 0.75, 0.4, 0.6), 2, true)
+			draw_circle(p, 15, Color(0.025, 0.035, 0.025, 0.94))
+			draw_arc(p, 15, 0, TAU, 24, col, 2, true)
+			draw_string(f, p + Vector2(-6, 7), str(m["number"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, col)
 
 
 func _update_info() -> void:
@@ -822,7 +870,7 @@ func _play_event(ev: Dictionary) -> void:
 			var key = "player" if ev["target"] is String else ev["target"]
 			if board.units.has(key):
 				var sp := rig.camera.unproject_position(board.units[key].position + Vector3(0, 1.6, 0))
-				_float_text(sp, "+%d Ward" % ev["gain"], UITheme.WARD, 30)
+				_float_text(sp, "%+d Ward" % ev["gain"], UITheme.WARD, 30)
 			Sfx.play("ward")
 			_refresh_hud()
 			_sync_plates()

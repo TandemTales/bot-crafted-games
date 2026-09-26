@@ -24,6 +24,9 @@ func _ready() -> void:
 
 
 func play(name_: String, pitch_jitter: float = 0.06, volume_db: float = 0.0) -> void:
+	# Headless QA has no audio output. Godot's Dummy driver retains active WAV playback at shutdown.
+	if DisplayServer.get_name() == "headless":
+		return
 	if not _streams.has(name_):
 		return
 	var p := _players[_next]
@@ -41,6 +44,9 @@ func play_music(track: String) -> void:
 	if not ResourceLoader.exists(path):
 		return
 	var stream = load(path)
+	# Still load/validate the asset in headless checks, but do not start inaudible looping playback.
+	if DisplayServer.get_name() == "headless":
+		return
 	if _music.stream == stream and _music.playing:
 		return
 	if stream is AudioStreamWAV:
