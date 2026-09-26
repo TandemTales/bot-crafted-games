@@ -20,6 +20,7 @@ func _init() -> void:
 		"test_cloister_card_progression", "test_cloister_ward_cards", "test_cloister_daze_cards",
 		"test_cloister_growth_and_reach",
 		"test_glasswood_progression", "test_glasswood_patterns", "test_glasswood_counterplay",
+		"test_enemy_forecast_matches_resolution",
 	]
 	for t in tests:
 		_current = t
@@ -705,6 +706,73 @@ func test_preview_matches_play() -> bool:
 	var hp0: int = e["hp"]
 	c.play_card(uid, e["pos"])
 	check(pv["damage"][e["uid"]] == hp0 - int(e["hp"]), "maul damage preview exact")
+	return true
+
+
+## Enemies act one after another, so each forecast must account for allies that move first.
+## Sweeps every authored encounter and compares the forecast path end and hit/miss with the
+## actual enemy phase.
+func test_enemy_forecast_matches_resolution() -> bool:
+	var compared := 0
+	var mismatches := 0
+	for enc_id in EncounterDB.ENCOUNTERS.keys():
+		for s in [3, 11, 29]:
+			var c := CombatState.new()
+			var deck: Array = []
+			for i in 10:
+				deck.append({"id": "thornstrike", "up": false})
+			c.setup(EncounterDB.get_def(enc_id), deck, 999, 999, [], Rng.new(s * 97 + enc_id.length()))
+			var walk := Rng.new(s)
+			for _t in 6:
+				if c.phase != "player":
+					break
+				var moves: Array = c.reachable().keys()
+				moves.sort_custom(func(a, b): return a.x < b.x or (a.x == b.x and a.y < b.y))
+				if not moves.is_empty() and walk.randf() < 0.6:
+					c.move_player(moves[walk.randi_range(0, moves.size() - 1)])
+				var fc := {}
+				for e in c.enemies:
+					var pv := c.enemy_preview(e)
+					fc[e["uid"]] = {"start": e["pos"], "end": pv["end"], "attack": pv["attack"], "hits": pv["hits"], "dmg": pv["dmg"]}
+				var actual := {}
+				var striker := -1
+				for ev in c.end_turn():
+					match ev["type"]:
+						"enemy_act":
+							actual[ev["target"]] = {"end": fc.get(ev["target"], {}).get("start"), "hit": null}
+						"move":
+							if actual.has(ev["who"]):
+								actual[ev["who"]]["end"] = ev["path"].back()
+						"attack":
+							striker = ev["source"]
+							if actual.has(ev["source"]):
+								actual[ev["source"]]["hit"] = true
+						"damage":
+							if ev["target"] is String and ev["target"] == "player" and actual.has(striker):
+								actual[striker]["dmg"] = int(ev["amount"]) + int(ev["blocked"])
+								striker = -1
+						"miss":
+							if actual.has(ev["source"]):
+								actual[ev["source"]]["hit"] = false
+				for uid in actual:
+					if not fc.has(uid):
+						continue
+					compared += 1
+					var f: Dictionary = fc[uid]
+					var a: Dictionary = actual[uid]
+					var ok: bool = a["end"] == f["end"]
+					if f["attack"] and a["hit"] != null:
+						ok = ok and bool(a["hit"]) == bool(f["hits"])
+					if a.has("dmg"):
+						ok = ok and int(a["dmg"]) == int(f["dmg"])
+					if not ok:
+						mismatches += 1
+						if mismatches <= 5:
+							printerr("  forecast drift %s seed %d turn %d uid %d: forecast %s/%s actual %s/%s" % [
+								enc_id, s, c.turn, uid, f["end"], f["hits"], a["end"], a["hit"]])
+	print("  enemy forecasts compared: %d, drift: %d" % [compared, mismatches])
+	check(compared > 500, "forecast sweep exercised many enemy actions")
+	check(mismatches == 0, "every enemy forecast matches its sequential resolution")
 	return true
 
 

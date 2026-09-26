@@ -386,7 +386,7 @@ func _sync_plates() -> void:
 		for a in e["intent"].get("actions", []):
 			match a["t"]:
 				"attack":
-					icons.append({"kind": "attack", "n": c.attack_damage(e, int(a["dmg"]), prev["end"]), "hot": prev["hits"]})
+					icons.append({"kind": "attack", "n": int(prev["dmg"]), "hot": prev["hits"]})
 				"spread", "blight_self":
 					icons.append({"kind": "spread", "n": a.get("hexes", []).size()})
 				"summon":
@@ -753,7 +753,7 @@ func _update_info() -> void:
 		for a in mv.get("actions", []):
 			match a["t"]:
 				"attack":
-					lines.append("• Attack for [color=#ff7060]%d[/color] (range %d)%s" % [c.attack_damage(e, int(a["dmg"]), pv["end"]), a["range"],
+					lines.append("• Attack for [color=#ff7060]%d[/color] (range %d)%s" % [int(pv["dmg"]), a["range"],
 						"  [color=#ff7060]will hit you[/color]" if pv["hits"] else "  [color=#a0a0a0]you're out of reach[/color]"])
 				"spread":
 					lines.append("• Spread [color=#c48be8]Blight[/color] on %d marked hexes near you" % a.get("hexes", []).size())

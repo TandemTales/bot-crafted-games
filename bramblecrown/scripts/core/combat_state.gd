@@ -27,6 +27,7 @@ var phase := "player"  # player | won | lost
 var attacks_this_turn := 0
 var _next_uid := 1
 var _events: Array = []
+var _trace = null  # uid -> forecast, recorded only on the throwaway copy in enemy_forecasts()
 
 
 # ------------------------------------------------------------------ setup
@@ -327,15 +328,8 @@ func end_turn() -> Array:
 	_tick_player_statuses()
 	if phase != "player":
 		return _flush()
-	# Enemy phase. Enemy ward lasts through the player's turn and drops as the enemies act.
-	for e in enemies:
-		e["ward"] = 0
-	for e in enemies.duplicate():
-		if not enemies.has(e):
-			continue
-		_enemy_act(e)
-		if phase != "player":
-			return _flush()
+	if not _enemy_phase():
+		return _flush()
 	_check_victory()
 	if phase != "player":
 		return _flush()
@@ -751,15 +745,47 @@ func attack_damage(e: Dictionary, base: int, at_pos = null) -> int:
 
 ## Live preview of an enemy's upcoming turn given the current board.
 func enemy_preview(e: Dictionary) -> Dictionary:
-	var path := _enemy_plan_path(e)
-	var end_pos: Vector2i = e["pos"] if path.is_empty() else path.back()
-	var atk := intent_attack(e)
-	var out := {"path": path, "end": end_pos, "attack": false, "dmg": 0, "hits": false}
-	if not atk.is_empty():
-		out["attack"] = true
-		out["dmg"] = attack_damage(e, int(atk["dmg"]), end_pos)
-		out["hits"] = Hex.distance(end_pos, player["pos"]) <= int(atk["range"])
-	return out
+	var fc := enemy_forecasts()
+	if fc.has(e["uid"]):
+		return fc[e["uid"]]
+	# Dies before acting (bleed, or a boss falling takes its brood with it).
+	return {"path": [] as Array[Vector2i], "end": e["pos"], "attack": false, "dmg": 0, "hits": false}
+
+
+## Forecast for every enemy, keyed by uid. Enemies act in order, so the coming phase is run on
+## a throwaway copy: each enemy sees the moves, trample, blight, summons and deaths of the allies
+## that act before it. The real state and its RNG are untouched.
+func enemy_forecasts() -> Dictionary:
+	var sim := CombatState.new()
+	sim.rng = Rng.new()
+	sim.rng.set_state(rng.get_state())
+	sim.encounter = encounter
+	sim.radius = radius
+	sim.terrain = terrain
+	sim.growth = growth.duplicate()
+	sim.player = player.duplicate(true)
+	sim.player["hp"] = 1 << 30  # an earlier lethal hit must not hide later forecasts
+	sim.enemies = enemies.duplicate(true)
+	sim.charms = charms
+	sim.turn = turn
+	sim._next_uid = _next_uid
+	sim._trace = {}
+	sim._enemy_phase()
+	return sim._trace
+
+
+## Resolves every enemy in order. Returns false if the fight ended mid-phase.
+func _enemy_phase() -> bool:
+	# Enemy ward lasts through the player's turn and drops as the enemies act.
+	for e in enemies:
+		e["ward"] = 0
+	for e in enemies.duplicate():
+		if not enemies.has(e):
+			continue
+		_enemy_act(e)
+		if phase != "player":
+			return false
+	return true
 
 
 func _enemy_act(e: Dictionary) -> void:
@@ -785,11 +811,19 @@ func _enemy_act(e: Dictionary) -> void:
 		_emit({"type": "move", "who": e["uid"], "path": path})
 		if not trampled.is_empty():
 			_emit({"type": "board", "changes": trampled, "cause": "trample"})
+	if _trace != null:
+		var atk := intent_attack(e)
+		_trace[e["uid"]] = {"path": path, "end": e["pos"], "attack": not atk.is_empty(), "dmg": 0, "hits": false}
+		if not atk.is_empty():
+			_trace[e["uid"]]["dmg"] = attack_damage(e, int(atk["dmg"]))
+			_trace[e["uid"]]["hits"] = Hex.distance(e["pos"], player["pos"]) <= int(atk["range"])
 	for a in mv.get("actions", []):
 		if not enemies.has(e) or phase != "player":
 			return
 		match a["t"]:
 			"attack":
+				if _trace != null and a == intent_attack(e):
+					_trace[e["uid"]]["dmg"] = attack_damage(e, int(a["dmg"]))  # after earlier buffs
 				if Hex.distance(e["pos"], player["pos"]) <= int(a["range"]):
 					_emit({"type": "attack", "source": e["uid"], "range": a["range"]})
 					_damage_player(attack_damage(e, int(a["dmg"])), e)
