@@ -90,6 +90,7 @@ func _camp() -> void:
 	match r.region_def().get("theme", ""):
 		"cloister": camp_text = "Candle-wax and wet stone. The Blight will not cross a lit hearth tonight."
 		"glasswood": camp_text = "A thousand quiet reflections hold the firelight. For once, none of them move."
+		"ironroot": camp_text = "An old miners' brazier still draws. Above you, the props creak but hold."
 	_heading("Campfire", camp_text)
 	var heal := mini(r.max_hp - r.hp, int(ceil(r.max_hp * 0.3)))
 	_button("Rest: heal %d HP" % heal if heal > 0 else "Rest: already at full health", func():

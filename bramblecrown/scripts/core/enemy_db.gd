@@ -12,6 +12,9 @@ extends RefCounted
 ##   daze {n}                      the Grovewalker starts its next turn with n less energy (min 1)
 ##   shield_allies {n}             every other enemy gains n ward
 ##   heal_allies {n}               every enemy (itself included) heals n
+##   collapse {count, radius}      cave-in: marked open hexes near the Grovewalker become stone
+##                                 (locked at intent time; a Grovewalker still standing there takes
+##                                 damage instead, and a cave-in never splits the walkable board)
 ## Flags: move (hexes per turn), keep_range (preferred distance), flying (ignores Thicket cost),
 ## trample (destroys Thicket it walks through), death_blight (blights its hex on death), size (visual scale).
 
@@ -196,6 +199,68 @@ const ENEMIES := {
 		"pattern": [0, 1, 2, 3],
 		"phase2_at": 0.5,
 		"pattern2": [4, 5, 7, 6],
+	},
+	# Ironroot Deeps: cave-ins reshape the board every few turns. Each creature asks a
+	# different spatial question: stand off the marked hexes, keep thicket between you and
+	# the carts, and reach the Tunnelers before the room closes in.
+	"rustgrub": {
+		"name": "Rustgrub", "hp": [15, 18], "move": 2, "model": "rustgrub", "size": 0.8,
+		"death_blight": true,
+		"moves": [
+			{"name": "Gnaw", "actions": [{"t": "attack", "dmg": 7, "range": 1}]},
+			{"name": "Rust Trail", "actions": [{"t": "blight_self", "count": 2, "radius": 1}]},
+		],
+		"pattern": [0, 0, 1],
+	},
+	"cart_golem": {
+		"name": "Cart Golem", "hp": [42, 46], "move": 1, "model": "cart_golem", "size": 1.1,
+		"trample": true,
+		# A runaway charge crushes thicket; a stoke turn afterwards is the window to punish it.
+		"moves": [
+			{"name": "Runaway Cart", "move_bonus": 2, "actions": [{"t": "attack", "dmg": 11, "range": 1}]},
+			{"name": "Stoke the Firebox", "stay": true, "actions": [{"t": "ward", "n": 7}, {"t": "strength", "n": 1}]},
+			{"name": "Iron Ram", "actions": [{"t": "attack", "dmg": 8, "range": 1}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"tunneler": {
+		"name": "Tunneler", "hp": [20, 23], "move": 2, "keep_range": 2, "model": "tunneler", "size": 0.9,
+		"moves": [
+			{"name": "Undermine", "stay": true, "actions": [{"t": "collapse", "count": 2, "radius": 1}]},
+			{"name": "Pick Throw", "actions": [{"t": "attack", "dmg": 6, "range": 2}]},
+			{"name": "Shore Up", "actions": [{"t": "ward", "n": 5}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"foundry_heart": {
+		"name": "Foundry Heart", "hp": [86, 90], "move": 0, "keep_range": 3,
+		"model": "foundry_heart", "size": 1.2, "elite": true,
+		# Rooted in place: the fight is about crossing its cave-ins while the carts escort it.
+		"moves": [
+			{"name": "Bellows", "stay": true, "actions": [{"t": "ward", "n": 8}, {"t": "shield_allies", "n": 5}]},
+			{"name": "Molten Arc", "stay": true, "actions": [{"t": "attack", "dmg": 13, "range": 3}]},
+			{"name": "Ceiling Drop", "stay": true, "actions": [{"t": "collapse", "count": 3, "radius": 2}]},
+			{"name": "Slag Pour", "stay": true, "actions": [{"t": "spread", "count": 3, "radius": 2}]},
+		],
+		"pattern": [0, 1, 2, 3],
+	},
+	"engine_of_rot": {
+		"name": "The Engine of Rot", "hp": [196, 196], "move": 1, "keep_range": 2,
+		"model": "engine_of_rot", "size": 1.15, "boss": true, "trample": true,
+		# Phase 1 builds the mine around you; phase 2 drives straight through it.
+		"moves": [
+			{"name": "Piston Slam", "actions": [{"t": "attack", "dmg": 13, "range": 2}]},
+			{"name": "Shaft Collapse", "stay": true, "actions": [{"t": "collapse", "count": 3, "radius": 2}]},
+			{"name": "Feed the Furnace", "stay": true, "actions": [{"t": "summon", "enemy": "rustgrub", "count": 2, "max": 2}]},
+			{"name": "Boiler Plating", "stay": true, "actions": [{"t": "ward", "n": 12}]},
+			{"name": "Full Steam", "move_bonus": 2, "actions": [{"t": "attack", "dmg": 16, "range": 1}]},
+			{"name": "Rot Exhaust", "stay": true, "actions": [{"t": "spread", "count": 4, "radius": 2}, {"t": "strength", "n": 1}]},
+			{"name": "Deep Collapse", "stay": true, "actions": [{"t": "collapse", "count": 4, "radius": 2}]},
+			{"name": "Couple the Cart", "stay": true, "actions": [{"t": "summon", "enemy": "cart_golem", "count": 1, "max": 1}]},
+		],
+		"pattern": [0, 1, 3, 2],
+		"phase2_at": 0.5,
+		"pattern2": [4, 6, 5, 7],
 	},
 }
 

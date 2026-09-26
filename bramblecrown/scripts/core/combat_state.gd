@@ -8,6 +8,8 @@ const BASE_ENERGY := 3
 const BASE_MOVE := 2
 const ROT_LOSS := 2
 const EMPOWER_BONUS := 2
+const COLLAPSE_DMG := 6  # a Grovewalker caught under a cave-in; the hex then stays open
+const COLLAPSE_CAP := 0.4  # cave-ins stop once this share of the board is stone
 const MAX_HAND := 10
 
 var rng: Rng
@@ -709,6 +711,8 @@ func _lock_targets(e: Dictionary, mv: Dictionary) -> void:
 				a["hexes"] = _pick_blight_targets(player["pos"], int(a["radius"]), int(a["count"]))
 			"blight_self":
 				a["hexes"] = _pick_blight_targets(e["pos"], int(a["radius"]), int(a["count"]))
+			"collapse":
+				a["hexes"] = _pick_collapse_targets(player["pos"], int(a["radius"]), int(a["count"]))
 
 
 func _pick_blight_targets(center: Vector2i, r: int, count: int) -> Array:
@@ -723,6 +727,74 @@ func _pick_blight_targets(center: Vector2i, r: int, count: int) -> Array:
 		var db := Hex.distance(b, center) * 2 - (1 if growth[b] == "thicket" else 0)
 		return da < db)
 	return cands.slice(0, count)
+
+
+## Cave-in targets near the Grovewalker: open ground, nearest first, never an enemy's hex, and
+## never a hex whose loss would split the walkable board.
+func _pick_collapse_targets(center: Vector2i, r: int, count: int) -> Array:
+	var cands: Array = []
+	for h in Hex.disc(center, r):
+		if in_bounds(h) and terrain[h] == "plain" and enemy_at(h) == null:
+			cands.append(h)
+	rng.shuffle(cands)
+	cands.sort_custom(func(a, b): return Hex.distance(a, center) < Hex.distance(b, center))
+	var out: Array = []
+	for h in cands:
+		if out.size() >= count:
+			break
+		if _can_collapse(out + [h]):
+			out.append(h)
+	return out
+
+
+## True when turning `hexes` to stone stays under the cap and keeps every walkable region whole.
+func _can_collapse(hexes: Array) -> bool:
+	var stone := hexes.size()
+	for h in terrain:
+		if terrain[h] == "stone":
+			stone += 1
+	if stone > int(terrain.size() * COLLAPSE_CAP):
+		return false
+	return _walkable_regions(hexes) <= _walkable_regions([])
+
+
+func _walkable_regions(extra_stone: Array) -> int:
+	var seen := {}
+	var regions := 0
+	for start in terrain:
+		if terrain[start] != "plain" or seen.has(start) or extra_stone.has(start):
+			continue
+		regions += 1
+		var stack: Array = [start]
+		seen[start] = true
+		while not stack.is_empty():
+			var h: Vector2i = stack.pop_back()
+			for n in Hex.neighbors(h):
+				if terrain.get(n, "") == "plain" and not seen.has(n) and not extra_stone.has(n):
+					seen[n] = true
+					stack.append(n)
+	return regions
+
+
+## Resolves a telegraphed cave-in. Occupied hexes stay open; the Grovewalker takes COLLAPSE_DMG.
+func _collapse_hexes(hexes: Array, source: Dictionary) -> void:
+	var fallen: Array = []
+	for h in hexes:
+		if terrain.get(h, "") != "plain" or enemy_at(h) != null:
+			continue
+		if player["pos"] == h:
+			_emit({"type": "cave_in", "target": "player", "pos": h, "source": source["uid"]})
+			_damage_player(COLLAPSE_DMG, null)
+			if phase != "player":
+				return
+			continue
+		if not _can_collapse([h]):
+			continue
+		terrain[h] = "stone"
+		growth[h] = "none"
+		fallen.append(h)
+	if not fallen.is_empty():
+		_emit({"type": "collapse", "hexes": fallen, "source": source["uid"]})
 
 
 func intent_attack(e: Dictionary) -> Dictionary:
@@ -761,7 +833,7 @@ func enemy_forecasts() -> Dictionary:
 	sim.rng.set_state(rng.get_state())
 	sim.encounter = encounter
 	sim.radius = radius
-	sim.terrain = terrain
+	sim.terrain = terrain.duplicate()  # cave-ins change terrain mid-phase
 	sim.growth = growth.duplicate()
 	sim.player = player.duplicate(true)
 	sim.player["hp"] = 1 << 30  # an earlier lethal hit must not hide later forecasts
@@ -831,6 +903,8 @@ func _enemy_act(e: Dictionary) -> void:
 					_emit({"type": "miss", "source": e["uid"]})
 			"spread", "blight_self":
 				_blight_hexes(a.get("hexes", []))
+			"collapse":
+				_collapse_hexes(a.get("hexes", []), e)
 			"summon":
 				var alive := 0
 				for o in enemies:

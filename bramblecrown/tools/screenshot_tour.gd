@@ -35,6 +35,12 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "run5":
+		await _ironroot()
+		await _rooms(3)
+		await _rail_input()
+		_finish()
+		return
 	if only == "run4":
 		await _glasswood()
 		await _rooms(2)
@@ -169,6 +175,81 @@ func _glasswood() -> void:
 	Game.route_to_status()
 	await _wait(0.7)
 	await _shot("44_development_clear")
+	Game.goto_title()
+	await _wait(0.4)
+
+
+func _ironroot() -> void:
+	Game.new_run(1003)
+	var r := Game.run
+	r.region = 3
+	r.generate_map()
+	Game.goto_map()
+	await _wait(1.2)
+	await _shot("50_ironroot_map")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		Game.goto_combat()
+		await _wait(3.2)
+		var sc = get_tree().current_scene
+		_check(sc.banner.modulate.a < 0.01, "encounter title has cleared before capture")
+		_check(sc.board.theme == BoardView.THEMES["ironroot"], "Ironroot theme is active")
+		_check(sc.board.units.size() == sc.c.enemies.size() + 1, "every Ironroot unit has a model")
+		await _shot("51_" + enc)
+		if enc == "iro_undermine":
+			# Stage a telegraphed cave-in beside the Grovewalker, then resolve it natively.
+			var tun: Dictionary = sc.c.enemies[0]
+			tun["pattern_idx"] = 0
+			sc.c._choose_intent(tun)
+			var marked: Array = tun["intent"]["actions"][0]["hexes"]
+			sc._refresh_all()
+			var panel: UnitPlate = sc.plates[tun["uid"]]
+			_check(panel.intent["icons"].any(func(ic): return ic["kind"] == "collapse"), "cave-in intent has its own icon")
+			_check(marked.size() > 0 and sc.board.overlays[marked[0]].visible, "cave-in hexes are highlighted")
+			await _shot("52_cave_in_telegraph")
+			sc._on_end_turn()
+			for frame in 100:
+				await _wait(0.1)
+				if not sc.busy:
+					break
+			_check(not sc.busy, "cave-in enemy turn finishes")
+			var fell := 0
+			for h in marked:
+				if sc.c.terrain[h] == "stone":
+					fell += 1
+					_check(sc.board.tiles[h].scene_file_path.ends_with("hex_rubble.glb"), "fallen hex shows rubble")
+			_check(fell > 0, "at least one marked hex collapsed")
+			await _wait(1.0)
+			await _shot("53_cave_in_resolved")
+		if enc == reg["boss"]:
+			var boss: Dictionary = sc.c.enemies[0]
+			var animation: AnimationPlayer = sc.board.units[boss["uid"]].find_child("AnimationPlayer", true, false)
+			_check(animation != null and animation.is_playing(), "Engine piston animation imported and playing")
+			sc.c._damage_enemy(boss, int(boss["hp"]) / 2 + 1)
+			_check(boss["phase2"], "Engine switches phase")
+			sc.c._choose_intent(boss)
+			sc._refresh_all()
+			await _shot("54_engine_phase2_intent")
+			sc._on_end_turn()
+			for frame in 100:
+				await _wait(0.1)
+				if not sc.busy:
+					break
+			_check(not sc.busy and sc.c.turn >= 2, "Engine phase-two enemy turn finishes")
+			await _wait(1.4)
+			await _shot("55_engine_phase2_resolved")
+		var expected: String = enc
+		Game.run = RunState.from_json(r.to_json())
+		Game.goto_combat()
+		await _wait(0.4)
+		_check(Game.combat.encounter["id"] == expected, "native checkpoint resume: " + expected)
+		r = Game.run
+	r.status = "victory"
+	Game.route_to_status()
+	await _wait(0.7)
+	await _shot("56_development_clear")
 	Game.goto_title()
 	await _wait(0.4)
 

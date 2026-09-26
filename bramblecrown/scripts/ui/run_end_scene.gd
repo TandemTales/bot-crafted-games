@@ -31,7 +31,7 @@ func _ready() -> void:
 	s.add_theme_font_size_override("font_size", 26)
 	v.add_child(s)
 	var note := Label.new()
-	note.text = "The Splintered Queen falls, and the Glasswood holds its own light again. You have cleared the three regions in this development build. Ironroot Deeps and the Crown of Thorns are still to come." if won else "Another Grovewalker will take up the seed."
+	note.text = "The Engine of Rot shudders still, and the Ironroot Deeps fall quiet. You have cleared the four regions in this development build. The Crown of Thorns is still to come." if won else "Another Grovewalker will take up the seed."
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	note.add_theme_color_override("font_color", UITheme.INK_DIM)

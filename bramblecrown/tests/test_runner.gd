@@ -21,6 +21,7 @@ func _init() -> void:
 		"test_cloister_growth_and_reach",
 		"test_glasswood_progression", "test_glasswood_patterns", "test_glasswood_counterplay",
 		"test_enemy_forecast_matches_resolution",
+		"test_ironroot_progression", "test_ironroot_patterns", "test_ironroot_collapse",
 	]
 	for t in tests:
 		_current = t
@@ -41,6 +42,141 @@ func check(cond: bool, msg: String) -> void:
 	else:
 		_fails += 1
 		printerr("FAIL [%s] %s" % [_current, msg])
+
+
+func test_ironroot_progression() -> bool:
+	var r := RunState.new()
+	r.new_run(1003)
+	r.region = 2
+	r.generate_map()
+	for n in r.map:
+		if n["type"] == "boss":
+			r.node_id = n["id"]
+	r.status = "reward"
+	r.used_encounters = ["gls_queen"]
+	r.leave_reward()
+	check(r.region == 3 and r.status == "map", "Glasswood boss unlocks Ironroot rather than ending the run")
+	check(r.region_def()["id"] == "ironroot", "fourth region is Ironroot Deeps")
+	var restored := RunState.from_json(r.to_json())
+	check(restored.to_json() == r.to_json(), "Ironroot map save roundtrip")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		var c := r.make_combat()
+		var again := RunState.from_json(r.to_json()).make_combat()
+		check(again.encounter["id"] == enc and again.enemies == c.enemies and again.terrain == c.terrain,
+			"saved Ironroot node restarts the same deterministic encounter: " + enc)
+	for seed_value in range(10):
+		var rr := RunState.new()
+		rr.new_run(seed_value)
+		rr.region = 3
+		rr.generate_map()
+		rr.enter_node(rr.available_nodes()[0])
+		rr.make_combat()
+		check(reg["easy"].has(rr.current_encounter), "Ironroot starts from its easy pool")
+	# The Engine of Rot is the last boss of this build.
+	for n in r.map:
+		if n["type"] == "boss":
+			r.node_id = n["id"]
+	r.status = "reward"
+	r.leave_reward()
+	check(r.status == "victory", "clearing Ironroot completes the four-region build")
+	return true
+
+
+func test_ironroot_patterns() -> bool:
+	# Every authored move under real rules, both boss phases. Rules-bound, not a balance claim.
+	for id in ["rustgrub", "cart_golem", "tunneler", "foundry_heart", "engine_of_rot"]:
+		var c := _blank_combat({"radius": 4, "player": [0, 3], "enemies": [[id, 0, -2]]})
+		c.player["hp"] = 9999
+		c.player["max_hp"] = 9999
+		var e: Dictionary = c.enemies[0]
+		for phase in [false, true] if e["def"].has("pattern2") else [false]:
+			if phase:
+				var old_intent: Dictionary = e["intent"].duplicate(true)
+				e["ward"] = 0
+				c._damage_enemy(e, int(e["hp"]) - int(e["max_hp"] * e["def"]["phase2_at"]))
+				check(e["phase2"], "Engine enters its second phase at the threshold")
+				check(e["intent"] == old_intent, "phase change preserves this turn's promised intent")
+			e["pattern_idx"] = 0
+			var pattern: Array = e["def"]["pattern2"] if phase else e["def"]["pattern"]
+			for mi in pattern:
+				c._choose_intent(e)
+				check(e["intent"]["name"] == e["def"]["moves"][mi]["name"], "%s authored pattern order" % id)
+				c._enemy_act(e)
+				check(c.player["hp"] > 0 and c.enemies.has(e), "%s move resolves without corrupting units" % id)
+			for turn in 12:
+				c.end_turn()
+			for move in e["def"]["moves"]:
+				for action in move["actions"]:
+					if action["t"] == "summon":
+						var count := c.enemies.filter(func(en): return en["id"] == action["enemy"]).size()
+						check(count <= int(action["max"]), "%s summons remain capped" % id)
+	return true
+
+
+func test_ironroot_collapse() -> bool:
+	var c := _blank_combat({"player": [0, 1], "enemies": [["tunneler", 0, -3]], "thicket": [[1, 0]], "blight": [[-1, 1]]})
+	var t: Dictionary = c.enemies[0]
+	t["pattern_idx"] = 0
+	c._choose_intent(t)
+	var marked: Array = t["intent"]["actions"][0]["hexes"]
+	check(marked.size() == 2, "Undermine marks two hexes")
+	for h in marked:
+		check(Hex.distance(h, c.player["pos"]) <= 1 and c.terrain[h] == "plain", "cave-in targets open ground beside the Grovewalker")
+	# Forecasting the enemy phase must not touch the real board or RNG.
+	var terrain0 := c.terrain.duplicate()
+	var rng0 := c.rng.get_state()
+	c.enemy_preview(t)
+	check(c.terrain == terrain0 and c.rng.get_state() == rng0, "forecast leaves terrain and RNG untouched")
+	# Step off the marked hexes: they fall and clear any growth; the Grovewalker is unharmed.
+	var safe := Vector2i(-3, 3)
+	check(not marked.has(safe), "safe hex is not marked")
+	c.player["pos"] = safe
+	var hp: int = c.player["hp"]
+	c._enemy_act(t)
+	for h in marked:
+		check(c.terrain[h] == "stone" and c.growth[h] == "none", "marked hex becomes rubble with no growth")
+	check(c.player["hp"] == hp, "no damage when the Grovewalker stepped away")
+	# Standing on a marked hex: it stays open and the Grovewalker takes the cave-in damage.
+	var c2 := _blank_combat({"player": [0, 1], "enemies": [["tunneler", 0, -3]]})
+	var t2: Dictionary = c2.enemies[0]
+	t2["pattern_idx"] = 0
+	c2._choose_intent(t2)
+	var hexes: Array = t2["intent"]["actions"][0]["hexes"]
+	c2.player["pos"] = hexes[0]
+	var hp2: int = c2.player["hp"]
+	c2._enemy_act(t2)
+	check(c2.player["hp"] == hp2 - CombatState.COLLAPSE_DMG, "cave-in costs a Grovewalker who stays on the mark")
+	check(c2.terrain[hexes[0]] == "plain", "an occupied hex does not become rubble")
+	# An enemy standing on a marked hex also keeps it open.
+	var c3 := _blank_combat({"player": [0, 2], "enemies": [["tunneler", 0, -3], ["rustgrub", 3, -3]]})
+	var t3: Dictionary = c3.enemies[0]
+	t3["pattern_idx"] = 0
+	c3._choose_intent(t3)
+	var h3: Vector2i = t3["intent"]["actions"][0]["hexes"][0]
+	c3.enemies[1]["pos"] = h3
+	c3._collapse_hexes([h3], t3)
+	check(c3.terrain[h3] == "plain", "a cave-in never buries an enemy")
+	# Repeated cave-ins never split the walkable board and stop at the cap.
+	for enc in ["iro_undermine", "iro_foundry", "iro_engine", "iro_sump"]:
+		var cc := CombatState.new()
+		cc.setup(EncounterDB.get_def(enc), [{"id": "thornstrike", "up": false}], 9999, 9999, [], Rng.new(enc.length()))
+		var regions0 := cc._walkable_regions([])
+		for _t in 30:
+			if cc.phase != "player":
+				break
+			for e in cc.enemies:
+				e["statuses"]["rooted"] = 0
+			cc.end_turn()
+		var stone := 0
+		for h in cc.terrain:
+			if cc.terrain[h] == "stone":
+				stone += 1
+		check(cc._walkable_regions([]) <= regions0, "%s: cave-ins never split the walkable board" % enc)
+		check(stone <= int(cc.terrain.size() * CombatState.COLLAPSE_CAP), "%s: rubble stays under the cap" % enc)
+	return true
 
 
 func test_glasswood_progression() -> bool:

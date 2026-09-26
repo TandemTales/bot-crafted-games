@@ -56,6 +56,9 @@ func _draw() -> void:
 	if theme_id == "glasswood":
 		paper = Color(0.62, 0.72, 0.72)
 		backdrop = Color(0.025, 0.065, 0.09)
+	elif theme_id == "ironroot":
+		paper = Color(0.66, 0.58, 0.48)
+		backdrop = Color(0.07, 0.05, 0.04)
 	elif theme_id == "cloister":
 		paper = Color(0.66, 0.67, 0.63)
 		backdrop = Color(0.04, 0.045, 0.075)
@@ -85,6 +88,13 @@ func _draw() -> void:
 					var tip := root + Vector2(k * 5 - 7, -45 - k * 9)
 					draw_colored_polygon(PackedVector2Array([root + Vector2(-9, 0), tip, root + Vector2(9, -5)]), ink)
 					draw_line(root, tip, Color(0.8, 0.9, 0.88, 0.6), 2, true)
+			elif theme_id == "ironroot":
+				# Pit-prop frame over a rail stub.
+				draw_line(p + Vector2(-22, 45), p + Vector2(-20, -8), ink, 6)
+				draw_line(p + Vector2(22, 45), p + Vector2(20, -8), ink, 6)
+				draw_line(p + Vector2(-30, -10), p + Vector2(30, -10), ink, 7)
+				draw_line(p + Vector2(-16, 40), p + Vector2(16, 40), ink, 2)
+				draw_line(p + Vector2(-16, 30), p + Vector2(16, 30), ink, 2)
 			elif theme_id == "cloister":
 				draw_arc(p, 25, PI, TAU, 20, ink, 5, true)
 				draw_line(p + Vector2(-25, 0), p + Vector2(-25, 45), ink, 5)

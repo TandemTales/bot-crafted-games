@@ -1774,6 +1774,297 @@ def build_splintered_queen():
     finish("splintered_queen")
 
 
+# ------------------------------------------------------------------ region 4: Ironroot Deeps
+
+def ironroot_palette():
+    """Soot, rust and old timber, lit by warm lamps. Copper ore gives the only cool accent."""
+    return {
+        "earth": mat("ironroot_earth", (0.07, 0.055, 0.045), 0.97),
+        "floor": mat("packed_spoil", (0.20, 0.15, 0.11), 0.93),
+        "gravel": mat("coal_gravel", (0.075, 0.07, 0.07), 0.9),
+        "timber": mat("pit_timber", (0.28, 0.17, 0.09), 0.86),
+        "timber_dark": mat("tarred_timber", (0.13, 0.08, 0.05), 0.8),
+        "rail": mat("rail_iron", (0.30, 0.28, 0.27), 0.45, metal=0.8),
+        "rust": mat("flaking_rust", (0.45, 0.19, 0.07), 0.78, metal=0.35),
+        "iron": mat("black_iron", (0.10, 0.10, 0.11), 0.52, metal=0.75),
+        "rock": mat("seam_rock", (0.24, 0.21, 0.19), 0.9),
+        "rock_dark": mat("seam_rock_dark", (0.13, 0.115, 0.11), 0.92),
+        "ore": mat("verdigris_ore", (0.16, 0.52, 0.44), 0.35, metal=0.4),
+        "water": mat("rust_sump", (0.045, 0.05, 0.05), 0.06, metal=0.35),
+        "scum": mat("rust_scum", (0.42, 0.18, 0.06), 0.7),
+        "flesh": mat("grub_flesh", (0.62, 0.46, 0.36), 0.62),
+        "flesh_dark": mat("grub_fold", (0.36, 0.22, 0.17), 0.7),
+        "canvas": mat("miners_canvas", (0.38, 0.33, 0.22), 0.95),
+        "brass": mat("tarnished_brass", (0.55, 0.40, 0.16), 0.38, metal=0.8),
+        "blight": mat("iron_blight", (0.30, 0.10, 0.36), 0.7),
+        "eye": mat("furnace_eye", (1.0, 0.55, 0.18), 0.4, emit=(1.0, 0.42, 0.08), emit_strength=0.8),
+        "glow": mat("furnace_glow", (1.0, 0.36, 0.06), 0.5, emit=(1.0, 0.35, 0.05), emit_strength=1.2),
+    }
+
+
+def rock_chunk(name, r, loc, material, seed, squash=0.7):
+    random.seed(seed)
+    o = ico(name, r, loc, scale=(random.uniform(0.9, 1.3), random.uniform(0.8, 1.15), squash), sub=1)
+    o.rotation_euler = (random.uniform(-0.3, 0.3), random.uniform(-0.3, 0.3), random.uniform(0, 6.28))
+    return assign(o, material)
+
+
+def ironroot_floor(P, seed):
+    random.seed(seed)
+    parts = [assign(hex_prism("bedrock", 0.98, 0.94, -1.0, 0), P["earth"]),
+             assign(hex_prism("packed_spoil", 0.98, 0.09, -0.07, 0.025), P["floor"])]
+    # Two rails with sleepers cross every tile edge-to-edge so the rails join across the board.
+    for x in (-0.19, 0.19):
+        parts.append(assign(cube("rail", 1.0, (x, 0, 0.045), scale=(0.035, 1.62, 0.03)), P["rail"]))
+    for y in (-0.6, -0.2, 0.2, 0.6):
+        parts.append(assign(cube("sleeper", 1.0, (0, y, 0.022), scale=(0.62, 0.11, 0.03),
+                                 rot=(0, 0, random.uniform(-0.08, 0.08))), P["timber_dark"]))
+    for i in range(7):
+        a = random.uniform(0, 6.28)
+        d = random.uniform(0.42, 0.8)
+        parts.append(rock_chunk("gravel", random.uniform(0.035, 0.06), (d * math.cos(a), d * math.sin(a), 0.02),
+                                P["gravel"], seed * 31 + i, 0.5))
+    a = random.uniform(0, 6.28)
+    parts.append(assign(ico("ore_fleck", 0.05, (0.62 * math.cos(a), 0.62 * math.sin(a), 0.03),
+                            scale=(1.3, 0.8, 0.5), sub=1), P["ore"]))
+    return parts
+
+
+def build_ironroot_tiles():
+    for name in ("hex_mine", "hex_rubble", "hex_sump"):
+        reset()
+        P = ironroot_palette()
+        if name == "hex_sump":
+            parts = [assign(hex_prism("sump_bed", 0.98, 0.58, -0.8, 0.025), P["earth"]),
+                     assign(hex_prism("rust_water", 0.96, 0.018, -0.215, 0.015), P["water"])]
+            # A drowned rail end and a sunk cart wheel read as a flooded working, not a pond.
+            parts.append(assign(cube("drowned_rail", 1.0, (-0.25, 0.1, -0.2), scale=(0.035, 1.1, 0.03),
+                                     rot=(0.12, 0, 0.3)), P["rust"]))
+            parts.append(assign(cyl("sunk_wheel", 0.2, 0.05, (0.45, -0.35, -0.16), verts=14,
+                                    rot=(math.radians(70), 0, 0.4)), P["rust"]))
+            # Rust scum rings the edge so the pool reads as mine water, not bare soil.
+            for i in range(6):
+                t = i / 6 * 6.283 + 0.3
+                parts.append(assign(ico("scum", 0.12, (0.78 * math.cos(t), 0.78 * math.sin(t), -0.2),
+                                        scale=(1.6, 0.7, 0.12), sub=1), P["scum"]))
+        else:
+            parts = ironroot_floor(P, 11 if name == "hex_mine" else 23)
+            if name == "hex_rubble":
+                # A cave-in: heaped rock under a snapped roof prop. Tall enough to read as a wall.
+                for i, (x, y, r, z) in enumerate([(0, 0.05, 0.5, 0.22), (-0.4, -0.25, 0.32, 0.14),
+                                                  (0.42, -0.2, 0.34, 0.15), (0.26, 0.4, 0.3, 0.14),
+                                                  (-0.36, 0.34, 0.28, 0.12), (0.02, -0.05, 0.38, 0.58),
+                                                  (-0.14, 0.14, 0.28, 0.86), (0.18, 0.1, 0.22, 1.0)]):
+                    parts.append(rock_chunk("fallen_rock", r, (x, y, z), P["rock"] if i % 2 else P["rock_dark"],
+                                            400 + i, 0.75))
+                parts.append(assign(cube("snapped_prop", 1.0, (0.3, -0.25, 0.75), scale=(0.1, 0.1, 1.1),
+                                         rot=(0.55, 0.35, 0)), P["timber"]))
+                parts.append(assign(cube("split_cap", 1.0, (-0.25, 0.1, 0.42), scale=(0.7, 0.1, 0.1),
+                                         rot=(0.2, 0.5, 0.7)), P["timber_dark"]))
+                parts.append(assign(ico("exposed_ore", 0.09, (0.3, -0.3, 0.3), scale=(1.2, 0.8, 0.7), sub=1), P["ore"]))
+        join(parts, name)
+        finish(name)
+
+
+def build_ironroot_props():
+    # Timber roof set: two posts and a cap beam with a hanging lamp.
+    reset()
+    P = ironroot_palette()
+    parts = []
+    for s in (-1, 1):
+        parts.append(assign(cube("post", 1.0, (s * 0.55, 0, 0.9), scale=(0.14, 0.14, 1.8), rot=(0, s * 0.06, 0)), P["timber"]))
+        parts.append(assign(cube("foot_wedge", 1.0, (s * 0.55, 0, 0.06), scale=(0.24, 0.24, 0.12)), P["timber_dark"]))
+        parts.append(assign(cube("brace", 1.0, (s * 0.4, 0, 1.62), scale=(0.08, 0.08, 0.42), rot=(0, -s * 0.8, 0)), P["timber_dark"]))
+    parts.append(assign(cube("cap_beam", 1.0, (0, 0, 1.84), scale=(1.45, 0.18, 0.16)), P["timber"]))
+    parts.append(tube("lamp_chain", [(0.2, 0, 1.76), (0.2, 0, 1.5)], 0.01, P["iron"], taper=False))
+    parts.append(assign(cyl("lamp_cage", 0.07, 0.16, (0.2, 0, 1.42), verts=6), P["brass"]))
+    parts.append(assign(sphere("lamp_flame", 0.045, (0.2, 0, 1.42), seg=8, rings=6), P["glow"]))
+    join(parts, "timber_frame")
+    finish("timber_frame")
+
+    # Abandoned ore cart, tipped slightly, spilling ore.
+    reset()
+    P = ironroot_palette()
+    parts = [assign(cube("tub", 1.0, (0, 0, 0.36), scale=(0.5, 0.72, 0.36), rot=(0.08, 0, 0)), P["rust"]),
+             assign(cube("tub_rim", 1.0, (0, 0, 0.55), scale=(0.56, 0.78, 0.05), rot=(0.08, 0, 0)), P["iron"])]
+    for x in (-0.27, 0.27):
+        for y in (-0.24, 0.24):
+            parts.append(assign(cyl("wheel", 0.12, 0.05, (x, y, 0.12), verts=14, rot=(0, math.radians(90), 0)), P["iron"]))
+    for i in range(6):
+        parts.append(rock_chunk("ore_load", 0.1, (random.uniform(-0.15, 0.15), random.uniform(-0.25, 0.25), 0.58),
+                                P["ore"] if i % 3 == 0 else P["rock_dark"], 700 + i))
+    join(parts, "ore_cart")
+    finish("ore_cart")
+
+    # Low filler: rock spoil and a copper seam.
+    reset()
+    P = ironroot_palette()
+    parts = []
+    for i in range(5):
+        a = i * 1.3
+        parts.append(rock_chunk("spoil", 0.1 + (i % 3) * 0.035, (0.18 * math.cos(a), 0.18 * math.sin(a), 0.05),
+                                P["rock"] if i % 2 else P["rock_dark"], 800 + i))
+    for i in range(3):
+        parts.append(assign(ico("copper_seam", 0.055, (0.12 * i - 0.1, -0.05 * i, 0.16 + 0.03 * i),
+                                scale=(1.3, 0.7, 0.8), sub=1), P["ore"]))
+    join(parts, "ore_spoil")
+    finish("ore_spoil")
+
+
+def build_rustgrub():
+    reset()
+    P = ironroot_palette()
+    parts = []
+    # Segmented larva, head toward -Y, rust plates along the back.
+    for i in range(5):
+        y = -0.22 + i * 0.13
+        r = 0.16 - abs(i - 1.5) * 0.02
+        parts.append(assign(ico("segment", r, (0, y, r * 0.9), scale=(1.0, 0.85, 0.85), sub=2),
+                            P["flesh"] if i % 2 == 0 else P["flesh_dark"]))
+        parts.append(assign(cube("rust_plate", 1.0, (0, y, r * 1.7), scale=(r * 1.5, 0.09, 0.04),
+                                 rot=(0.2, 0, 0)), P["rust"]))
+        for s in (-1, 1):
+            parts.append(tube("stub_leg", [(s * r * 0.8, y, r * 0.5), (s * r * 1.25, y - 0.02, 0.02)],
+                              0.02, P["flesh_dark"], taper=False))
+    head = (0, -0.34, 0.16)
+    parts.append(assign(ico("head", 0.14, head, scale=(1.0, 0.9, 0.9), sub=2), P["flesh_dark"]))
+    for s in (-1, 1):
+        parts.append(tube("mandible", [(s * 0.07, -0.44, 0.12), (s * 0.1, -0.53, 0.1), (s * 0.03, -0.58, 0.09)],
+                          0.022, P["iron"]))
+    _eyes(parts, P, [(-0.06, -0.46, 0.21), (0.06, -0.46, 0.21)], 0.028)
+    join(parts, "rustgrub")
+    finish("rustgrub")
+
+
+def build_cart_golem():
+    reset()
+    P = ironroot_palette()
+    random.seed(77)
+    parts = []
+    # An ore cart that learned to stand: tub torso, rail-iron legs, firebox belly, wheel shoulders.
+    parts.append(assign(cube("tub_torso", 1.0, (0, 0, 0.78), scale=(0.62, 0.5, 0.46), rot=(0.1, 0, 0)), P["rust"]))
+    parts.append(assign(cube("tub_rim", 1.0, (0, 0.02, 1.02), scale=(0.68, 0.56, 0.06), rot=(0.1, 0, 0)), P["iron"]))
+    parts.append(assign(cube("firebox", 1.0, (0, -0.26, 0.68), scale=(0.3, 0.06, 0.2)), P["iron"]))
+    parts.append(assign(cube("fire_grate", 1.0, (0, -0.29, 0.68), scale=(0.22, 0.02, 0.12)), P["glow"]))
+    for i in range(5):
+        parts.append(rock_chunk("ore_heap", 0.12, (random.uniform(-0.2, 0.2), random.uniform(-0.1, 0.18), 1.08),
+                                P["ore"] if i == 2 else P["rock_dark"], 900 + i))
+    # Head: a miner's lamp in an iron hood.
+    parts.append(assign(cube("hood", 1.0, (0, -0.12, 1.2), scale=(0.24, 0.2, 0.18)), P["iron"]))
+    parts.append(assign(cyl("head_lamp", 0.06, 0.05, (0, -0.23, 1.22), verts=12, rot=(math.radians(90), 0, 0)), P["brass"]))
+    _eyes(parts, P, [(-0.07, -0.23, 1.14), (0.07, -0.23, 1.14)], 0.03)
+    for s in (-1, 1):
+        parts.append(assign(cyl("wheel_shoulder", 0.17, 0.07, (s * 0.36, -0.02, 0.95), verts=16,
+                                rot=(0, math.radians(90), 0)), P["iron"]))
+        parts.append(tube("arm", [(s * 0.38, -0.02, 0.9), (s * 0.46, -0.12, 0.6), (s * 0.44, -0.24, 0.38)],
+                          0.06, P["rail"], taper=False))
+        parts.append(assign(cube("ram_fist", 1.0, (s * 0.44, -0.27, 0.32), scale=(0.16, 0.18, 0.16)), P["iron"]))
+        parts.append(tube("leg", [(s * 0.2, 0.05, 0.56), (s * 0.24, 0.0, 0.3), (s * 0.22, 0.02, 0.04)],
+                          0.07, P["rail"], taper=False))
+        parts.append(assign(cube("foot", 1.0, (s * 0.22, -0.05, 0.04), scale=(0.18, 0.28, 0.08)), P["iron"]))
+    join(parts, "cart_golem")
+    finish("cart_golem")
+
+
+def build_tunneler():
+    reset()
+    P = ironroot_palette()
+    parts = []
+    # Hunched mole-miner: canvas coat, a lamp helm, digging claws and a pick across the back.
+    parts.append(assign(ico("coat", 0.24, (0, 0.04, 0.42), scale=(0.95, 0.85, 1.2), sub=2), P["canvas"]))
+    parts.append(assign(ico("snout_head", 0.15, (0, -0.16, 0.7), scale=(0.9, 1.2, 0.85), sub=2), P["flesh_dark"]))
+    parts.append(assign(ico("nose", 0.045, (0, -0.33, 0.68), sub=1), P["flesh"]))
+    parts.append(assign(sphere("helm", 0.14, (0, -0.12, 0.8), scale=(1.05, 1.05, 0.6), seg=14, rings=8), P["brass"]))
+    parts.append(assign(cyl("helm_lamp", 0.045, 0.05, (0, -0.26, 0.83), verts=10, rot=(math.radians(80), 0, 0)), P["glow"]))
+    _eyes(parts, P, [(-0.06, -0.28, 0.72), (0.06, -0.28, 0.72)], 0.022)
+    for s in (-1, 1):
+        parts.append(tube("arm", [(s * 0.18, -0.02, 0.52), (s * 0.28, -0.14, 0.36), (s * 0.24, -0.26, 0.26)],
+                          0.045, P["canvas"], taper=False))
+        for k in range(3):
+            parts.append(tube("claw", [(s * 0.24, -0.26, 0.26), (s * (0.22 + k * 0.03), -0.36, 0.2 - k * 0.02)],
+                              0.014, P["iron"]))
+        parts.append(tube("leg", [(s * 0.12, 0.05, 0.22), (s * 0.14, 0.0, 0.03)], 0.05, P["flesh_dark"], taper=False))
+    parts.append(tube("pick_haft", [(-0.26, 0.24, 0.2), (0.24, 0.22, 0.78)], 0.02, P["timber"], taper=False))
+    parts.append(tube("pick_head", [(0.1, 0.24, 0.86), (0.24, 0.22, 0.78), (0.4, 0.2, 0.66)], 0.025, P["iron"]))
+    join(parts, "tunneler")
+    finish("tunneler")
+
+
+def build_foundry_heart():
+    reset()
+    P = ironroot_palette()
+    parts = []
+    # A squat blast furnace fused into the rock: stone skirt, riveted iron belly, a glowing maw.
+    for i in range(8):
+        a = i / 8 * 6.283
+        parts.append(rock_chunk("root_rock", 0.2, (0.42 * math.cos(a), 0.42 * math.sin(a), 0.1),
+                                P["rock"] if i % 2 else P["rock_dark"], 1000 + i))
+    parts.append(assign(cyl("furnace_body", 0.4, 0.8, (0, 0, 0.55), verts=12, r2=0.3), P["iron"]))
+    for z in (0.3, 0.55, 0.8):
+        parts.append(assign(cyl("hoop", 0.41 - (z - 0.3) * 0.2, 0.05, (0, 0, z), verts=12), P["rust"]))
+    parts.append(assign(cube("maw", 1.0, (0, -0.33, 0.5), scale=(0.3, 0.1, 0.22)), P["glow"]))
+    parts.append(assign(cube("maw_lip", 1.0, (0, -0.37, 0.38), scale=(0.36, 0.08, 0.05)), P["rust"]))
+    _eyes(parts, P, [(-0.12, -0.33, 0.78), (0.12, -0.33, 0.78)], 0.05)
+    parts.append(assign(cyl("chimney", 0.12, 0.5, (0.08, 0.05, 1.18), verts=10, r2=0.09), P["iron"]))
+    parts.append(assign(cyl("chimney_glow", 0.08, 0.03, (0.08, 0.05, 1.44), verts=10), P["glow"]))
+    for s in (-1, 1):
+        # Bellows arms with brass nozzles.
+        parts.append(assign(cube("bellows", 1.0, (s * 0.46, 0.05, 0.62), scale=(0.12, 0.3, 0.22), rot=(0, s * 0.3, 0)), P["canvas"]))
+        parts.append(assign(cyl("nozzle", 0.04, 0.2, (s * 0.38, -0.14, 0.58), verts=8, rot=(math.radians(80), 0, s * 0.4)), P["brass"]))
+        parts.append(tube("pipe", [(s * 0.3, 0.2, 0.9), (s * 0.5, 0.3, 1.0), (s * 0.56, 0.3, 0.3)], 0.045, P["rust"], taper=False))
+    join(parts, "foundry_heart")
+    finish("foundry_heart")
+
+
+def build_engine_of_rot():
+    reset()
+    P = ironroot_palette()
+    parts = []
+    # A mine winding-engine grown through with Blight. ~1.35m authored height.
+    parts.append(assign(cube("chassis", 1.0, (0, 0.05, 0.3), scale=(0.7, 0.9, 0.26)), P["iron"]))
+    for x in (-0.38, 0.38):
+        for y in (-0.3, 0.38):
+            parts.append(assign(cyl("drive_wheel", 0.2, 0.08, (x, y, 0.2), verts=18, rot=(0, math.radians(90), 0)), P["rust"]))
+    parts.append(assign(cyl("boiler", 0.3, 0.8, (0, 0.12, 0.66), verts=16, rot=(math.radians(90), 0, 0)), P["rust"]))
+    for y in (-0.15, 0.12, 0.4):
+        parts.append(assign(cyl("boiler_band", 0.315, 0.04, (0, y, 0.66), verts=16, rot=(math.radians(90), 0, 0)), P["iron"]))
+    parts.append(assign(cyl("smokestack", 0.1, 0.5, (0, 0.3, 1.08), verts=12, r2=0.14), P["iron"]))
+    parts.append(assign(cyl("stack_glow", 0.12, 0.03, (0, 0.3, 1.34), verts=12), P["glow"]))
+    # Face: a furnace door under a riveted brow, with a toothed cowcatcher jaw.
+    parts.append(assign(cyl("furnace_face", 0.24, 0.06, (0, -0.3, 0.66), verts=16, rot=(math.radians(90), 0, 0)), P["iron"]))
+    parts.append(assign(cube("mouth_grate", 1.0, (0, -0.34, 0.58), scale=(0.28, 0.03, 0.08)), P["glow"]))
+    parts.append(assign(cube("brow", 1.0, (0, -0.33, 0.8), scale=(0.44, 0.08, 0.06), rot=(0.25, 0, 0)), P["rust"]))
+    _eyes(parts, P, [(-0.1, -0.35, 0.72), (0.1, -0.35, 0.72)], 0.045)
+    for k in range(5):
+        x = -0.28 + k * 0.14
+        parts.append(assign(cyl("cowcatcher_tooth", 0.045, 0.22, (x, -0.52, 0.14), verts=4, r2=0.0,
+                                rot=(math.radians(-70), 0, 0)), P["rail"]))
+    # Blight grows through the seams.
+    random.seed(1200)
+    for i in range(6):
+        parts.append(assign(sphere("blight_bloom", 0.07, (random.uniform(-0.3, 0.3), random.uniform(0.0, 0.5), 0.92),
+                                   scale=(1, 1, 0.55), seg=10, rings=6), P["blight"]))
+    for s in (-1, 1):
+        parts.append(tube("blight_vine", [(s * 0.3, 0.45, 0.4), (s * 0.36, 0.3, 0.8), (s * 0.2, 0.1, 0.98)], 0.03, P["blight"]))
+    join(parts, "engine_of_rot_body")
+    # Piston arms rise and fall on each side: pivot at the boiler shoulder.
+    for side in (-1, 1):
+        arm = join([tube("piston_rod", [(side * 0.36, 0.0, 0.0), (side * 0.52, -0.2, -0.28), (side * 0.5, -0.36, -0.45)],
+                         0.05, P["rail"], taper=False),
+                    assign(cube("piston_head", 1.0, (side * 0.5, -0.38, -0.5), scale=(0.18, 0.2, 0.14)), P["iron"])],
+                   "piston_left" if side < 0 else "piston_right")
+        arm.location = Vector((0, 0.05, 0.8))
+        # The two pistons alternate strokes.
+        for frame, up in [(1, side > 0), (13, side < 0), (25, side > 0)]:
+            arm.rotation_euler.x = 0.18 if up else 0.0
+            arm.keyframe_insert("rotation_euler", frame=frame)
+        arm.animation_data.action.name = "piston_stroke"
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = 25
+    bpy.context.scene.frame_set(1)
+    finish("engine_of_rot")
+
+
 BUILDERS = {
     "hex": build_hex_tiles,
     "thicket": build_thicket,
@@ -1804,6 +2095,13 @@ BUILDERS = {
     "glass_mite": build_glass_mite,
     "lantern_hart": build_lantern_hart,
     "splintered_queen": build_splintered_queen,
+    "ironroot_tiles": build_ironroot_tiles,
+    "ironroot_props": build_ironroot_props,
+    "rustgrub": build_rustgrub,
+    "cart_golem": build_cart_golem,
+    "tunneler": build_tunneler,
+    "foundry_heart": build_foundry_heart,
+    "engine_of_rot": build_engine_of_rot,
 }
 
 

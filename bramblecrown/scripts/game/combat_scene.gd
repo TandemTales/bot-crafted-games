@@ -8,6 +8,7 @@ const COL_CLEAR := Color(0.95, 0.95, 0.8, 0.7)
 const COL_BURN := Color(1.0, 0.45, 0.15, 0.85)
 const COL_SPREAD := Color(0.78, 0.32, 1.0, 0.6)
 const COL_DANGER := Color(1.0, 0.25, 0.2, 0.75)
+const COL_COLLAPSE := Color(1.0, 0.6, 0.18, 0.7)
 const COL_HOVER := Color(1, 1, 1, 0.35)
 
 var c: CombatState
@@ -389,6 +390,8 @@ func _sync_plates() -> void:
 					icons.append({"kind": "attack", "n": int(prev["dmg"]), "hot": prev["hits"]})
 				"spread", "blight_self":
 					icons.append({"kind": "spread", "n": a.get("hexes", []).size()})
+				"collapse":
+					icons.append({"kind": "collapse", "n": a.get("hexes", []).size(), "hot": a.get("hexes", []).has(c.player["pos"])})
 				"summon":
 					icons.append({"kind": "summon"})
 				"ward":
@@ -420,6 +423,11 @@ func _refresh_board_overlays() -> void:
 			if a["t"] in ["spread", "blight_self"]:
 				for h in a.get("hexes", []):
 					ov[h] = [COL_SPREAD, true]
+			elif a["t"] == "collapse":
+				for h in a.get("hexes", []):
+					ov[h] = [COL_COLLAPSE, true]
+				if a.get("hexes", []).has(c.player["pos"]):
+					incoming += CombatState.COLLAPSE_DMG
 		var pv := c.enemy_preview(e)
 		var col := Color(1, 0.3, 0.24, 0.95) if pv["attack"] else Color(0.8, 0.45, 1.0, 0.95)
 		if not pv["path"].is_empty():
@@ -759,6 +767,8 @@ func _update_info() -> void:
 					lines.append("• Spread [color=#c48be8]Blight[/color] on %d marked hexes near you" % a.get("hexes", []).size())
 				"blight_self":
 					lines.append("• Rot %d marked hexes around itself" % a.get("hexes", []).size())
+				"collapse":
+					lines.append("• Cave-in: %d [color=#ffa040]amber[/color] hexes become rubble. Standing on one costs %d HP" % [a.get("hexes", []).size(), CombatState.COLLAPSE_DMG])
 				"summon":
 					lines.append("• Summon %s" % EnemyDB.ENEMIES[a["enemy"]]["name"])
 				"ward":
@@ -783,7 +793,11 @@ func _update_info() -> void:
 		"water":
 			lines.append("[color=#8fb8c0]Black water[/color]: impassable except to fliers.")
 		"stone":
-			lines.append("[color=#bbbbbb]Standing stone[/color]: blocks movement.")
+			lines.append("[color=#bbbbbb]%s[/color]: blocks movement." % ("Rubble" if board.theme.get("stone", "") == "hex_rubble" else "Standing stone"))
+	for e2 in c.enemies:
+		for a in e2["intent"].get("actions", []):
+			if a["t"] == "collapse" and a.get("hexes", []).has(h):
+				lines.append("[color=#ffa040]Cave-in[/color] (%s): becomes rubble this enemy turn; %d HP if you are standing here." % [e2["def"]["name"], CombatState.COLLAPSE_DMG])
 	match g:
 		"thicket":
 			lines.append("[color=#a6d86a]Thicket[/color]: enemies pay 2 Movement to enter.")
@@ -869,6 +883,16 @@ func _play_event(ev: Dictionary) -> void:
 				"cleanse":
 					Sfx.play("ward")
 			await _wait(0.28)
+		"collapse":
+			board.collapse_hexes(ev["hexes"])
+			Sfx.play("burn", 0.1, -2)
+			rig.shake(0.7)
+			await _wait(0.45)
+		"cave_in":
+			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.9, 0))
+			_float_text(sp, "Cave-in!", Color(1.0, 0.63, 0.25), 32, 1.1)
+			board.growth_burst(ev["pos"], "none")
+			rig.shake(0.8)
 		"damage":
 			var tgt = ev["target"]
 			var key = "player" if tgt is String else tgt

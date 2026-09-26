@@ -178,6 +178,9 @@ func _shrine() -> void:
 	elif theme_id == "glasswood":
 		_place("crystal_tree", Vector3(0, 0, -1.8), 20.0, 1.0)
 		_place("fallen_prism", _hex(Vector2i(1, -1)), 35.0, 0.85)
+	elif theme_id == "ironroot":
+		_place("timber_frame", Vector3(0, 0, -1.6), 0.0, 1.1)
+		_place("ore_spoil", _hex(Vector2i(1, -1)), 35.0, 1.1)
 	else:
 		_place("menhir", _hex(Vector2i(1, -1)), 20.0, 1.1)
 		_place("willow", _hex(Vector2i(-1, -1)) + Vector3(-0.4, 0, -0.4), 0.0, 1.3)
@@ -194,6 +197,8 @@ func _market() -> void:
 		_place("candles", _hex(Vector2i(1, 1)), 0.0, 1.1)
 	elif theme_id == "glasswood":
 		_place("glass_fern", _hex(Vector2i(1, 1)), 0.0, 1.0)
+	elif theme_id == "ironroot":
+		_place("ore_cart", _hex(Vector2i(1, 1)), 60.0, 1.0)
 	else:
 		_place("reeds", _hex(Vector2i(1, 1)), 0.0, 1.0)
 

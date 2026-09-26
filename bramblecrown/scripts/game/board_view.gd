@@ -19,6 +19,17 @@ void fragment() {
 const MODELS := "res://assets/models/%s.glb"
 ## Per-region look: tile models, surrounding props, and lighting.
 const THEMES := {
+	"ironroot": {
+		"plain": "hex_mine", "stone": "hex_rubble", "water": "hex_sump",
+		"outer": [["hex_mine", 0.7], ["hex_rubble", 0.3]],
+		"props": [["timber_frame", 0.10], ["ore_spoil", 0.26], ["ore_cart", 0.05], ["blight", 0.10]],
+		"tall": ["timber_frame"], "filler": "ore_spoil", "tall_scale": {"timber_frame": 1.0},
+		"bg": Color(0.05, 0.04, 0.035), "ambient": Color(0.5, 0.44, 0.4), "fog": Color(0.13, 0.09, 0.07),
+		"key": Color(1.0, 0.8, 0.58), "key_energy": 1.55, "rim": Color(0.35, 0.62, 0.58),
+		"pool": Color(0.04, 0.035, 0.03),
+		"water_color": Color(0.1, 0.09, 0.08),
+		"lamp_prop": "timber_frame",
+	},
 	"glasswood": {
 		"plain": "hex_glass", "stone": "hex_crystal", "water": "hex_mirror",
 		"outer": [["hex_glass", 0.85], ["hex_mirror", 0.15]],
@@ -338,13 +349,14 @@ func _build_surroundings(rng: RandomNumberGenerator) -> void:
 				var sc := rng.randf_range(0.8, 1.3) * float(theme["tall_scale"].get(prop, 1.0))
 				pn.scale = Vector3.ONE * sc
 				add_child(pn)
-				if prop == "candles" and theme.get("candle_lights", false) and _candle_lights < 6:
+				var lamp: bool = prop == theme.get("lamp_prop", "")
+				if ((prop == "candles" and theme.get("candle_lights", false)) or lamp) and _candle_lights < 6:
 					_candle_lights += 1
 					var cl := OmniLight3D.new()
 					cl.light_color = Color(1.0, 0.68, 0.32)
 					cl.light_energy = 1.6
 					cl.omni_range = 3.2
-					cl.position = pn.position + Vector3(0, 0.6, 0)
+					cl.position = pn.position + Vector3(0, 1.4 * sc if lamp else 0.6, 0)
 					add_child(cl)
 
 
@@ -479,6 +491,23 @@ func kill_unit(key) -> void:
 	tw.tween_property(n, "scale", Vector3(n.scale.x * 1.3, 0.05, n.scale.z * 1.3), 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tw.tween_property(n, "position:y", n.position.y - 0.2, 0.4)
 	tw.chain().tween_callback(n.queue_free)
+
+
+## Cave-in: the open tile is replaced by the theme's blocking tile, which drops from above.
+func collapse_hexes(hexes: Array) -> void:
+	for h in hexes:
+		_set_growth_node(h, "none", true)
+		if tiles.has(h):
+			tiles[h].queue_free()
+		var tile: Node3D = scene(theme["stone"]).instantiate()
+		tile.rotation.y = deg_to_rad(60.0 * (absi(hash(h)) % 6))
+		var rest := Hex.to_world(h, HEX_SIZE) + Vector3(0, float(tile_height.get(h, 0.0)), 0)
+		tile.position = rest + Vector3(0, 3.0, 0)
+		add_child(tile)
+		tiles[h] = tile
+		var tw := create_tween()
+		tw.tween_property(tile, "position", rest, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.tween_callback(func(): _burst(rest + Vector3(0, 0.2, 0), Color(0.62, 0.52, 0.42), 16))
 
 
 func growth_burst(h: Vector2i, g: String) -> void:

@@ -23,6 +23,8 @@ func _ready() -> void:
 	h.text = "The bells fall silent" if r.region_def().get("theme", "") == "cloister" else "The clearing is quiet again"
 	if r.region_def().get("theme", "") == "glasswood":
 		h.text = "The fractured light grows still"
+	elif r.region_def().get("theme", "") == "ironroot":
+		h.text = "The gallery settles into silence"
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 52)
 	h.add_theme_color_override("font_color", UITheme.GOLD)
