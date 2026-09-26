@@ -64,10 +64,12 @@ The export must produce `Bramblecrown.exe` with the embedded PCK (preset `embed_
 ## 6. Cloister and enemy-panel regression tour
 
 Run the exported executable with `--screenshot-tour <abs-out-dir> --shot-size WxH --tour-only run3`
-at 1280x720, 1920x1080, and 2560x1440. This produces 13 screenshots: six Cloister scenes,
-four sheets covering all ten cards and upgrades, and three targeting/summon images.
-The tour checks description clipping, keyboard selection, synthetic mouse hover/click through
-the viewport input path, legal card resolution, six enemy panels for overlap, and player-file hashes.
+at 1280x720, 1920x1080, and 2560x1440. This produces 14 screenshots: six Cloister scenes,
+four sheets covering all ten cards and upgrades, and four targeting/summon/resize images.
+3840x2160 also passed on the local workstation. The tour checks description and card-header
+clipping, inspector/hand bounds, keyboard selection, synthetic mouse hover/click through
+the viewport input path, legal card resolution, six enemy panels for overlap, programmatic native
+window resize, and player-file hashes.
 It exits nonzero on failure. Inspect the actual PNGs in addition to checking the log.
 
 The screenshot tour uses in-memory runs and suppresses run/profile/settings writes. It hashes

@@ -36,6 +36,53 @@
 - Next action: final art/framing touch-ups, re-export, three-resolution native checks, critic
   follow-up, and the final pushed handoff. No release or complete marker.
 
+### Final Run 3 result and handoff
+
+- **Delivered:** ten region-2 Wren cards and upgrades, original editable Blender illustrations,
+  readable Abbess mask/candle crown, numbered enemy targeting rail, rarity frames/labels,
+  enlarged pile cards, and a left-margin card inspector that leaves Wren and targeting hints clear.
+  Initial pile enlargement clipped headers because of the hand card's bottom pivot; fixed the
+  pivot and added whole-card bounds checks. The critic's later missing-cost report was withdrawn
+  after it re-opened the exact original images and confirmed all costs.
+- **Validation:** the strict full gate passed **1,055 / 0**. Subsequent presentation-only changes
+  passed combat scene smoke and packaged checks. The same final Windows x64 executable ran at
+  **1280x720, 1920x1080, 2560x1440, and 3840x2160**: 14 screenshots and zero assertions/errors
+  at each size, clean process exits, normal player-file hashes unchanged. The main runner inspected
+  every final image through contact sheets and opened representative card/targeting images at
+  full size. The independent critic inspected the final 720p images.
+- **Package:** `build/windows/Bramblecrown.exe`, embedded PCK.
+  SHA-256 `27FEE5A52334ED1ACEA86B12DCFE2A04827A6269986537646966F8452B9773E6`.
+  Renderer reported Vulkan 1.4.341 / NVIDIA GeForce RTX 2070 SUPER. This is one workstation,
+  not hardware coverage or a frame-time/performance certification.
+- **Evidence:** raw check logs, all four native tour logs, representative unmodified PNGs,
+  exact package hash, and critic scope in `evidence/2026-09-26/`. All 56 final PNGs remain
+  locally in `build/run3/checked-<resolution>/`. Evidence and Blender sources are excluded
+  from player downloads through their `.gdignore` files.
+- **Critic verdict:** static readability passes for gallery headers/descriptions, player/hint
+  visibility, left-margin inspection, and six-entry enemy association. Still loses to the
+  inspected official Into the Breach / Slay the Spire 2 references on battlefield visual noise,
+  map legend/presentation, and card-art quality. No whole-game/AAA or shipping-judge pass.
+- **Unverified:** human/full-region playthrough, audio listening, physical controller input,
+  focus/fullscreen behavior, ultrawide, sustained frame times, and player-path download/install.
+  Input and resize evidence here are automated native-window checks. The boss “enemy turn”
+  capture can occur after the animation and is not animation-timing proof.
+- **Release:** nothing uploaded or published this run. No `.aaa-complete`. Bramblecrown stays
+  active, and the forced release remains **2026-10-03 Pacific**.
+
+### Exact next action (Run 4)
+
+1. Implement Glasswood as the next substantial content unit: authored board identity, Blender
+   roster, at least six distinct encounters, Lantern Hart elite, and multi-phase Splintered Queen.
+   Integrate progression/save tests and import/package evidence before pushing.
+2. Add region-specific Cloister shrine choices and strengthen its visual hierarchy (calmer
+   peripheral glow/tiles; region-specific map composition). Preserve today's readability gains.
+3. Obtain a genuine keyboard/mouse full-region playthrough and listening/controller evidence
+   when available; do not substitute screenshot tours for those checks.
+
+Full contract still owed: regions 3–5, Cassia and Thatch with their own card sets, additional
+charms/events, Withering tiers, and broad quality/interaction acceptance. There are 34 Wren cards;
+each other walker still needs its planned 20-card minimum, irrespective of the overall 60-card floor.
+
 Started: 2026-09-24 (Pacific). Forced release date: Saturday 2026-10-03.
 
 ## Toolchain (verified 2026-09-24)

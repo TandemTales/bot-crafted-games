@@ -1,0 +1,172 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (3 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | DeckViewer[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (46 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | 08_map_r2_1280x720.png[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_abbess_1280x720.png[39m[0m
+[   4% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_choir_1280x720.png[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_knight_1280x720.png[39m[0m
+[   8% ] [90m[1m_update_scan_actions[22m | 09_r2_draw_pile_1280x720.png[39m[0m
+[  10% ] [90m[1m_update_scan_actions[22m | 10_r2_boss_enemy_turn_1280x720.png[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | 30_cards_base_0_1280x720.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | 30_cards_base_1_1280x720.png[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | 30_cards_up_0_1280x720.png[39m[0m
+[  19% ] [90m[1m_update_scan_actions[22m | 30_cards_up_1_1280x720.png[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | 31_rail_target_preview_1280x720.png[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | 32_rail_after_play_1280x720.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | 33_summoned_rail_1280x720.png[39m[0m
+[  27% ] [90m[1m_update_scan_actions[22m | 34_after_resize_1280x720.png[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | 08_map_r2_1920x1080.png[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_abbess_1920x1080.png[39m[0m
+[  34% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_choir_1920x1080.png[39m[0m
+[  36% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_knight_1920x1080.png[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | 09_r2_draw_pile_1920x1080.png[39m[0m
+[  40% ] [90m[1m_update_scan_actions[22m | 10_r2_boss_enemy_turn_1920x1080.png[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | 30_cards_base_0_1920x1080.png[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | 30_cards_base_1_1920x1080.png[39m[0m
+[  46% ] [90m[1m_update_scan_actions[22m | 30_cards_up_0_1920x1080.png[39m[0m
+[  48% ] [90m[1m_update_scan_actions[22m | 30_cards_up_1_1920x1080.png[39m[0m
+[  51% ] [90m[1m_update_scan_actions[22m | 31_rail_target_preview_1920x1080.png[39m[0m
+[  53% ] [90m[1m_update_scan_actions[22m | 32_rail_after_play_1920x1080.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | 33_summoned_rail_1920x1080.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | 34_after_resize_1920x1080.png[39m[0m
+[  59% ] [90m[1m_update_scan_actions[22m | 08_map_r2_2560x1440.png[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_abbess_2560x1440.png[39m[0m
+[  63% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_choir_2560x1440.png[39m[0m
+[  65% ] [90m[1m_update_scan_actions[22m | 09_r2_clo_knight_2560x1440.png[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | 09_r2_draw_pile_2560x1440.png[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | 10_r2_boss_enemy_turn_2560x1440.png[39m[0m
+[  72% ] [90m[1m_update_scan_actions[22m | 30_cards_base_0_2560x1440.png[39m[0m
+[  74% ] [90m[1m_update_scan_actions[22m | 30_cards_base_1_2560x1440.png[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | 30_cards_up_0_2560x1440.png[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | 30_cards_up_1_2560x1440.png[39m[0m
+[  80% ] [90m[1m_update_scan_actions[22m | 31_rail_target_preview_2560x1440.png[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | 32_rail_after_play_2560x1440.png[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | 33_summoned_rail_2560x1440.png[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | 34_after_resize_2560x1440.png[39m[0m
+[  89% ] [90m[1m_update_scan_actions[22m | inspect-720-0.png[39m[0m
+[  91% ] [90m[1m_update_scan_actions[22m | inspect-720-1.png[39m[0m
+[  93% ] [90m[1m_update_scan_actions[22m | inspect-720-2.png[39m[0m
+[  95% ] [90m[1m_update_scan_actions[22m | inspect-720-3.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (46 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   4% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   6% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   8% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  10% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  12% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  19% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  31% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  34% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  36% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  46% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  53% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  63% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  65% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  68% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  74% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  80% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  87% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  93% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  95% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | 30_cards_up_1_1920x1080.png[39m[0m
+[   2% ] [90m[1mreimport[22m | 31_rail_target_preview_1920x1080.png[39m[0m
+[   4% ] [90m[1mreimport[22m | 32_rail_after_play_1920x1080.png[39m[0m
+[   6% ] [90m[1mreimport[22m | 33_summoned_rail_1920x1080.png[39m[0m
+[   8% ] [90m[1mreimport[22m | 34_after_resize_1920x1080.png[39m[0m
+[  10% ] [90m[1mreimport[22m | 08_map_r2_2560x1440.png[39m[0m
+[  12% ] [90m[1mreimport[22m | 09_r2_clo_abbess_2560x1440.png[39m[0m
+[  14% ] [90m[1mreimport[22m | 09_r2_clo_choir_2560x1440.png[39m[0m
+[  17% ] [90m[1mreimport[22m | 09_r2_clo_knight_2560x1440.png[39m[0m
+[  19% ] [90m[1mreimport[22m | 09_r2_draw_pile_2560x1440.png[39m[0m
+[  21% ] [90m[1mreimport[22m | 10_r2_boss_enemy_turn_2560x1440.png[39m[0m
+[  23% ] [90m[1mreimport[22m | 30_cards_base_0_2560x1440.png[39m[0m
+[  25% ] [90m[1mreimport[22m | 30_cards_base_1_2560x1440.png[39m[0m
+[  27% ] [90m[1mreimport[22m | 30_cards_up_0_2560x1440.png[39m[0m
+[  29% ] [90m[1mreimport[22m | 30_cards_up_1_2560x1440.png[39m[0m
+[  31% ] [90m[1mreimport[22m | 31_rail_target_preview_2560x1440.png[39m[0m
+[  34% ] [90m[1mreimport[22m | 32_rail_after_play_2560x1440.png[39m[0m
+[  36% ] [90m[1mreimport[22m | 33_summoned_rail_2560x1440.png[39m[0m
+[  38% ] [90m[1mreimport[22m | 34_after_resize_2560x1440.png[39m[0m
+[  40% ] [90m[1mreimport[22m | inspect-720-0.png[39m[0m
+[  42% ] [90m[1mreimport[22m | inspect-720-1.png[39m[0m
+[  44% ] [90m[1mreimport[22m | inspect-720-2.png[39m[0m
+[  46% ] [90m[1mreimport[22m | inspect-720-3.png[39m[0m
+[  48% ] [90m[1mreimport[22m | 08_map_r2_1280x720.png[39m[0m
+[  51% ] [90m[1mreimport[22m | 09_r2_clo_abbess_1280x720.png[39m[0m
+[  53% ] [90m[1mreimport[22m | 09_r2_clo_choir_1280x720.png[39m[0m
+[  55% ] [90m[1mreimport[22m | 09_r2_clo_knight_1280x720.png[39m[0m
+[  57% ] [90m[1mreimport[22m | 09_r2_draw_pile_1280x720.png[39m[0m
+[  59% ] [90m[1mreimport[22m | 10_r2_boss_enemy_turn_1280x720.png[39m[0m
+[  61% ] [90m[1mreimport[22m | 30_cards_base_0_1280x720.png[39m[0m
+[  63% ] [90m[1mreimport[22m | 30_cards_base_1_1280x720.png[39m[0m
+[  65% ] [90m[1mreimport[22m | 30_cards_up_0_1280x720.png[39m[0m
+[  68% ] [90m[1mreimport[22m | 30_cards_up_1_1280x720.png[39m[0m
+[  70% ] [90m[1mreimport[22m | 31_rail_target_preview_1280x720.png[39m[0m
+[  72% ] [90m[1mreimport[22m | 32_rail_after_play_1280x720.png[39m[0m
+[  74% ] [90m[1mreimport[22m | 33_summoned_rail_1280x720.png[39m[0m
+[  76% ] [90m[1mreimport[22m | 34_after_resize_1280x720.png[39m[0m
+[  78% ] [90m[1mreimport[22m | 08_map_r2_1920x1080.png[39m[0m
+[  80% ] [90m[1mreimport[22m | 09_r2_clo_abbess_1920x1080.png[39m[0m
+[  82% ] [90m[1mreimport[22m | 09_r2_clo_choir_1920x1080.png[39m[0m
+[  85% ] [90m[1mreimport[22m | 09_r2_clo_knight_1920x1080.png[39m[0m
+[  87% ] [90m[1mreimport[22m | 09_r2_draw_pile_1920x1080.png[39m[0m
+[  89% ] [90m[1mreimport[22m | 10_r2_boss_enemy_turn_1920x1080.png[39m[0m
+[  91% ] [90m[1mreimport[22m | 30_cards_base_0_1920x1080.png[39m[0m
+[  93% ] [90m[1mreimport[22m | 30_cards_base_1_1920x1080.png[39m[0m
+[  95% ] [90m[1mreimport[22m | 30_cards_up_0_1920x1080.png[39m[0m
+[  97% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (46 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m

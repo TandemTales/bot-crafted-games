@@ -111,10 +111,12 @@ func _check(ok: bool, message: String) -> void:
 
 
 func _finish() -> void:
+	var saves_unchanged := true
 	for path in save_hashes:
 		var now := FileAccess.get_sha256(path) if FileAccess.file_exists(path) else ""
+		saves_unchanged = saves_unchanged and now == save_hashes[path]
 		_check(now == save_hashes[path], "normal player save/profile/settings unchanged: " + path)
-	print("[tour] completed: %d screenshots, %d failures; normal saves unchanged=%s" % [_shots.size(), failures, failures == 0])
+	print("[tour] completed: %d screenshots, %d failures; normal saves unchanged=%s" % [_shots.size(), failures, saves_unchanged])
 	get_tree().quit(0 if failures == 0 else 1)
 
 
@@ -130,6 +132,7 @@ func _cloister_cards() -> void:
 			for cv in dv.find_children("*", "Control", true, false):
 				if cv is CardView:
 					_check(cv._desc.get_content_height() <= cv._desc.size.y + 1, "card rules fit: " + cv.def["name"])
+					_check(cv.get_global_transform().origin.y >= cv.get_parent().get_global_rect().position.y - 1, "card header stays within its allocated row: " + cv.def["name"])
 			await _shot("30_cards_%s_%d" % ["up" if up else "base", page])
 			dv.queue_free()
 			await _wait(0.2)
@@ -168,6 +171,11 @@ func _rail_input() -> void:
 	get_viewport().push_input(motion, true)
 	await _wait(0.2)
 	_check(sc.hover_hex == e["pos"], "enemy rail hover selects matching hex")
+	_check(is_instance_valid(sc.card_inspector), "selected card has a separate inspector")
+	if is_instance_valid(sc.card_inspector):
+		_check(sc.card_inspector.get_global_rect().end.x < 350, "card inspector stays in left margin")
+	for cv in sc.card_views:
+		_check(cv.get_global_rect().position.y > sc.hint_label.get_global_rect().end.y, "hand card does not cover targeting instruction")
 	await _shot("31_rail_target_preview")
 	var hp := int(e["hp"])
 	for down in [true, false]:
@@ -191,6 +199,7 @@ func _rail_input() -> void:
 		sc.board.add_enemy(add, false)
 	sc._refresh_all()
 	await _wait(0.5)
+	_check(sc.plates.size() == 6, "stress scenario contains six live enemies")
 	var rects: Array[Rect2] = []
 	for plate in sc.plates.values():
 		var rect := Rect2(plate.position, plate.size)
@@ -199,6 +208,12 @@ func _rail_input() -> void:
 			_check(not rect.intersects(other), "enemy rail plates do not overlap")
 		rects.append(rect)
 	await _shot("33_summoned_rail")
+	get_window().size = Vector2i(1600, 900) if res != Vector2i(1600, 900) else Vector2i(1280, 720)
+	await _wait(0.4)
+	get_window().size = res
+	await _wait(0.5)
+	_check(get_window().size == res, "native window returns to requested size after resize")
+	await _shot("34_after_resize")
 	Game.clear_run()
 
 

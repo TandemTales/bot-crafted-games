@@ -87,7 +87,16 @@ func _ready() -> void:
 			Sfx.play("card")
 			chosen.emit(idx)
 			queue_free())
-		grid.add_child(cv)
+		if mode == "pile":
+			var holder := Control.new()
+			holder.custom_minimum_size = CardView.SIZE * 1.35
+			holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			grid.add_child(holder)
+			holder.add_child(cv)
+			cv.pivot_offset = Vector2.ZERO
+			cv.scale = Vector2.ONE * 1.35
+		else:
+			grid.add_child(cv)
 	var close := Button.new()
 	close.text = "Close" if mode in ["view", "pile"] else "Cancel"
 	close.custom_minimum_size = Vector2(240, 56)

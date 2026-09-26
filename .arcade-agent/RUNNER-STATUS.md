@@ -93,3 +93,19 @@ Proceeding to STEP 2 (new game).
 New game started: **bramblecrown** (see `bramblecrown/PROGRESS.md`). There is a playable region-1 build with an exported
 Windows exe, verified at 3 resolutions through the packaged screenshot tour. A draft itch.io page
 and Windows upload now exist; public publication and a player-facing download check remain pending.
+
+## 2026-09-26 (Pacific) — Run 3 result
+
+Active game remains Bramblecrown; work is on documented `dev`. First Saturday (age 2 days),
+so forced release is still 2026-10-03. No upload/publication occurred this run.
+
+Added ten Cloister cards (34 Wren cards total), Blender source illustrations, enemy targeting
+rail, readable boss framing, rarity presentation, and unobstructed card inspection. Full
+rule/import/scene gate: 1,055 passed, 0 failed. Final native Windows package passed automated
+input, resize, save-preservation and screenshot checks at 720p/1080p/1440p/4K. Retained raw
+evidence and the exact package hash in `bramblecrown/evidence/2026-09-26/`.
+
+Independent static readability review passes the revised interfaces; art/map/overall AAA
+gates remain unmet. Campaign content and human play/audio/controller validation remain
+incomplete. Next action: Glasswood content, then region-specific events and further art work.
+Read the latest Run 3 section at the top of `bramblecrown/PROGRESS.md` for exact scope and limits.

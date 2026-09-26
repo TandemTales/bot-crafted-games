@@ -20,6 +20,7 @@ var plates := {}
 var selected_uid := -1
 var hover_hex: Variant = null
 var hover_card: CardView = null
+var card_inspector: CardView
 var busy := false
 var ended := false
 var _pad_cursor := Vector2i.ZERO
@@ -199,7 +200,7 @@ func _build_ui() -> void:
 	hint_label.scroll_active = false
 	hint_label.fit_content = true
 	hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UITheme.anchor(hint_label, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -348), Vector2(1000, 36))
+	UITheme.anchor(hint_label, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -322), Vector2(1000, 36))
 	hint_label.add_theme_font_size_override("normal_font_size", 22)
 	hint_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	hint_label.add_theme_constant_override("outline_size", 6)
@@ -508,6 +509,7 @@ func _sync_hand() -> void:
 
 
 func _layout_hand(delta: float) -> void:
+	_update_card_inspector()
 	var n := card_views.size()
 	if n == 0:
 		return
@@ -525,9 +527,7 @@ func _layout_hand(delta: float) -> void:
 		var rot := t * 0.035
 		var sc := 1.0
 		if cv == hover_card or cv.inst["uid"] == selected_uid:
-			y = -CardView.SIZE.y - 70
 			rot = 0.0
-			sc = 1.22
 			cv.z_index = 10
 		else:
 			cv.z_index = i
@@ -535,6 +535,34 @@ func _layout_hand(delta: float) -> void:
 		cv.position = cv.position.lerp(Vector2(x, y), k)
 		cv.rotation = lerpf(cv.rotation, rot, k)
 		cv.scale = cv.scale.lerp(Vector2.ONE * sc, k)
+
+
+func _update_card_inspector() -> void:
+	var inspect: CardView = null
+	if is_instance_valid(hover_card) and card_views.has(hover_card):
+		inspect = hover_card
+	else:
+		hover_card = null
+	if inspect == null:
+		for cv in card_views:
+			if cv.inst["uid"] == selected_uid:
+				inspect = cv
+				break
+	if inspect == null or busy or pause_layer.visible:
+		if is_instance_valid(card_inspector):
+			card_inspector.queue_free()
+			card_inspector = null
+		return
+	if is_instance_valid(card_inspector) and card_inspector.inst == inspect.inst:
+		return
+	if is_instance_valid(card_inspector):
+		card_inspector.queue_free()
+	card_inspector = CardView.new().setup(inspect.def, inspect.inst)
+	card_inspector.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_inspector.pivot_offset = Vector2.ZERO
+	card_inspector.position = Vector2(24, 210)
+	card_inspector.scale = Vector2.ONE * 1.28
+	float_root.add_child(card_inspector)
 
 
 func _on_card_hovered(cv: CardView, on: bool) -> void:
