@@ -1,5 +1,15 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-26 — Run 3 checkpoint (Pacific Saturday, age 2 days)
+
+- STOP absent. Clean `dev` at `9a4220b`, confirmed equal to remote `dev` before changes.
+- Installed tools rechecked: Godot `4.7.2.stable.official.ed1daf0bf`, Blender `5.1.2`; matching `4.7.2.stable` Windows x64 release template present. Existing preset: `Windows Desktop`, embedded PCK.
+- Butler authenticated status still reports `shoejunk/bramblecrown:windows`, processed build `#2014268`, version `2026.09.24-10aa561`. Recorded page state is Draft; visibility has not been rechecked this run.
+- First Saturday, below the nine-day threshold: polish night. Forced release remains 2026-10-03; outstanding critic failures also prevent an early release.
+- Bounded plan: (1) a non-overlapping enemy plate rail with clear unit association and readable Abbess, (2) ten authored Cloister cards with ward/daze counterplay, original Blender illustrations, and rarity presentation. Preserve the full five-region SPEC contract.
+- Verification planned: focused rules and save/preview regressions, installed-Godot import and complete suite, Blender reopen/import, Windows export and native screenshot checks at three resolutions, then independent harsh critique and a pushed handoff. Human play, audio listening, and physical controller coverage must remain explicitly unverified unless performed.
+- Next action: implement and verify enemy readability first.
+
 Started: 2026-09-24 (Pacific). Forced release date: Saturday 2026-10-03.
 
 ## Toolchain (verified 2026-09-24)
