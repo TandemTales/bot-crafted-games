@@ -1,5 +1,21 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-26 — Run 4 checkpoint (Pacific Saturday, age 2 days)
+
+- STOP absent; clean documented `dev` at `977a7d9`, equal to remote `dev`.
+- Installed Godot `4.7.2.stable.official.ed1daf0bf`, Blender `5.1.2`; matching
+  `4.7.2.stable/windows_release_x86_64.exe` and embedded-PCK `Windows Desktop` preset verified.
+- Authenticated Butler confirms `shoejunk/bramblecrown:windows`, processed build `#2014268`,
+  version `2026.09.24-10aa561`. Page visibility is not rechecked; last recorded state is Draft.
+- Polish night: release is not due until 2026-10-03 Pacific. No early-release quality pass.
+- Bounded scope: Glasswood roster and eight authored encounters; original Blender board/roster
+  assets; progression, save/resume and packaged UI verification. Preserve the full SPEC contract.
+- Main runner owns integration and Git. Separate content collaborators each own exactly one
+  SPEC-listed file: `enemy_db.gd` and `encounter_db.gd`. Independent critic edits no files.
+- Next action: implement Glasswood, run installed-engine import/rules, reopen representative
+  Blender source, export Windows and inspect native captures at 720p/1080p/1440p.
+
+
 ## 2026-09-26 — Run 3 checkpoint (Pacific Saturday, age 2 days)
 
 - STOP absent. Clean `dev` at `9a4220b`, confirmed equal to remote `dev` before changes.
