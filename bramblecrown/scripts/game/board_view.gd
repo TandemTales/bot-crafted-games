@@ -20,7 +20,7 @@ const MODELS := "res://assets/models/%s.glb"
 ## Per-region look: tile models, surrounding props, and lighting.
 const THEMES := {
 	"ironroot": {
-		"plain": "hex_mine", "stone": "hex_rubble", "water": "hex_sump",
+		"plain": "hex_mine", "stone": "hex_rubble", "water": "hex_sump", "rail": "hex_mine_rail",
 		"outer": [["hex_mine", 0.7], ["hex_rubble", 0.3]],
 		"props": [["timber_frame", 0.10], ["ore_spoil", 0.26], ["ore_cart", 0.05], ["blight", 0.10]],
 		"tall": ["timber_frame"], "filler": "ore_spoil", "tall_scale": {"timber_frame": 1.0},
@@ -67,7 +67,7 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform float pulse = 0.0;
 void fragment() {
 	float edge = smoothstep(0.55, 1.0, UV.x);
-	float p = 1.0 - pulse * (0.5 + 0.5 * sin(TIME * 5.0));
+	float p = 1.0 - pulse * 0.4 * (0.5 + 0.5 * sin(TIME * 5.0));  // never below 60%
 	ALBEDO = tint.rgb;
 	ALPHA = tint.a * (0.18 + 0.82 * edge) * p;
 }
@@ -179,11 +179,14 @@ func build(c: CombatState, region_seed: int = 1, theme_id: String = "marsh") -> 
 	rng.seed = region_seed
 	for h in c.terrain:
 		var t: String = c.terrain[h]
-		var tile: Node3D = scene(theme["water"] if t == "water" else (theme["stone"] if t == "stone" else theme["plain"])).instantiate()
+		var on_rail: bool = t == "plain" and theme.has("rail") and h.y == int(c.encounter.get("rail_row", 0))
+		var tile: Node3D = scene(theme["rail"] if on_rail else (theme["water"] if t == "water" else (theme["stone"] if t == "stone" else theme["plain"]))).instantiate()
 		var hgt := rng.randf_range(-0.03, 0.04) if t != "water" else -0.0
 		tile_height[h] = hgt if t != "water" else -0.25
 		tile.position = Hex.to_world(h, HEX_SIZE) + Vector3(0, hgt, 0)
 		tile.rotation.y = deg_to_rad(60.0 * rng.randi_range(0, 5))
+		if on_rail:
+			tile.rotation.y = PI * rng.randi_range(0, 1)  # rails run east-west and join neighbours
 		add_child(tile)
 		tiles[h] = tile
 		if t == "water":

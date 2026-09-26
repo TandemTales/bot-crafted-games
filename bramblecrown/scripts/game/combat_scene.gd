@@ -59,7 +59,7 @@ func _ready() -> void:
 	BoardView.make_environment(self, theme_id)
 	board = BoardView.new()
 	add_child(board)
-	board.build(c, Game.run.seed_value + Game.run.floor_num, theme_id)
+	board.build(c, Game.run.seed_value + Game.run.floor_num + hash(String(c.encounter.get("id", ""))) % 997, theme_id)
 	rig = CameraRig.new()
 	add_child(rig)
 	rig.frame_radius(c.radius)

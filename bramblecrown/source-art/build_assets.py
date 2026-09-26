@@ -1792,11 +1792,13 @@ def ironroot_palette():
         "ore": mat("verdigris_ore", (0.16, 0.52, 0.44), 0.35, metal=0.4),
         "water": mat("rust_sump", (0.045, 0.05, 0.05), 0.06, metal=0.35),
         "scum": mat("rust_scum", (0.42, 0.18, 0.06), 0.7),
-        "flesh": mat("grub_flesh", (0.62, 0.46, 0.36), 0.62),
+        "flesh": mat("grub_flesh", (0.78, 0.56, 0.42), 0.55),
         "flesh_dark": mat("grub_fold", (0.36, 0.22, 0.17), 0.7),
         "canvas": mat("miners_canvas", (0.55, 0.47, 0.3), 0.9),
         "brass": mat("tarnished_brass", (0.55, 0.40, 0.16), 0.38, metal=0.8),
         "blight": mat("iron_blight", (0.30, 0.10, 0.36), 0.7),
+        "brick": mat("kiln_brick", (0.42, 0.17, 0.11), 0.88),
+        "brick_dark": mat("kiln_brick_dark", (0.24, 0.1, 0.07), 0.9),
         "eye": mat("furnace_eye", (1.0, 0.55, 0.18), 0.4, emit=(1.0, 0.42, 0.08), emit_strength=0.8),
         "glow": mat("furnace_glow", (1.0, 0.36, 0.06), 0.5, emit=(1.0, 0.35, 0.05), emit_strength=1.2),
     }
@@ -1809,16 +1811,23 @@ def rock_chunk(name, r, loc, material, seed, squash=0.7):
     return assign(o, material)
 
 
-def ironroot_floor(P, seed):
+def ironroot_floor(P, seed, rails=False):
     random.seed(seed)
     parts = [assign(hex_prism("bedrock", 0.98, 0.94, -1.0, 0), P["earth"]),
              assign(hex_prism("packed_spoil", 0.98, 0.09, -0.07, 0.025), P["floor"])]
-    # Two rails with sleepers cross every tile edge-to-edge so the rails join across the board.
-    for x in (-0.19, 0.19):
-        parts.append(assign(cube("rail", 1.0, (x, 0, 0.045), scale=(0.035, 1.62, 0.03)), P["rail"]))
-    for y in (-0.6, -0.2, 0.2, 0.6):
-        parts.append(assign(cube("sleeper", 1.0, (0, y, 0.022), scale=(0.62, 0.11, 0.03),
-                                 rot=(0, 0, random.uniform(-0.08, 0.08))), P["timber_dark"]))
+    if rails:
+        # Rails run edge-to-edge along X (east-west in Godot) so neighbouring rail tiles join.
+        for y in (-0.19, 0.19):
+            parts.append(assign(cube("rail", 1.0, (0, y, 0.045), scale=(1.7, 0.035, 0.03)), P["rail"]))
+        for x in (-0.64, -0.21, 0.21, 0.64):
+            parts.append(assign(cube("sleeper", 1.0, (x, 0, 0.022), scale=(0.11, 0.62, 0.03),
+                                     rot=(0, 0, random.uniform(-0.08, 0.08))), P["timber_dark"]))
+    else:
+        # Worn plank walkway fragments and spoil ridges keep open ground from reading as flat.
+        for i in range(2):
+            a = random.uniform(0, 6.28)
+            parts.append(assign(cube("loose_plank", 1.0, (0.35 * math.cos(a), 0.35 * math.sin(a), 0.03),
+                                     scale=(0.42, 0.1, 0.025), rot=(0, 0, a + 1.2)), P["timber_dark"]))
     for i in range(7):
         a = random.uniform(0, 6.28)
         d = random.uniform(0.42, 0.8)
@@ -1831,7 +1840,7 @@ def ironroot_floor(P, seed):
 
 
 def build_ironroot_tiles():
-    for name in ("hex_mine", "hex_rubble", "hex_sump"):
+    for name in ("hex_mine", "hex_mine_rail", "hex_rubble", "hex_sump"):
         reset()
         P = ironroot_palette()
         if name == "hex_sump":
@@ -1848,7 +1857,7 @@ def build_ironroot_tiles():
                 parts.append(assign(ico("scum", 0.12, (0.78 * math.cos(t), 0.78 * math.sin(t), -0.2),
                                         scale=(1.6, 0.7, 0.12), sub=1), P["scum"]))
         else:
-            parts = ironroot_floor(P, 11 if name == "hex_mine" else 23)
+            parts = ironroot_floor(P, {"hex_mine": 11, "hex_mine_rail": 17}.get(name, 23), rails=name == "hex_mine_rail")
             if name == "hex_rubble":
                 # A cave-in: heaped rock under a snapped roof prop. Tall enough to read as a wall.
                 for i, (x, y, r, z) in enumerate([(0, 0.05, 0.5, 0.22), (-0.4, -0.25, 0.32, 0.14),
@@ -1994,24 +2003,26 @@ def build_foundry_heart():
     reset()
     P = ironroot_palette()
     parts = []
-    # A squat blast furnace fused into the rock: stone skirt, riveted iron belly, a glowing maw.
+    # A wide, squat brick crucible fused into the rock: low and broad, with a molten bowl on top
+    # and a huge glowing maw, so it never shares the Engine's tall boiler-and-stack silhouette.
     for i in range(8):
         a = i / 8 * 6.283
-        parts.append(rock_chunk("root_rock", 0.2, (0.42 * math.cos(a), 0.42 * math.sin(a), 0.1),
+        parts.append(rock_chunk("root_rock", 0.2, (0.5 * math.cos(a), 0.5 * math.sin(a), 0.1),
                                 P["rock"] if i % 2 else P["rock_dark"], 1000 + i))
-    parts.append(assign(cyl("furnace_body", 0.4, 0.8, (0, 0, 0.55), verts=12, r2=0.3), P["iron"]))
-    for z in (0.3, 0.55, 0.8):
-        parts.append(assign(cyl("hoop", 0.41 - (z - 0.3) * 0.2, 0.05, (0, 0, z), verts=12), P["rust"]))
-    parts.append(assign(cube("maw", 1.0, (0, -0.33, 0.5), scale=(0.3, 0.1, 0.22)), P["glow"]))
-    parts.append(assign(cube("maw_lip", 1.0, (0, -0.37, 0.38), scale=(0.36, 0.08, 0.05)), P["rust"]))
-    _eyes(parts, P, [(-0.12, -0.33, 0.78), (0.12, -0.33, 0.78)], 0.05)
-    parts.append(assign(cyl("chimney", 0.12, 0.5, (0.08, 0.05, 1.18), verts=10, r2=0.09), P["iron"]))
-    parts.append(assign(cyl("chimney_glow", 0.08, 0.03, (0.08, 0.05, 1.44), verts=10), P["glow"]))
+    parts.append(assign(cyl("crucible_body", 0.5, 0.62, (0, 0, 0.42), verts=10, r2=0.58), P["brick"]))
+    for z in (0.2, 0.62):
+        parts.append(assign(cyl("brick_course", 0.53 + (z - 0.2) * 0.12, 0.06, (0, 0, z), verts=10), P["brick_dark"]))
+    parts.append(assign(cyl("rim", 0.6, 0.08, (0, 0, 0.75), verts=12), P["iron"]))
+    parts.append(assign(cyl("molten_bowl", 0.5, 0.03, (0, 0, 0.78), verts=16), P["glow"]))
+    parts.append(assign(cube("maw", 1.0, (0, -0.46, 0.36), scale=(0.44, 0.12, 0.26)), P["glow"]))
+    parts.append(assign(cube("maw_lip", 1.0, (0, -0.52, 0.22), scale=(0.5, 0.1, 0.06)), P["iron"]))
+    _eyes(parts, P, [(-0.17, -0.5, 0.58), (0.17, -0.5, 0.58)], 0.06)
+    # Pouring lip facing the player: a tongue of slag.
+    parts.append(assign(cube("pour_spout", 1.0, (0.36, -0.36, 0.72), scale=(0.16, 0.26, 0.06), rot=(0.3, 0, 0.6)), P["iron"]))
     for s in (-1, 1):
         # Bellows arms with brass nozzles.
-        parts.append(assign(cube("bellows", 1.0, (s * 0.46, 0.05, 0.62), scale=(0.12, 0.3, 0.22), rot=(0, s * 0.3, 0)), P["canvas"]))
-        parts.append(assign(cyl("nozzle", 0.04, 0.2, (s * 0.38, -0.14, 0.58), verts=8, rot=(math.radians(80), 0, s * 0.4)), P["brass"]))
-        parts.append(tube("pipe", [(s * 0.3, 0.2, 0.9), (s * 0.5, 0.3, 1.0), (s * 0.56, 0.3, 0.3)], 0.045, P["rust"], taper=False))
+        parts.append(assign(cube("bellows", 1.0, (s * 0.66, 0.05, 0.42), scale=(0.14, 0.34, 0.24), rot=(0, s * 0.3, 0)), P["canvas"]))
+        parts.append(assign(cyl("nozzle", 0.045, 0.22, (s * 0.56, -0.14, 0.4), verts=8, rot=(math.radians(80), 0, s * 0.4)), P["brass"]))
     join(parts, "foundry_heart")
     finish("foundry_heart")
 

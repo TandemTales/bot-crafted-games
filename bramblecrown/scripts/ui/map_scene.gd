@@ -89,12 +89,13 @@ func _draw() -> void:
 					draw_colored_polygon(PackedVector2Array([root + Vector2(-9, 0), tip, root + Vector2(9, -5)]), ink)
 					draw_line(root, tip, Color(0.8, 0.9, 0.88, 0.6), 2, true)
 			elif theme_id == "ironroot":
-				# Pit-prop frame over a rail stub.
-				draw_line(p + Vector2(-22, 45), p + Vector2(-20, -8), ink, 6)
-				draw_line(p + Vector2(22, 45), p + Vector2(20, -8), ink, 6)
-				draw_line(p + Vector2(-30, -10), p + Vector2(30, -10), ink, 7)
-				draw_line(p + Vector2(-16, 40), p + Vector2(16, 40), ink, 2)
-				draw_line(p + Vector2(-16, 30), p + Vector2(16, 30), ink, 2)
+				# Pit headframe: A-frame legs, a back stay and the winding wheel on top.
+				draw_line(p + Vector2(-20, 45), p + Vector2(0, -22), ink, 5)
+				draw_line(p + Vector2(20, 45), p + Vector2(0, -22), ink, 5)
+				draw_line(p + Vector2(-12, 18), p + Vector2(12, 18), ink, 3)
+				draw_arc(p + Vector2(0, -26), 11, 0, TAU, 18, ink, 4, true)
+				draw_line(p + Vector2(0, -26), p + Vector2(0, 45), Color(ink, ink.a * 0.6), 1.5)
+				draw_line(p + Vector2(-30, 45), p + Vector2(30, 45), ink, 3)
 			elif theme_id == "cloister":
 				draw_arc(p, 25, PI, TAU, 20, ink, 5, true)
 				draw_line(p + Vector2(-25, 0), p + Vector2(-25, 45), ink, 5)

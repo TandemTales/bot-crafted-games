@@ -1118,8 +1118,9 @@ func test_region_data() -> bool:
 		var m: String = EnemyDB.ENEMIES[id]["model"]
 		check(ResourceLoader.exists("res://assets/models/%s.glb" % m), "model for %s exists" % id)
 	for th in BoardView.THEMES.values():
-		for key in ["plain", "stone", "water"]:
-			check(ResourceLoader.exists("res://assets/models/%s.glb" % th[key]), "theme tile %s exists" % th[key])
+		for key in ["plain", "stone", "water", "rail"]:
+			if th.has(key):
+				check(ResourceLoader.exists("res://assets/models/%s.glb" % th[key]), "theme tile %s exists" % th[key])
 		for pr in th["props"]:
 			check(ResourceLoader.exists("res://assets/models/%s.glb" % pr[0]), "theme prop %s exists" % pr[0])
 	return true

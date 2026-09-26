@@ -9,7 +9,7 @@ Size and SHA-256 are in `package-sha256.txt`. All three native tours below used 
 
 ## Rules / import / export
 
-- `rules.log`: `tools/check.sh` gate, **1,657 passed / 0 failed** (import, three scene smokes, rules).
+- `rules.log`: final `tools/check.sh` gate, **1,658 passed / 0 failed** (import, three scene smokes, rules).
 - The forecast sweep reports `enemy forecasts compared: 1461, drift: 0`. Before the fix, the same
   sweep (then 1,107 comparisons, pre-Ironroot) found 81 forecasts with the wrong end hex or hit/miss.
 - `import.log`, `export.log`: installed-Godot import and release export, exit 0.
@@ -30,6 +30,28 @@ The main runner read all 66 images through the six `sheet5-*.jpg` contact sheets
 full-size 1280x720 originals retained here. The first 720p pass showed rust-coloured enemies and
 the amber cave-in overlay blending into an orange floor. The floor and key light were cooled and
 the Rustgrub and Tunneler scaled up, then everything was re-exported and all three tours were rerun.
+
+## Critic round 1 and fixes
+
+An independent read-only critic compared the first packaged Ironroot build with Into the Breach
+and Slay the Spire 2 / Monster Train 2 presentation. It rated room/reward screens at parity and
+everything else as losing or losing badly. Its key finding was that the phase-two "Deep Collapse"
+showed no marks on the board. Investigation found a pre-existing shader bug: pulsing telegraph
+overlays (cave-in, blight spread, danger) faded to alpha 0 at every pulse trough in all regions.
+Fixed (minimum 60% opacity), along with these:
+
+- a single continuous rail line along the central row;
+- per-encounter prop layouts;
+- a larger, brighter Rustgrub;
+- a squat brick-crucible Foundry Heart distinct from the Engine;
+- a pit-headframe map motif.
+
+The rules gate was rerun (**1,658 passed / 0 failed**). The build was re-exported and all three
+native tours were rerun: 22 images each, 0 failures, saves unchanged. The final package hash is in
+`package-sha256.txt`, and the contact sheets, logs and originals here come from that final package.
+
+"Floor 0" and the zeroed clear-screen stats in the tour images come from staging each encounter
+directly. They are not play results.
 
 ## Limits
 
