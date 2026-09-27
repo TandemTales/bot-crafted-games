@@ -1,5 +1,16 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-27 — Run 6 checkpoint (Pacific Sunday 09:05, age 3 days)
+
+- STOP absent; worktree at remote `dev` `670cf3c` (Run 5 final). Work pushes to `dev`.
+- Polish night: forced release remains 2026-10-03 Pacific; no quality pass exists for early release.
+- Bounded plan: (1) Region 5 Crown of Thorns — six authored fights, The Last Gardener elite,
+  two-phase Withered Crown boss, original Blender board/roster assets, and a real five-region
+  campaign victory replacing the development continuation screen; (2) the HUD items Run 5 named
+  (Your Turn banner placement, clipped card text) if time remains.
+- Main runner owns every file and Git this run.
+- Next action: read region/encounter/enemy data paths, then author Crown of Thorns.
+
 ## 2026-09-26 — Run 5 checkpoint (Pacific Saturday 09:35, age 2 days)
 
 - STOP absent; worktree fast-forwarded to remote `dev` `4f65d1c` (Run 4 final). Work pushes to `dev`.
