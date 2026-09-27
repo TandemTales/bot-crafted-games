@@ -75,6 +75,14 @@ func generate_map() -> void:
 			row_nodes.append(n)
 			map.append(n)
 		rows.append(row_nodes)
+	# Every region offers at least one elite (its charm), one shrine and one pedlar.
+	for need in ["elite", "shrine", "market"]:
+		if map.any(func(n): return n["type"] == need):
+			continue
+		var lo := 2 if need == "elite" else 1
+		var spots: Array = map.filter(func(n): return n["type"] == "fight" and n["row"] >= lo and n["row"] <= ROWS - 2)
+		if not spots.is_empty():
+			spots[rng.randi_range(0, spots.size() - 1)]["type"] = need
 	var boss := {"id": next_id, "row": ROWS, "col": 0, "width": 1, "type": "boss", "links": []}
 	map.append(boss)
 	# Link rows: each node to its nearest node above, sometimes a neighbour too.

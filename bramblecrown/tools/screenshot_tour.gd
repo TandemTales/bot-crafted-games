@@ -303,6 +303,8 @@ func _crown() -> void:
 			_check(panel.intent["icons"].any(func(ic): return ic["kind"] == "thorns"), "thorn intent has its own icon")
 			_check(marked.size() > 0 and sc.board.overlays[marked[0]].visible, "thorn marks are highlighted")
 			_check(sc.board._mark_root.get_child_count() >= marked.size(), "thorn marks show damage and a tether to the source")
+			var ghosts: Array = sc.board._mark_root.get_children().filter(func(n): return n.scene_file_path.ends_with("hex_thornwall.glb"))
+			_check(ghosts.size() == marked.size(), "every thorn mark previews a ghost wall")
 			await _shot("62_thorn_telegraph")
 			sc._on_end_turn()
 			await _await_enemy_turn(sc)
@@ -335,9 +337,13 @@ func _crown() -> void:
 			_check(animation != null and animation.is_playing(), "Crown diadem animation imported and playing")
 			sc.c._damage_enemy(boss, int(boss["hp"]) / 2 + 1)
 			_check(boss["phase2"], "Withered Crown switches phase")
+			await sc._run_events(sc.c._flush())  # the real phase-two banner and transformation
+			_check(sc.board.units[boss["uid"]].has_node("EnrageLight"), "phase two wakes the boss light")
 			sc.c._choose_intent(boss)
 			sc._refresh_all()
+			await _wait(1.2)
 			await _shot("65_crown_phase2_intent")
+			sc.c.player["max_hp"] = 999
 			sc.c.player["hp"] = 999
 			sc._on_end_turn()
 			await _await_enemy_turn(sc)

@@ -268,7 +268,7 @@ const ENEMIES := {
 	# The dying hedge defends itself with walls that rise around you and recede a few turns later.
 	# The Crown also calls back champions of the Blight from every earlier region.
 	"thornling": {
-		"name": "Thornling", "hp": [14, 17], "move": 2, "model": "thornling", "size": 0.95,
+		"name": "Thornling", "hp": [14, 17], "move": 2, "model": "thornling", "size": 1.25,
 		"moves": [
 			{"name": "Prick", "actions": [{"t": "attack", "dmg": 6, "range": 1}]},
 			{"name": "Take Root", "stay": true, "actions": [{"t": "thorns", "count": 1, "radius": 1, "lasts": 2}, {"t": "ward", "n": 4}]},
@@ -276,7 +276,7 @@ const ENEMIES := {
 		"pattern": [0, 0, 1],
 	},
 	"briar_knight": {
-		"name": "Briar Knight", "hp": [40, 44], "move": 1, "model": "briar_knight", "size": 1.1,
+		"name": "Briar Knight", "hp": [40, 44], "move": 1, "model": "briar_knight", "size": 1.3,
 		# Walls you in, then reaches over them with its lance: step out before the wall rises.
 		"moves": [
 			{"name": "Hedge Wall", "stay": true, "actions": [{"t": "thorns", "count": 3, "radius": 2, "lasts": 2}]},

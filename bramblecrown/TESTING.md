@@ -145,6 +145,11 @@ Run `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH --tour-onl
 the same walls after they recede, Crown phase two intent and resolution, the campaign victory
 screen, four Crown rooms and the input/resize regression views. Assertions cover the theme, a
 thorn model on every authored wall, one countdown per wall, the thorn intent icon, highlighted
-marks and tethers, raised and receded tiles, the turn banner staying clear of every enemy, the
+marks, ghost walls and tethers, raised and receded tiles, the phase-two boss light, the turn banner staying clear of every enemy, the
 diadem animation, checkpoint resume and unchanged player saves. Run at 1280x720, 1920x1080 and
 2560x1440 and read every image. The victory screen is staged, not a won campaign.
+
+`test_events` requires at least 12 events with 2-3 choices, real cards, and region events offered
+first and only in their region. `test_map_generation` requires an elite, shrine and pedlar on
+every region map over 40 seeds. `tools/check.sh` does not parse `tools/screenshot_tour.gd`; the
+tour itself reports parse errors, so read its log.

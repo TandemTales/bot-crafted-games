@@ -823,6 +823,15 @@ func test_map_generation() -> bool:
 				check(incoming, "seed %d node %d reachable" % [s, n["id"]])
 		check(boss_count == 1, "one boss")
 		check(r.available_nodes().size() == 3, "3 starting nodes")
+	# Every region map, across many seeds, offers an elite, a shrine and a pedlar.
+	for s in range(40):
+		for reg in EncounterDB.REGIONS.size():
+			var r := RunState.new()
+			r.new_run(900 + s)
+			r.region = reg
+			r.generate_map()
+			for need in ["elite", "shrine", "market"]:
+				check(r.map.any(func(n): return n["type"] == need), "seed %d region %d map has a %s" % [s, reg, need])
 	return true
 
 

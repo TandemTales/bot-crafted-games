@@ -2263,7 +2263,7 @@ def build_thornling():
     P = crown_palette()
     parts = []
     # A knot of thorn canes walking on four spiked legs, a bone mask at its heart.
-    parts.append(assign(ico("knot", 0.2, (0, 0, 0.36), scale=(1.1, 1.0, 0.9), sub=2), P["thornwood_light"]))
+    parts.append(assign(ico("knot", 0.2, (0, 0, 0.36), scale=(1.1, 1.0, 0.9), sub=2), P["bark"]))
     for i in range(6):
         a = i / 6 * 6.283
         thorn_cane(parts, P, [(0.1 * math.cos(a), 0.1 * math.sin(a), 0.36), (0.25 * math.cos(a), 0.25 * math.sin(a), 0.55),
@@ -2272,8 +2272,8 @@ def build_thornling():
         a = k / 4 * 6.283 + 0.78
         parts.append(tube("leg", [(0.12 * math.cos(a), 0.12 * math.sin(a), 0.3), (0.3 * math.cos(a), 0.3 * math.sin(a), 0.22),
                                   (0.34 * math.cos(a), 0.34 * math.sin(a), 0.0)], 0.035, P["thornwood"]))
-    crown_face(parts, P, (0, -0.17, 0.4), 0.11)
-    parts.append(assign(sphere("hip", 0.05, (0.1, 0.05, 0.58), seg=8, rings=6), P["hip"]))
+    crown_face(parts, P, (0, -0.17, 0.4), 0.13)
+    parts.append(assign(sphere("hip", 0.06, (0.1, 0.05, 0.58), seg=8, rings=6), P["hip"]))
     join(parts, "thornling")
     finish("thornling")
 
@@ -2285,8 +2285,8 @@ def build_briar_knight():
     # A hedge-knight grown from the Crown: a thorn-woven body in tarnished gold plate,
     # a shield of woven canes and a thorn lance.
     parts.append(assign(cyl("body", 0.26, 0.7, (0, 0.02, 0.62), verts=10, r2=0.2), P["thornwood_light"]))
-    parts.append(assign(cube("breastplate", 1.0, (0, -0.16, 0.74), scale=(0.4, 0.08, 0.36), rot=(0.12, 0, 0)), P["gold_dark"]))
-    parts.append(assign(sphere("helm", 0.17, (0, -0.02, 1.1), scale=(0.9, 0.95, 1.1), seg=14, rings=8), P["gold_dark"]))
+    parts.append(assign(cube("breastplate", 1.0, (0, -0.16, 0.74), scale=(0.4, 0.08, 0.36), rot=(0.12, 0, 0)), P["gold"]))
+    parts.append(assign(sphere("helm", 0.17, (0, -0.02, 1.1), scale=(0.9, 0.95, 1.1), seg=14, rings=8), P["gold"]))
     parts.append(assign(cube("visor_slit", 1.0, (0, -0.17, 1.1), scale=(0.2, 0.02, 0.03)), P["eye"]))
     for k in range(5):
         a = -0.8 + k * 0.4

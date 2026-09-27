@@ -39,8 +39,76 @@
   sheets plus representative originals. Evidence is in `evidence/2026-09-27-run6/`.
 - **Blender:** `withered_crown.blend` (`diadem_turn`, frames 1-61), `hex_thornwall.blend` and
   `last_gardener.blend` reopen with the expected meshes and materials.
-- **Limits:** balance is unverified; the bot has never cleared a boss run. The victory screen is
-  staged. Region-specific shrine events are still missing.
+- **Limits:** balance is unverified (the bot still clears Marsh in 2 of 20 seeds). The victory
+  screen is staged.
+
+### Run 6 final result and next action
+
+- **Region-specific shrine events:** eight new ones, two each for Cloister, Glasswood, Ironroot and
+  Crown. That makes 13 events, meeting the 12-event contract. Region events are offered first in
+  their region and never appear elsewhere.
+- **Map fix (all regions):** node types were purely weighted, so a map could lack an elite (and
+  its charm), a shrine or a pedlar. The critic found the Crown map had no elite. Every map now
+  guarantees one of each, tested over 40 seeds x 5 regions.
+- **Critic-driven fixes:**
+  - Thornling scale 1.25 and a larger bone mask.
+  - Briar Knight scale 1.3 with gold plate and helm, so it no longer blends into the walls.
+  - Boss phase 2 plays its banner and a transformation: the model swells 18% and a pulsing
+    ember-violet light wakes inside it (all bosses).
+  - Each thorn mark shows a translucent ghost of the wall that will rise.
+  - The tour no longer shows a 994/72 HP artifact (the staged max HP is now set too).
+- **Gate:** 2,754 passed / 0 failed. Forecast drift 0 of 1,800.
+- **Package:** `build/windows/Bramblecrown.exe`, 120,619,464 bytes, SHA-256
+  `DBD30E439C534E29D8703888BE314C5D4218538BBD3C8506A370DD0B5A5167A7`.
+- **Tour:** the final `--tour-only run6` passed at 720p, 1080p and 1440p: 23 images each,
+  0 failures, saves unchanged. It now also asserts the ghost walls and the phase-2 light.
+  - The main runner read all 69 images of the previous pass through contact sheets. For the final
+    pass it read the changed telegraph and phase-2 shots at each size.
+  - Sheets and representative originals are in `evidence/2026-09-27-run6/`.
+- **Critic** (independent, read-only; one round, on the pre-fix build; vs Into the Breach and
+  StS/Monster Train 2):
+  - Thorn telegraph: loses badly.
+  - Board art/region identity: loses badly.
+  - New-enemy readability: loses.
+  - Boss presentation: loses badly.
+  - HUD/banner: parity.
+  - Victory screen: loses.
+  - Encounter variety: loses.
+  - Its top fixes 1 (tour HP artifact only; see below), 2 (elite on map), 4 (phase-2 transition)
+    and part of 5 (scale and rim) were applied. They have **not** been re-judged.
+  - No discipline passes, so there is no quality release.
+- **Remaining critic items:**
+  - Ghost walls are faint at 1440p.
+  - Floating "-N" labels overlap (for example "-11/-5"); the forecast should be one stacked label.
+  - Crown fights share one look: no boss-arena set piece, no lighting change for elite or boss.
+  - Every encounter uses the same player-bottom, enemies-top layout.
+  - The boss and Gardener mark the starting Thicket on turn 1.
+  - The victory screen lacks a run summary, score and unlocks. Its zero stats are from the staged
+    tour, not a bug.
+  - The hand covers the bottom row of hexes.
+- **Not verified:** human play, audio listening, a physical controller, fullscreen/focus,
+  4K/ultrawide, sustained performance, other hardware, a genuine (non-staged) five-region win.
+- **Release:** nothing uploaded. No `.aaa-complete`. Forced release remains
+  **Saturday 2026-10-03 Pacific**. itch.io was not rechecked; the last recorded state is a Draft
+  page with build #2014268.
+
+Exact next action for Run 7:
+1. Ask the critic to re-judge the final Run 6 package, then fix its top two items. Likely:
+   - A stacked forecast label on the player's hex.
+   - A distinct boss-arena and elite presentation for the Crown.
+2. Victory/defeat summary: regions cleared, path and score. Then do a real bot or keyboard run
+   into the Crown to check balance on the new region. Tune turn-1 thorn marks on starting Thicket.
+3. Before Saturday: Cassia (at least 20 cards) is the largest missing contract item. Scope it
+   honestly. Otherwise put release prep (itch page text, screenshots, system requirements) ahead
+   of new content on Run 7 or 8.
+
+Full remaining contract:
+- Cassia and Thatch (at least 20 cards each), with progression unlocks.
+- Charms (10 of 20).
+- Withering tiers 0-10.
+- Human balance and discipline acceptance.
+
+Content now: 30 fights, 5 elites, 5 bosses, 34 Wren cards, 10 charms, 13 events.
 
 ## 2026-09-26 — Run 5 checkpoint (Pacific Saturday 09:35, age 2 days)
 

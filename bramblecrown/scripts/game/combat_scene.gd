@@ -432,7 +432,8 @@ func _refresh_board_overlays() -> void:
 				for h in a.get("hexes", []):
 					ov[h] = [COL_THORNS if thorny else COL_COLLAPSE, true]
 					marks.append({"hex": h, "from": e["pos"], "text": "-%d" % dmg,
-						"color": Color(1.0, 0.55, 0.72) if thorny else Color(1.0, 0.66, 0.25)})
+						"color": Color(1.0, 0.55, 0.72) if thorny else Color(1.0, 0.66, 0.25),
+						"ghost": board.theme.get("thorn", "") if thorny else ""})
 				if a.get("hexes", []).has(c.player["pos"]):
 					incoming += dmg
 		var pv := c.enemy_preview(e)
@@ -1004,6 +1005,8 @@ func _play_event(ev: Dictionary) -> void:
 		"phase2":
 			var boss = c.enemy_by_uid(ev["target"])
 			_show_banner("%s rises in fury!" % (boss["def"]["name"] if boss != null else "The boss"), 1.8)
+			board.enrage_unit(ev["target"])
+			Sfx.play("burn", 0.1, 0)
 			rig.shake(1.0)
 			await _wait(0.8)
 		"energy", "move_points", "power":

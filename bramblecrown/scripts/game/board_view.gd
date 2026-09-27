@@ -258,6 +258,28 @@ func add_enemy(e: Dictionary, animate: bool) -> Node3D:
 	return n
 
 
+## Boss phase two: the model swells and a pulsing ember-violet light wakes inside it.
+func enrage_unit(key) -> void:
+	if not units.has(key) or units[key].has_meta("enraged"):
+		return
+	var n: Node3D = units[key]
+	n.set_meta("enraged", true)
+	var tw := create_tween()
+	tw.tween_property(n, "scale", n.scale * 1.18, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var l := OmniLight3D.new()
+	l.name = "EnrageLight"
+	l.light_color = Color(1.0, 0.3, 0.55)
+	l.light_energy = 3.2
+	l.omni_range = 3.2
+	l.position = Vector3(0, 0.9, -0.3)
+	l.shadow_enabled = false
+	n.add_child(l)
+	var pulse := l.create_tween().set_loops()
+	pulse.tween_property(l, "light_energy", 1.6, 0.7).set_trans(Tween.TRANS_SINE)
+	pulse.tween_property(l, "light_energy", 3.2, 0.7).set_trans(Tween.TRANS_SINE)
+	_burst(n.position + Vector3(0, 1.0, 0), Color(1.0, 0.35, 0.6), 28)
+
+
 ## Dark silhouette outline plus a glowing team ring under the unit.
 func _decorate_unit(n: Node3D, ring_col: Color) -> void:
 	for node in n.find_children("*", "MeshInstance3D", true, false):
@@ -677,6 +699,16 @@ func set_marks(marks: Array) -> void:
 	for mk in marks:
 		var col: Color = mk["color"]
 		var h: Vector2i = mk["hex"]
+		if mk.get("ghost", "") != "":
+			# A translucent, half-grown preview of the wall that will rise here.
+			var g: Node3D = scene(mk["ghost"]).instantiate()
+			g.position = world(h)
+			g.rotation.y = deg_to_rad(60.0 * (absi(hash(h)) % 6))
+			g.scale = Vector3(0.9, 0.55, 0.9)
+			for mi in g.find_children("*", "GeometryInstance3D", true, false):
+				mi.transparency = 0.6
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_mark_root.add_child(g)
 		if combat == null or h != combat.player["pos"]:
 			var lb := Label3D.new()
 			lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED

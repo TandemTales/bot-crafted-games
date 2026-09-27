@@ -109,7 +109,10 @@ Withered Heralds fly, rot, dart and shield allies. Two fights bring back earlier
 tiles; hedge arch, withered briar and crown shard props; the five enemies, with a turning thorn
 diadem animation on the Crown. The map margins, rooms, reward headline and camp text follow the region.
 The turn banner now sits in a band under the encounter title so it never covers enemies.
-Region-specific shrine events remain owed. Run 6 used no editing sub-agents.
+Each marked hex also shows a translucent ghost of the wall to come. Boss phase two swells the
+model and wakes a pulsing light. Eight region-specific shrine events (two per region after the
+Marsh) bring events to 13, and every region map now guarantees an elite, a shrine and a pedlar.
+Run 6 used no editing sub-agents.
 
 ### Implemented Ironroot Deeps region (2026-09-26, Run 5)
 
