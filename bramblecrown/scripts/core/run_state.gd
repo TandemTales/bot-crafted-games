@@ -341,11 +341,16 @@ func leave_room() -> void:
 	status = "map"
 
 
+## Unused events for this region come first, then unused global events, then a fresh cycle.
 func _pick_event() -> String:
-	var cands := EventDB.EVENTS.keys().filter(func(id): return not used_events.has(id))
+	var here: String = region_def()["id"]
+	var allowed := EventDB.EVENTS.keys().filter(func(id): return EventDB.EVENTS[id].get("region", here) == here)
+	var cands := allowed.filter(func(id): return EventDB.EVENTS[id].has("region") and not used_events.has(id))
+	if cands.is_empty():
+		cands = allowed.filter(func(id): return not used_events.has(id))
 	if cands.is_empty():
 		used_events.clear()
-		cands = EventDB.EVENTS.keys()
+		cands = allowed
 	var id: String = rng.pick(cands)
 	used_events.append(id)
 	return id

@@ -866,6 +866,32 @@ func test_rewards_and_market() -> bool:
 
 
 func test_events() -> bool:
+	check(EventDB.EVENTS.size() >= 12, "at least 12 authored shrine events")
+	var region_ids := EncounterDB.REGIONS.map(func(reg): return reg["id"])
+	for id in EventDB.EVENTS:
+		var ev: Dictionary = EventDB.EVENTS[id]
+		check(ev["options"].size() >= 2 and ev["options"].size() <= 3, "%s has 2-3 choices" % id)
+		if ev.has("region"):
+			check(region_ids.has(ev["region"]), "%s names a real region" % id)
+		for opt in ev["options"]:
+			for op in opt["ops"]:
+				if op[0] == "card":
+					check(CardDB.CARDS.has(op[1]), "%s grants a real card %s" % [id, op[1]])
+	# Region events come first in their own region and never leak into another.
+	for ri in EncounterDB.REGIONS.size():
+		var r := RunState.new()
+		r.new_run(40 + ri)
+		r.region = ri
+		var here: String = EncounterDB.REGIONS[ri]["id"]
+		var own := EventDB.EVENTS.keys().filter(func(id): return EventDB.EVENTS[id].get("region", "") == here)
+		for k in 12:
+			var got := r._pick_event()
+			var owner: String = EventDB.EVENTS[got].get("region", here)
+			check(owner == here, "%s never offers another region's event" % here)
+			if k < own.size():
+				check(own.has(got), "%s offers its own events first" % here)
+		var saved := RunState.from_json(r.to_json())
+		check(saved.used_events == r.used_events, "used events survive save/load in %s" % here)
 	for id in EventDB.EVENTS:
 		for i in EventDB.EVENTS[id]["options"].size():
 			var r := RunState.new()
