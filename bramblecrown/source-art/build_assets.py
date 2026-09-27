@@ -2076,6 +2076,333 @@ def build_engine_of_rot():
     finish("engine_of_rot")
 
 
+def crown_palette():
+    """Ash-pale sward, blackened thorn wood and dried crimson hips under a failing gold crown."""
+    return {
+        "earth": mat("crown_earth", (0.09, 0.065, 0.055), 0.97),
+        "sward": mat("ash_sward", (0.30, 0.27, 0.20), 0.95),
+        "sward_dark": mat("ash_sward_dark", (0.19, 0.17, 0.13), 0.95),
+        "straw": mat("dead_straw", (0.52, 0.45, 0.30), 0.9),
+        "petal": mat("fallen_petal", (0.55, 0.12, 0.14), 0.7),
+        "thornwood": mat("thornwood", (0.07, 0.05, 0.05), 0.75),
+        "thornwood_light": mat("thornwood_light", (0.2, 0.13, 0.11), 0.8),
+        "spike": mat("crimson_spike", (0.46, 0.08, 0.08), 0.45),
+        "hip": mat("rose_hip", (0.72, 0.1, 0.07), 0.35),
+        "stone": mat("root_stone", (0.33, 0.31, 0.3), 0.88),
+        "stone_dark": mat("root_stone_dark", (0.17, 0.16, 0.16), 0.9),
+        "root": mat("old_root", (0.26, 0.18, 0.12), 0.85),
+        "sap": mat("amber_sap", (0.2, 0.09, 0.02), 0.08, metal=0.1),
+        "sap_glow": mat("sap_glow", (0.9, 0.5, 0.1), 0.3, emit=(1.0, 0.5, 0.08), emit_strength=0.9),
+        "gold": mat("crown_gold", (0.72, 0.52, 0.2), 0.35, metal=1.0),
+        "gold_dark": mat("crown_gold_tarnish", (0.34, 0.25, 0.1), 0.5, metal=0.8),
+        "bark": mat("crown_bark", (0.3, 0.22, 0.15), 0.9),
+        "leaf": mat("last_leaf", (0.36, 0.42, 0.16), 0.75),
+        "leaf_dead": mat("dead_leaf", (0.44, 0.3, 0.13), 0.85),
+        "cloth": mat("gardener_cloth", (0.2, 0.24, 0.17), 0.95),
+        "cloth_red": mat("herald_cloth", (0.38, 0.07, 0.09), 0.9),
+        "bone": mat("bone_mask", (0.78, 0.72, 0.6), 0.6),
+        "iron": mat("shear_iron", (0.32, 0.31, 0.3), 0.4, metal=0.85),
+        "blight": mat("crown_blight", (0.32, 0.1, 0.38), 0.6),
+        "blight_glow": mat("crown_blight_glow", (0.55, 0.2, 0.75), 0.4, emit=(0.6, 0.2, 0.9), emit_strength=1.6),
+        "eye": mat("thorn_eye", (1.0, 0.35, 0.25), 0.3, emit=(1.0, 0.3, 0.2), emit_strength=2.5),
+    }
+
+
+def thorn_cane(parts, P, pts, radius, wood, spikes=4, seed=0, spike_len=0.1):
+    """A bramble cane with crimson spikes along it, appended to parts."""
+    random.seed(seed)
+    parts.append(tube("thorn_cane", pts, radius, wood))
+    for t in range(spikes):
+        u = (t + 0.5) / spikes
+        seg = min(len(pts) - 2, int(u * (len(pts) - 1)))
+        lu = u * (len(pts) - 1) - seg
+        p = Vector(pts[seg]).lerp(Vector(pts[seg + 1]), lu)
+        th = cyl("spike", radius * 0.7, spike_len, p, verts=5, r2=0.0,
+                 rot=(random.uniform(0, 3.1), random.uniform(0, 3.1), 0))
+        parts.append(assign(th, P["spike"]))
+
+
+def crown_floor(P, seed):
+    random.seed(seed)
+    parts = [assign(hex_prism("root_soil", 0.98, 0.94, -1.0, 0), P["earth"]),
+             assign(hex_prism("ash_sward", 0.98, 0.09, -0.07, 0.025), P["sward"])]
+    # Dead grass tufts and fallen petals: pale ground so the dark thorn walls read against it.
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        d = random.uniform(0.3, 0.78)
+        base = (d * math.cos(a), d * math.sin(a), 0.02)
+        for k in range(3):
+            b = random.uniform(0, 6.28)
+            parts.append(tube("straw", [base, (base[0] + 0.05 * math.cos(b), base[1] + 0.05 * math.sin(b), 0.11)],
+                              0.012, P["straw"] if k else P["sward_dark"]))
+    for i in range(5):
+        a = random.uniform(0, 6.28)
+        d = random.uniform(0.2, 0.8)
+        pe = ico("petal", 0.045, (d * math.cos(a), d * math.sin(a), 0.025), scale=(1.4, 0.8, 0.15), sub=1)
+        pe.rotation_euler = (0, 0, random.uniform(0, 6.28))
+        parts.append(assign(pe, P["petal"]))
+    a = random.uniform(0, 6.28)
+    parts.append(tube("surface_root", [(0.7 * math.cos(a), 0.7 * math.sin(a), -0.01),
+                                       (0.35 * math.cos(a + 0.4), 0.35 * math.sin(a + 0.4), 0.05),
+                                       (0.1 * math.cos(a + 0.9), 0.1 * math.sin(a + 0.9), -0.01)], 0.03, P["root"]))
+    return parts
+
+
+def build_crown_tiles():
+    for name in ("hex_crown", "hex_crownstone", "hex_thornwall", "hex_sap"):
+        reset()
+        P = crown_palette()
+        if name == "hex_sap":
+            parts = [assign(hex_prism("sap_bed", 0.98, 0.58, -0.8, 0.025), P["earth"]),
+                     assign(hex_prism("amber_sap", 0.96, 0.018, -0.215, 0.015), P["sap"])]
+            # Sap welling from a severed hedge root: a slow amber pool, not water.
+            parts.append(tube("severed_root", [(-0.9, 0.2, -0.1), (-0.5, 0.1, -0.08), (-0.2, 0.05, -0.18)], 0.09, P["root"]))
+            parts.append(assign(cyl("root_cut", 0.07, 0.02, (-0.2, 0.05, -0.17), verts=12,
+                                    rot=(0, math.radians(80), 0)), P["sap_glow"]))
+            for i in range(5):
+                t = i / 5 * 6.283 + 0.6
+                parts.append(assign(ico("sap_bead", 0.05, (0.55 * math.cos(t), 0.55 * math.sin(t), -0.19),
+                                        scale=(1, 1, 0.5), sub=1), P["sap_glow"]))
+        else:
+            parts = crown_floor(P, {"hex_crown": 31, "hex_crownstone": 37}.get(name, 41))
+            if name == "hex_crownstone":
+                # Old root-knots of the hedge swallowed standing stones: permanent cover.
+                for i, (x, y, r, z) in enumerate([(0, 0, 0.5, 0.3), (-0.3, 0.3, 0.3, 0.2), (0.35, -0.2, 0.32, 0.18),
+                                                  (0.05, 0.05, 0.34, 0.72)]):
+                    parts.append(rock_chunk("root_stone", r, (x, y, z), P["stone"] if i % 2 else P["stone_dark"], 1500 + i, 0.8))
+                for k in range(4):
+                    a = k * 1.57 + 0.4
+                    parts.append(tube("gripping_root", [(0.75 * math.cos(a), 0.75 * math.sin(a), 0.0),
+                                                         (0.45 * math.cos(a), 0.45 * math.sin(a), 0.45),
+                                                         (0.15 * math.cos(a + 0.5), 0.15 * math.sin(a + 0.5), 0.95)],
+                                      0.06, P["root"]))
+            elif name == "hex_thornwall":
+                # A raised thorn wall: dense black canes, crimson spikes and hips. Tall and dark so it
+                # reads as a barrier from the gameplay camera, never as the player's green Thicket.
+                random.seed(1600)
+                for i in range(11):
+                    a = i / 11 * 6.283 + random.uniform(-0.2, 0.2)
+                    r0 = random.uniform(0.35, 0.8)
+                    h = random.uniform(0.9, 1.35)
+                    lean = random.uniform(-0.5, 0.5)
+                    pts = [(r0 * math.cos(a), r0 * math.sin(a), 0.0),
+                           (r0 * 0.8 * math.cos(a + lean * 0.3), r0 * 0.8 * math.sin(a + lean * 0.3), h * 0.45),
+                           (r0 * 0.45 * math.cos(a + lean), r0 * 0.45 * math.sin(a + lean), h * 0.85),
+                           (r0 * 0.2 * math.cos(a + lean * 1.4), r0 * 0.2 * math.sin(a + lean * 1.4), h)]
+                    thorn_cane(parts, P, pts, 0.05, P["thornwood"] if i % 3 else P["thornwood_light"], 5, 1600 + i, 0.13)
+                random.seed(1650)
+                for i in range(7):
+                    a = random.uniform(0, 6.28)
+                    r = random.uniform(0.15, 0.55)
+                    parts.append(assign(sphere("hip", 0.05, (r * math.cos(a), r * math.sin(a), random.uniform(0.5, 1.1)),
+                                               scale=(1, 1, 1.3), seg=8, rings=6), P["hip"]))
+                parts.append(assign(cyl("root_boss", 0.62, 0.22, (0, 0, 0.1), verts=9, r2=0.4), P["thornwood"]))
+        join(parts, name)
+        finish(name)
+
+
+def build_crown_props():
+    # A dead arch of the old living hedge: the tall prop framing the board.
+    reset()
+    P = crown_palette()
+    parts = []
+    for s in (-1, 1):
+        thorn_cane(parts, P, [(s * 0.6, 0, 0), (s * 0.65, 0.05, 0.9), (s * 0.45, 0, 1.7), (0, 0, 2.0)],
+                   0.1, P["thornwood"], 6, 1700 + s, 0.16)
+        thorn_cane(parts, P, [(s * 0.7, 0.15, 0), (s * 0.5, 0.2, 1.0), (s * 0.2, 0.1, 1.85)],
+                   0.06, P["thornwood_light"], 4, 1710 + s, 0.12)
+    parts.append(assign(cyl("crown_ring", 0.24, 0.06, (0, 0, 2.02), verts=10), P["gold_dark"]))
+    for k in range(5):
+        a = k / 5 * 6.283
+        parts.append(assign(cyl("crown_point", 0.05, 0.2, (0.22 * math.cos(a), 0.22 * math.sin(a), 2.14), verts=4, r2=0.0), P["gold"]))
+    random.seed(1720)
+    for i in range(4):
+        parts.append(assign(sphere("hip", 0.06, (random.uniform(-0.5, 0.5), 0.05, random.uniform(1.0, 1.8)), seg=8, rings=6), P["hip"]))
+    join(parts, "hedge_arch")
+    finish("hedge_arch")
+
+    # Low filler: a withered briar with dead leaves and one last hip.
+    reset()
+    P = crown_palette()
+    parts = []
+    for i in range(5):
+        a = i * 1.25
+        thorn_cane(parts, P, [(0.05 * math.cos(a), 0.05 * math.sin(a), 0), (0.2 * math.cos(a), 0.2 * math.sin(a), 0.28),
+                              (0.34 * math.cos(a + 0.3), 0.34 * math.sin(a + 0.3), 0.12)], 0.028,
+                   P["thornwood_light"], 3, 1800 + i, 0.07)
+    random.seed(1810)
+    for i in range(6):
+        a = random.uniform(0, 6.28)
+        lf = ico("dead_leaf", 0.06, (0.22 * math.cos(a), 0.22 * math.sin(a), random.uniform(0.1, 0.25)), scale=(1.4, 0.7, 0.15), sub=1)
+        lf.rotation_euler = (random.uniform(-0.5, 0.5), 0, a)
+        parts.append(assign(lf, P["leaf_dead"]))
+    parts.append(assign(sphere("hip", 0.045, (0.1, 0.05, 0.26), seg=8, rings=6), P["hip"]))
+    join(parts, "withered_briar")
+    finish("withered_briar")
+
+    # A toppled crown shard: a fallen gold spike half buried in the sward.
+    reset()
+    P = crown_palette()
+    parts = [assign(cyl("fallen_spike", 0.16, 1.0, (0, 0, 0.14), verts=5, r2=0.02, rot=(math.radians(78), 0, 0.4)), P["gold_dark"]),
+             assign(cyl("band", 0.18, 0.08, (-0.05, 0.3, 0.12), verts=5, rot=(math.radians(78), 0, 0.4)), P["gold"])]
+    for i in range(3):
+        parts.append(rock_chunk("clod", 0.1, (0.1 * i - 0.1, 0.45 + 0.05 * i, 0.03), P["sward_dark"], 1850 + i, 0.5))
+    join(parts, "crown_shard")
+    finish("crown_shard")
+
+
+def crown_face(parts, P, center, r):
+    """A pale bone mask with ember eyes: the shared face of the Crown's servants."""
+    x, y, z = center
+    parts.append(assign(sphere("mask", r, (x, y, z), scale=(0.85, 0.55, 1.0), seg=14, rings=8), P["bone"]))
+    _eyes(parts, P, [(x - r * 0.35, y - r * 0.5, z + r * 0.15), (x + r * 0.35, y - r * 0.5, z + r * 0.15)], r * 0.18)
+
+
+def build_thornling():
+    reset()
+    P = crown_palette()
+    parts = []
+    # A knot of thorn canes walking on four spiked legs, a bone mask at its heart.
+    parts.append(assign(ico("knot", 0.2, (0, 0, 0.36), scale=(1.1, 1.0, 0.9), sub=2), P["thornwood_light"]))
+    for i in range(6):
+        a = i / 6 * 6.283
+        thorn_cane(parts, P, [(0.1 * math.cos(a), 0.1 * math.sin(a), 0.36), (0.25 * math.cos(a), 0.25 * math.sin(a), 0.55),
+                              (0.3 * math.cos(a + 0.4), 0.3 * math.sin(a + 0.4), 0.7)], 0.025, P["thornwood"], 2, 1900 + i, 0.08)
+    for k in range(4):
+        a = k / 4 * 6.283 + 0.78
+        parts.append(tube("leg", [(0.12 * math.cos(a), 0.12 * math.sin(a), 0.3), (0.3 * math.cos(a), 0.3 * math.sin(a), 0.22),
+                                  (0.34 * math.cos(a), 0.34 * math.sin(a), 0.0)], 0.035, P["thornwood"]))
+    crown_face(parts, P, (0, -0.17, 0.4), 0.11)
+    parts.append(assign(sphere("hip", 0.05, (0.1, 0.05, 0.58), seg=8, rings=6), P["hip"]))
+    join(parts, "thornling")
+    finish("thornling")
+
+
+def build_briar_knight():
+    reset()
+    P = crown_palette()
+    parts = []
+    # A hedge-knight grown from the Crown: a thorn-woven body in tarnished gold plate,
+    # a shield of woven canes and a thorn lance.
+    parts.append(assign(cyl("body", 0.26, 0.7, (0, 0.02, 0.62), verts=10, r2=0.2), P["thornwood_light"]))
+    parts.append(assign(cube("breastplate", 1.0, (0, -0.16, 0.74), scale=(0.4, 0.08, 0.36), rot=(0.12, 0, 0)), P["gold_dark"]))
+    parts.append(assign(sphere("helm", 0.17, (0, -0.02, 1.1), scale=(0.9, 0.95, 1.1), seg=14, rings=8), P["gold_dark"]))
+    parts.append(assign(cube("visor_slit", 1.0, (0, -0.17, 1.1), scale=(0.2, 0.02, 0.03)), P["eye"]))
+    for k in range(5):
+        a = -0.8 + k * 0.4
+        parts.append(assign(cyl("helm_thorn", 0.025, 0.2, (0.12 * math.sin(a), 0.02, 1.26 + 0.05 * math.cos(a)), verts=4, r2=0.0,
+                                rot=(0, a * 0.8, 0)), P["spike"]))
+    for s in (-1, 1):
+        parts.append(assign(sphere("pauldron", 0.12, (s * 0.28, -0.02, 0.96), scale=(1.1, 1.0, 0.7), seg=10, rings=6), P["gold"]))
+        parts.append(tube("leg", [(s * 0.12, 0.02, 0.32), (s * 0.14, -0.02, 0.14), (s * 0.14, 0.0, 0.0)], 0.07, P["thornwood"], taper=False))
+    parts.append(assign(cube("shield", 1.0, (-0.38, -0.18, 0.66), scale=(0.07, 0.34, 0.46), rot=(0, 0.1, -0.4)), P["thornwood"]))
+    parts.append(assign(cube("shield_boss", 1.0, (-0.41, -0.22, 0.7), scale=(0.05, 0.14, 0.14), rot=(0, 0.1, -0.4)), P["gold"]))
+    for k in range(4):
+        parts.append(assign(cyl("shield_thorn", 0.02, 0.12, (-0.44, -0.24 + 0.04 * k, 0.5 + 0.1 * k), verts=4, r2=0.0,
+                                rot=(0, math.radians(-90), 0)), P["spike"]))
+    thorn_cane(parts, P, [(0.34, 0.1, 0.1), (0.36, -0.1, 0.7), (0.38, -0.35, 1.3)], 0.035, P["thornwood"], 5, 1950, 0.1)
+    parts.append(assign(cyl("lance_tip", 0.05, 0.25, (0.385, -0.4, 1.42), verts=5, r2=0.0, rot=(math.radians(-22), 0, 0)), P["gold"]))
+    join(parts, "briar_knight")
+    finish("briar_knight")
+
+
+def build_withered_herald():
+    reset()
+    P = crown_palette()
+    parts = []
+    # A hovering herald: crimson tabard on a thorn frame, a gold horn and a rose-hip lantern.
+    parts.append(assign(cyl("tabard", 0.24, 0.62, (0, 0, 0.62), verts=8, r2=0.1), P["cloth_red"]))
+    parts.append(assign(cube("tabard_band", 1.0, (0, -0.12, 0.64), scale=(0.1, 0.05, 0.5)), P["gold_dark"]))
+    crown_face(parts, P, (0, -0.02, 1.05), 0.13)
+    parts.append(assign(cyl("hood", 0.16, 0.2, (0, 0.03, 1.1), verts=10, r2=0.06), P["cloth_red"]))
+    for k in range(4):
+        a = -0.6 + k * 0.4
+        parts.append(assign(cyl("hood_thorn", 0.02, 0.16, (0.1 * math.sin(a), 0.04, 1.2), verts=4, r2=0.0, rot=(0.3, a, 0)), P["spike"]))
+    for s in (-1, 1):
+        parts.append(tube("sleeve", [(s * 0.14, 0, 0.86), (s * 0.3, -0.1, 0.78), (s * 0.28, -0.22, 0.88)], 0.05, P["cloth_red"]))
+        # Tattered wings of dead leaves: it flies.
+        for k in range(3):
+            lf = ico("wing_leaf", 0.12, (s * (0.22 + 0.1 * k), 0.14, 0.95 - 0.08 * k), scale=(1.6, 0.25, 0.7), sub=1)
+            lf.rotation_euler = (0, s * 0.4, s * 0.3)
+            parts.append(assign(lf, P["leaf_dead"]))
+    parts.append(assign(cyl("horn", 0.03, 0.38, (0.3, -0.36, 0.95), verts=10, r2=0.09, rot=(math.radians(-80), 0, 0)), P["gold"]))
+    parts.append(tube("lantern_chain", [(-0.28, -0.22, 0.88), (-0.3, -0.24, 0.66)], 0.008, P["iron"], taper=False))
+    parts.append(assign(sphere("hip_lantern", 0.07, (-0.3, -0.24, 0.6), scale=(1, 1, 1.25), seg=10, rings=6), P["sap_glow"]))
+    join(parts, "withered_herald")
+    finish("withered_herald")
+
+
+def build_last_gardener():
+    reset()
+    P = crown_palette()
+    parts = []
+    # The last keeper of the Crown: a tall, stooped figure in a moss coat with great shears, a
+    # basket of grafts on the back and a face hidden under a wide straw hat. Sad, not monstrous.
+    parts.append(assign(cyl("coat", 0.32, 1.0, (0, 0.05, 0.55), verts=12, r2=0.18), P["cloth"]))
+    parts.append(assign(ico("stoop", 0.22, (0, 0.02, 1.1), scale=(1.1, 1.0, 0.9), sub=2), P["cloth"]))
+    parts.append(assign(sphere("head", 0.13, (0, -0.12, 1.26), seg=12, rings=8), P["bark"]))
+    parts.append(assign(cyl("hat_brim", 0.36, 0.03, (0, -0.1, 1.36), verts=16, rot=(0.12, 0, 0)), P["straw"]))
+    parts.append(assign(cyl("hat_crown", 0.15, 0.14, (0, -0.1, 1.44), verts=12, r2=0.1), P["straw"]))
+    _eyes(parts, P, [(-0.05, -0.24, 1.24), (0.05, -0.24, 1.24)], 0.025)
+    parts.append(assign(cube("basket", 1.0, (0, 0.28, 1.0), scale=(0.34, 0.2, 0.3)), P["straw"]))
+    for k in range(4):
+        thorn_cane(parts, P, [(-0.12 + 0.08 * k, 0.28, 1.12), (-0.14 + 0.09 * k, 0.32, 1.4), (-0.1 + 0.09 * k, 0.36, 1.55)],
+                   0.02, P["thornwood_light"], 2, 2000 + k, 0.06)
+        parts.append(assign(ico("graft_leaf", 0.05, (-0.1 + 0.09 * k, 0.36, 1.56), scale=(1.3, 0.6, 0.3), sub=1), P["leaf"]))
+    for s in (-1, 1):
+        parts.append(tube("arm", [(s * 0.24, -0.02, 1.08), (s * 0.34, -0.2, 0.86), (s * 0.18, -0.36, 0.78)], 0.06, P["cloth"]))
+        parts.append(tube("leg", [(s * 0.13, 0.05, 0.12), (s * 0.14, 0.0, 0.0)], 0.07, P["bark"], taper=False))
+    # Great shears held across the body, blades open toward the player.
+    for s in (-1, 1):
+        parts.append(assign(cube("blade", 1.0, (s * 0.12, -0.62, 0.95), scale=(0.05, 0.62, 0.02), rot=(0.1, 0, s * 0.25)), P["iron"]))
+        parts.append(tube("handle", [(s * 0.05, -0.32, 0.8), (s * 0.18, -0.24, 0.7)], 0.025, P["root"], taper=False))
+    parts.append(assign(cyl("pivot", 0.04, 0.05, (0, -0.33, 0.86), verts=10), P["gold"]))
+    join(parts, "last_gardener")
+    finish("last_gardener")
+
+
+def build_withered_crown():
+    reset()
+    P = crown_palette()
+    parts = []
+    # The dying heart of the Bramblecrown: a knotted bole rooted in amber sap, crowned by a
+    # ring of great thorns set in a gold diadem, with Blight bleeding through the bark.
+    for k in range(7):
+        a = k / 7 * 6.283
+        parts.append(tube("buttress_root", [(0.2 * math.cos(a), 0.2 * math.sin(a), 0.5), (0.5 * math.cos(a), 0.5 * math.sin(a), 0.2),
+                                            (0.7 * math.cos(a + 0.2), 0.7 * math.sin(a + 0.2), 0.0)], 0.1, P["thornwood_light"]))
+    parts.append(assign(cyl("bole", 0.32, 1.0, (0, 0, 0.6), verts=10, r2=0.24), P["thornwood"]))
+    parts.append(assign(ico("heartwood", 0.3, (0, 0, 1.1), scale=(1.1, 1.0, 0.8), sub=2), P["thornwood_light"]))
+    crown_face(parts, P, (0, -0.24, 1.05), 0.17)
+    parts.append(assign(sphere("rot_wound", 0.12, (0.18, -0.24, 0.62), scale=(0.8, 0.4, 1.3), seg=10, rings=6), P["blight_glow"]))
+    random.seed(2100)
+    for k in range(4):
+        parts.append(assign(sphere("blight_bloom", 0.07, (random.uniform(-0.25, 0.25), random.uniform(-0.2, 0.2), random.uniform(0.3, 0.9)),
+                                   scale=(1, 0.6, 1), seg=8, rings=6), P["blight"]))
+    for k in range(3):
+        parts.append(assign(ico("sap_pool", 0.18, (0.45 * math.cos(k * 2.1), 0.45 * math.sin(k * 2.1), 0.0), scale=(1.5, 1.0, 0.1), sub=1), P["sap_glow"]))
+    join(parts, "withered_crown_body")
+    # The thorn diadem turns slowly above the bole.
+    halo = []
+    for k in range(9):
+        a = k / 9 * 6.283
+        halo.append(assign(cyl("great_thorn", 0.06, 0.55, (0.42 * math.cos(a), 0.42 * math.sin(a), 0.25), verts=5, r2=0.0,
+                               rot=(math.sin(a) * 0.45, math.cos(a) * 0.45, 0)), P["thornwood"]))
+        halo.append(assign(sphere("crown_hip", 0.05, (0.42 * math.cos(a), 0.42 * math.sin(a), 0.05), seg=8, rings=6), P["hip"]))
+    halo.append(assign(cyl("diadem", 0.44, 0.08, (0, 0, 0.0), verts=18), P["gold"]))
+    halo.append(assign(cyl("diadem_inner", 0.38, 0.1, (0, 0, 0.0), verts=18), P["gold_dark"]))
+    ring = join(halo, "thorn_diadem")
+    ring.location = Vector((0, 0, 1.35))
+    for frame, ang in [(1, 0.0), (31, 1.047), (61, 2.094)]:
+        ring.rotation_euler.z = ang
+        ring.keyframe_insert("rotation_euler", frame=frame)
+    ring.animation_data.action.name = "diadem_turn"
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = 61
+    bpy.context.scene.frame_set(1)
+    finish("withered_crown")
+
+
 BUILDERS = {
     "hex": build_hex_tiles,
     "thicket": build_thicket,
@@ -2113,6 +2440,13 @@ BUILDERS = {
     "tunneler": build_tunneler,
     "foundry_heart": build_foundry_heart,
     "engine_of_rot": build_engine_of_rot,
+    "crown_tiles": build_crown_tiles,
+    "crown_props": build_crown_props,
+    "thornling": build_thornling,
+    "briar_knight": build_briar_knight,
+    "withered_herald": build_withered_herald,
+    "last_gardener": build_last_gardener,
+    "withered_crown": build_withered_crown,
 }
 
 

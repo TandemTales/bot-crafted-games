@@ -10,6 +10,7 @@ const ROT_LOSS := 2
 const EMPOWER_BONUS := 2
 const COLLAPSE_DMG := 6  # a Grovewalker caught under a cave-in; the hex then stays open
 const COLLAPSE_CAP := 0.4  # cave-ins stop once this share of the board is stone
+const THORN_DMG := 5  # a Grovewalker caught where a thorn wall rises; the hex then stays open
 const MAX_HAND := 10
 
 var rng: Rng
@@ -17,6 +18,9 @@ var encounter: Dictionary
 var radius := 3
 var terrain := {}  # Vector2i -> "plain" | "water" | "stone"
 var growth := {}  # Vector2i -> "none" | "thicket" | "blight"
+## Crown of Thorns: stone hexes that are temporary thorn walls. Vector2i -> enemy phases left.
+## Each enemy phase starts by counting these down; a wall at 0 recedes to open ground.
+var thorn_timers := {}
 var player := {}
 var enemies: Array = []
 var draw_pile: Array = []
@@ -47,6 +51,9 @@ func setup(enc: Dictionary, deck: Array, hp: int, max_hp: int, charm_ids: Array,
 		terrain[Vector2i(p[0], p[1])] = "water"
 	for p in enc.get("stone", []):
 		terrain[Vector2i(p[0], p[1])] = "stone"
+	for p in enc.get("thorns", []):  # [q, r, enemy phases until it recedes]
+		terrain[Vector2i(p[0], p[1])] = "stone"
+		thorn_timers[Vector2i(p[0], p[1])] = int(p[2])
 	for p in enc.get("blight", []):
 		growth[Vector2i(p[0], p[1])] = "blight"
 	for p in enc.get("thicket", []):
@@ -711,7 +718,7 @@ func _lock_targets(e: Dictionary, mv: Dictionary) -> void:
 				a["hexes"] = _pick_blight_targets(player["pos"], int(a["radius"]), int(a["count"]))
 			"blight_self":
 				a["hexes"] = _pick_blight_targets(e["pos"], int(a["radius"]), int(a["count"]))
-			"collapse":
+			"collapse", "thorns":
 				a["hexes"] = _pick_collapse_targets(player["pos"], int(a["radius"]), int(a["count"]))
 
 
@@ -776,15 +783,16 @@ func _walkable_regions(extra_stone: Array) -> int:
 	return regions
 
 
-## Resolves a telegraphed cave-in. Occupied hexes stay open; the Grovewalker takes COLLAPSE_DMG.
-func _collapse_hexes(hexes: Array, source: Dictionary) -> void:
+## Resolves a telegraphed cave-in (lasts 0: permanent rubble) or thorn wall (lasts N: recedes
+## after N enemy phases). Occupied hexes stay open; a Grovewalker standing there takes damage.
+func _collapse_hexes(hexes: Array, source: Dictionary, lasts: int = 0) -> void:
 	var fallen: Array = []
 	for h in hexes:
 		if terrain.get(h, "") != "plain" or enemy_at(h) != null:
 			continue
 		if player["pos"] == h:
-			_emit({"type": "cave_in", "target": "player", "pos": h, "source": source["uid"]})
-			_damage_player(COLLAPSE_DMG, null)
+			_emit({"type": "cave_in", "target": "player", "pos": h, "source": source["uid"], "thorns": lasts > 0})
+			_damage_player(THORN_DMG if lasts > 0 else COLLAPSE_DMG, null)
 			if phase != "player":
 				return
 			continue
@@ -792,9 +800,25 @@ func _collapse_hexes(hexes: Array, source: Dictionary) -> void:
 			continue
 		terrain[h] = "stone"
 		growth[h] = "none"
+		if lasts > 0:
+			thorn_timers[h] = lasts
 		fallen.append(h)
 	if not fallen.is_empty():
-		_emit({"type": "collapse", "hexes": fallen, "source": source["uid"]})
+		_emit({"type": "collapse", "hexes": fallen, "source": source["uid"], "thorns": lasts > 0})
+
+
+## Counts down every thorn wall; walls reaching 0 recede to open ground before anyone acts.
+func _recede_thorns() -> void:
+	var opened: Array = []
+	for h in thorn_timers.keys():
+		thorn_timers[h] = int(thorn_timers[h]) - 1
+		if int(thorn_timers[h]) <= 0:
+			thorn_timers.erase(h)
+			terrain[h] = "plain"
+			growth[h] = "none"
+			opened.append(h)
+	if not opened.is_empty():
+		_emit({"type": "recede", "hexes": opened})
 
 
 func intent_attack(e: Dictionary) -> Dictionary:
@@ -834,6 +858,7 @@ func enemy_forecasts() -> Dictionary:
 	sim.encounter = encounter
 	sim.radius = radius
 	sim.terrain = terrain.duplicate()  # cave-ins change terrain mid-phase
+	sim.thorn_timers = thorn_timers.duplicate()  # and thorn walls recede before anyone acts
 	sim.growth = growth.duplicate()
 	sim.player = player.duplicate(true)
 	sim.player["hp"] = 1 << 30  # an earlier lethal hit must not hide later forecasts
@@ -851,6 +876,7 @@ func _enemy_phase() -> bool:
 	# Enemy ward lasts through the player's turn and drops as the enemies act.
 	for e in enemies:
 		e["ward"] = 0
+	_recede_thorns()
 	for e in enemies.duplicate():
 		if not enemies.has(e):
 			continue
@@ -905,6 +931,8 @@ func _enemy_act(e: Dictionary) -> void:
 				_blight_hexes(a.get("hexes", []))
 			"collapse":
 				_collapse_hexes(a.get("hexes", []), e)
+			"thorns":
+				_collapse_hexes(a.get("hexes", []), e, int(a.get("lasts", 2)))
 			"summon":
 				var alive := 0
 				for o in enemies:

@@ -6,7 +6,7 @@ extends SubViewportContainer
 
 const MODELS := "res://assets/models/%s.glb"
 
-var kind := "camp"  # camp | shrine | market | reward
+var kind := "camp"  # camp | shrine | market | reward | finale
 var theme_id := "marsh"
 var focus := "left"  # left | top
 var _vp: SubViewport
@@ -81,6 +81,8 @@ func _ready() -> void:
 			_shrine()
 		"market":
 			_market()
+		"finale":
+			_finale()
 		_:
 			_reward()
 	_cam = Camera3D.new()
@@ -181,6 +183,9 @@ func _shrine() -> void:
 	elif theme_id == "ironroot":
 		_place("timber_frame", Vector3(0, 0, -1.6), 0.0, 1.1)
 		_place("ore_spoil", _hex(Vector2i(1, -1)), 35.0, 1.1)
+	elif theme_id == "crown":
+		_place("hedge_arch", Vector3(0, 0, -1.5), 0.0, 1.0)
+		_place("crown_shard", _hex(Vector2i(1, -1)), 35.0, 1.0)
 	else:
 		_place("menhir", _hex(Vector2i(1, -1)), 20.0, 1.1)
 		_place("willow", _hex(Vector2i(-1, -1)) + Vector3(-0.4, 0, -0.4), 0.0, 1.3)
@@ -199,8 +204,22 @@ func _market() -> void:
 		_place("glass_fern", _hex(Vector2i(1, 1)), 0.0, 1.0)
 	elif theme_id == "ironroot":
 		_place("ore_cart", _hex(Vector2i(1, 1)), 60.0, 1.0)
+	elif theme_id == "crown":
+		_place("withered_briar", _hex(Vector2i(1, 1)), 0.0, 1.2)
 	else:
 		_place("reeds", _hex(Vector2i(1, 1)), 0.0, 1.0)
+
+
+## Ending: the Crown's dead heart ringed by new Thicket, the Grovewalker kneeling to plant the seed.
+func _finale() -> void:
+	_place("withered_crown", Vector3(0, 0, -0.6), 0.0, 1.5)
+	for h in [Vector2i(1, 0), Vector2i(-1, 1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(0, -1)]:
+		_place("thicket", _hex(h) + Vector3(0, 0, -0.6), _rng.randf_range(0, 360), 1.05)
+	_place("hedge_arch", Vector3(-2.4, 0, -1.6), 20.0, 1.2)
+	_place("hedge_arch", Vector3(2.4, 0, -1.6), -20.0, 1.2)
+	_place("grovewalker", Vector3(0.9, 0, 1.2), 200.0, 1.35)
+	_light(Vector3(0, 2.6, -0.2), Color(0.6, 1.0, 0.45), 6.0, 7.0, 0.15)
+	_light(Vector3(0.9, 1.4, 1.6), Color(1.0, 0.8, 0.5), 2.0, 4.0, 0.0)
 
 
 func _reward() -> void:

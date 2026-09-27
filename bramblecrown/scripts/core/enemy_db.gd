@@ -15,6 +15,8 @@ extends RefCounted
 ##   collapse {count, radius}      cave-in: marked open hexes near the Grovewalker become stone
 ##                                 (locked at intent time; a Grovewalker still standing there takes
 ##                                 damage instead, and a cave-in never splits the walkable board)
+##   thorns {count, radius, lasts} like collapse, but the marked hexes become thorn walls that
+##                                 recede after `lasts` enemy phases (the Crown's shifting maze)
 ## Flags: move (hexes per turn), keep_range (preferred distance), flying (ignores Thicket cost),
 ## trample (destroys Thicket it walks through), death_blight (blights its hex on death), size (visual scale).
 
@@ -261,6 +263,68 @@ const ENEMIES := {
 		"pattern": [0, 1, 3, 2],
 		"phase2_at": 0.5,
 		"pattern2": [4, 6, 5, 7],
+	},
+	# ---------------- Region 5: Crown of Thorns ----------------
+	# The dying hedge defends itself with walls that rise around you and recede a few turns later.
+	# The Crown also calls back champions of the Blight from every earlier region.
+	"thornling": {
+		"name": "Thornling", "hp": [14, 17], "move": 2, "model": "thornling", "size": 0.95,
+		"moves": [
+			{"name": "Prick", "actions": [{"t": "attack", "dmg": 6, "range": 1}]},
+			{"name": "Take Root", "stay": true, "actions": [{"t": "thorns", "count": 1, "radius": 1, "lasts": 2}, {"t": "ward", "n": 4}]},
+		],
+		"pattern": [0, 0, 1],
+	},
+	"briar_knight": {
+		"name": "Briar Knight", "hp": [40, 44], "move": 1, "model": "briar_knight", "size": 1.1,
+		# Walls you in, then reaches over them with its lance: step out before the wall rises.
+		"moves": [
+			{"name": "Hedge Wall", "stay": true, "actions": [{"t": "thorns", "count": 3, "radius": 2, "lasts": 2}]},
+			{"name": "Thorn Lance", "actions": [{"t": "attack", "dmg": 11, "range": 2}]},
+			{"name": "Bramble Guard", "stay": true, "actions": [{"t": "ward", "n": 8}, {"t": "strength", "n": 1}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"withered_herald": {
+		"name": "Withered Herald", "hp": [20, 23], "move": 3, "keep_range": 3, "flying": true,
+		"model": "withered_herald", "size": 0.95,
+		"moves": [
+			{"name": "Wilting Fanfare", "actions": [{"t": "spread", "count": 3, "radius": 2}]},
+			{"name": "Thorn Dart", "actions": [{"t": "attack", "dmg": 7, "range": 3}]},
+			{"name": "Herald's Summons", "stay": true, "actions": [{"t": "shield_allies", "n": 5}]},
+		],
+		"pattern": [0, 1, 2],
+	},
+	"last_gardener": {
+		"name": "The Last Gardener", "hp": [96, 100], "move": 2, "keep_range": 1,
+		"model": "last_gardener", "size": 1.2, "elite": true,
+		# The Crown's last keeper trains the hedge around you, then prunes whatever is left inside.
+		"moves": [
+			{"name": "Train the Hedge", "stay": true, "actions": [{"t": "thorns", "count": 4, "radius": 2, "lasts": 3}]},
+			{"name": "Prune", "actions": [{"t": "attack", "dmg": 15, "range": 1}]},
+			{"name": "Take Cuttings", "stay": true, "actions": [{"t": "summon", "enemy": "thornling", "count": 1, "max": 2}]},
+			{"name": "Graft", "stay": true, "actions": [{"t": "heal_allies", "n": 8}, {"t": "ward", "n": 8}]},
+		],
+		"pattern": [0, 1, 2, 1, 3],
+	},
+	"withered_crown": {
+		"name": "The Withered Crown", "hp": [236, 236], "move": 0, "keep_range": 3,
+		"model": "withered_crown", "size": 1.3, "boss": true,
+		# Rooted in place: the whole fight is reaching it through a maze it keeps rebuilding.
+		# Summons and defensive turns stay separate so a capped summon only skips that turn.
+		"moves": [
+			{"name": "Crown of Thorns", "stay": true, "actions": [{"t": "thorns", "count": 4, "radius": 2, "lasts": 2}]},
+			{"name": "Thorn Volley", "stay": true, "actions": [{"t": "attack", "dmg": 12, "range": 3}]},
+			{"name": "Call the Court", "stay": true, "actions": [{"t": "summon", "enemy": "briar_knight", "count": 1, "max": 1}]},
+			{"name": "Wither", "stay": true, "actions": [{"t": "spread", "count": 5, "radius": 2}, {"t": "ward", "n": 10}]},
+			{"name": "Bramble Maze", "stay": true, "actions": [{"t": "thorns", "count": 5, "radius": 3, "lasts": 3}]},
+			{"name": "Crownfall Lash", "stay": true, "actions": [{"t": "attack", "dmg": 18, "range": 3}]},
+			{"name": "Rot the Roots", "stay": true, "actions": [{"t": "spread", "count": 5, "radius": 2}, {"t": "strength", "n": 2}]},
+			{"name": "Last Bloom", "stay": true, "actions": [{"t": "summon", "enemy": "thornling", "count": 2, "max": 2}]},
+		],
+		"pattern": [0, 1, 3, 2],
+		"phase2_at": 0.5,
+		"pattern2": [4, 5, 7, 6],
 	},
 }
 

@@ -22,6 +22,7 @@ func _init() -> void:
 		"test_glasswood_progression", "test_glasswood_patterns", "test_glasswood_counterplay",
 		"test_enemy_forecast_matches_resolution",
 		"test_ironroot_progression", "test_ironroot_patterns", "test_ironroot_collapse",
+		"test_crown_progression", "test_crown_patterns", "test_crown_thorns",
 	]
 	for t in tests:
 		_current = t
@@ -75,13 +76,137 @@ func test_ironroot_progression() -> bool:
 		rr.enter_node(rr.available_nodes()[0])
 		rr.make_combat()
 		check(reg["easy"].has(rr.current_encounter), "Ironroot starts from its easy pool")
-	# The Engine of Rot is the last boss of this build.
 	for n in r.map:
 		if n["type"] == "boss":
 			r.node_id = n["id"]
 	r.status = "reward"
 	r.leave_reward()
-	check(r.status == "victory", "clearing Ironroot completes the four-region build")
+	check(r.region == 4 and r.status == "map", "clearing Ironroot unlocks the Crown of Thorns")
+	return true
+
+
+func test_crown_progression() -> bool:
+	var r := RunState.new()
+	r.new_run(1005)
+	r.region = 4
+	r.generate_map()
+	check(r.region_def()["id"] == "crown", "fifth region is the Crown of Thorns")
+	check(EncounterDB.REGIONS.size() == 5, "the campaign has exactly five regions")
+	var restored := RunState.from_json(r.to_json())
+	check(restored.to_json() == r.to_json(), "Crown map save roundtrip")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		var c := r.make_combat()
+		var again := RunState.from_json(r.to_json()).make_combat()
+		check(again.encounter["id"] == enc and again.enemies == c.enemies and again.terrain == c.terrain
+			and again.thorn_timers == c.thorn_timers,
+			"saved Crown node restarts the same deterministic encounter: " + enc)
+		check(not c.thorn_timers.is_empty(), "%s opens with thorn walls on a schedule" % enc)
+	for seed_value in range(10):
+		var rr := RunState.new()
+		rr.new_run(seed_value)
+		rr.region = 4
+		rr.generate_map()
+		rr.enter_node(rr.available_nodes()[0])
+		rr.make_combat()
+		check(reg["easy"].has(rr.current_encounter), "Crown starts from its easy pool")
+	# The Withered Crown is the final boss: clearing it wins the run.
+	for n in r.map:
+		if n["type"] == "boss":
+			r.node_id = n["id"]
+	r.status = "reward"
+	r.leave_reward()
+	check(r.status == "victory", "clearing the Crown of Thorns wins the five-region campaign")
+	return true
+
+
+func test_crown_patterns() -> bool:
+	# Every authored move under real rules, both boss phases. Rules-bound, not a balance claim.
+	for id in ["thornling", "briar_knight", "withered_herald", "last_gardener", "withered_crown"]:
+		var c := _blank_combat({"radius": 4, "player": [0, 3], "enemies": [[id, 0, -2]]})
+		c.player["hp"] = 9999
+		c.player["max_hp"] = 9999
+		var e: Dictionary = c.enemies[0]
+		for phase in [false, true] if e["def"].has("pattern2") else [false]:
+			if phase:
+				var old_intent: Dictionary = e["intent"].duplicate(true)
+				e["ward"] = 0
+				c._damage_enemy(e, int(e["hp"]) - int(e["max_hp"] * e["def"]["phase2_at"]))
+				check(e["phase2"], "Crown enters its second phase at the threshold")
+				check(e["intent"] == old_intent, "phase change preserves this turn's promised intent")
+			e["pattern_idx"] = 0
+			var pattern: Array = e["def"]["pattern2"] if phase else e["def"]["pattern"]
+			for mi in pattern:
+				c._choose_intent(e)
+				check(e["intent"]["name"] == e["def"]["moves"][mi]["name"], "%s authored pattern order" % id)
+				c._enemy_act(e)
+				check(c.player["hp"] > 0 and c.enemies.has(e), "%s move resolves without corrupting units" % id)
+			for turn in 12:
+				c.end_turn()
+			for move in e["def"]["moves"]:
+				for action in move["actions"]:
+					if action["t"] == "summon":
+						var count := c.enemies.filter(func(en): return en["id"] == action["enemy"]).size()
+						check(count <= int(action["max"]), "%s summons remain capped" % id)
+		var stone := 0
+		for h in c.terrain:
+			if c.terrain[h] == "stone":
+				stone += 1
+				check(c.thorn_timers.has(h) == (int(c.thorn_timers.get(h, 0)) > 0), "%s thorn timers stay positive" % id)
+		check(stone <= int(c.terrain.size() * CombatState.COLLAPSE_CAP), "%s thorn walls respect the board cap" % id)
+		check(c._walkable_regions([]) == 1, "%s thorn walls never split the board" % id)
+	return true
+
+
+func test_crown_thorns() -> bool:
+	var c := _blank_combat({"player": [0, 1], "enemies": [["briar_knight", 0, -3]], "thicket": [[1, 0]],
+		"thorns": [[-2, 0, 1], [2, -1, 2]]})
+	check(c.terrain[Vector2i(-2, 0)] == "stone" and c.thorn_timers[Vector2i(-2, 0)] == 1, "authored thorn walls start raised")
+	check(not c.passable(Vector2i(-2, 0)), "a thorn wall blocks movement")
+	var k: Dictionary = c.enemies[0]
+	k["pattern_idx"] = 0
+	c._choose_intent(k)
+	var marked: Array = k["intent"]["actions"][0]["hexes"]
+	check(k["intent"]["name"] == "Hedge Wall" and marked.size() == 3, "Hedge Wall marks three hexes")
+	for h in marked:
+		check(Hex.distance(h, c.player["pos"]) <= 2 and c.terrain[h] == "plain", "thorns target open ground near the Grovewalker")
+	# Forecasting must not touch the real board, timers or RNG, but must know walls will recede.
+	var terrain0 := c.terrain.duplicate()
+	var timers0 := c.thorn_timers.duplicate()
+	var rng0 := c.rng.get_state()
+	c.enemy_forecasts()
+	check(c.terrain == terrain0 and c.thorn_timers == timers0 and c.rng.get_state() == rng0, "thorn forecast is pure")
+	# Stand on one mark: take thorn damage, that hex stays open; the others rise for 2 enemy turns.
+	var stand: Vector2i = marked[0]
+	c.player["pos"] = stand
+	c.player["ward"] = 0
+	var hp0 := int(c.player["hp"])
+	var events := c.end_turn()
+	check(int(c.player["hp"]) <= hp0 - CombatState.THORN_DMG, "standing on a thorn mark costs %d HP" % CombatState.THORN_DMG)
+	check(c.terrain[stand] == "plain", "an occupied thorn mark stays open")
+	var raised := 0
+	for h in marked:
+		if h != stand and c.terrain[h] == "stone":
+			raised += 1
+			check(c.thorn_timers.get(h, 0) == 2, "a new thorn wall lasts two enemy turns")
+	check(raised > 0, "unoccupied marks became thorn walls")
+	check(c.terrain[Vector2i(-2, 0)] == "plain" and not c.thorn_timers.has(Vector2i(-2, 0)), "a wall at 1 recedes at the start of the enemy turn")
+	check(c.thorn_timers.get(Vector2i(2, -1), 0) == 1, "longer walls count down")
+	check(events.any(func(ev): return ev["type"] == "recede"), "receding emits an event for the board")
+	check(events.any(func(ev): return ev["type"] == "collapse" and ev.get("thorns", false)), "raising emits a thorn event")
+	# Two more enemy phases: every wall has receded.
+	c.player["hp"] = 999
+	c.player["max_hp"] = 999
+	for i in 2:
+		c.end_turn()
+	for h in marked:
+		if h != stand:
+			check(c.terrain[h] == "plain" or c.thorn_timers.has(h), "no wall outlives its timer")
+	check(not c.thorn_timers.has(Vector2i(2, -1)), "authored walls recede too")
+	# A Grovewalker never gets sealed in: every raised wall keeps one walkable region.
+	check(c._walkable_regions([]) == 1, "thorn walls keep the board connected")
 	return true
 
 
@@ -473,11 +598,12 @@ func test_encounters_valid() -> bool:
 			check(Hex.distance(h, Vector2i.ZERO) <= r, "%s enemy in bounds" % id)
 			check(not seen.has(h), "%s units do not overlap" % id)
 			seen[h] = true
-		for key in ["water", "stone"]:
-			for w in e[key]:
+		for key in ["water", "stone", "thorns"]:
+			for w in e.get(key, []):
 				var h := Vector2i(w[0], w[1])
 				check(Hex.distance(h, Vector2i.ZERO) <= r, "%s %s in bounds" % [id, key])
 				check(not seen.has(h), "%s %s not under a unit %s" % [id, key, h])
+				seen[h] = true
 	for reg in EncounterDB.REGIONS:
 		for id in reg["fights"] + reg["elites"] + [reg["boss"]]:
 			check(EncounterDB.ENCOUNTERS.has(id), "region references %s" % id)

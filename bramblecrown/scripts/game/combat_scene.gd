@@ -9,6 +9,7 @@ const COL_BURN := Color(1.0, 0.45, 0.15, 0.85)
 const COL_SPREAD := Color(0.78, 0.32, 1.0, 0.6)
 const COL_DANGER := Color(1.0, 0.25, 0.2, 0.75)
 const COL_COLLAPSE := Color(1.0, 0.6, 0.18, 0.7)
+const COL_THORNS := Color(1.0, 0.42, 0.62, 0.72)
 const COL_HOVER := Color(1, 1, 1, 0.35)
 
 var c: CombatState
@@ -390,8 +391,8 @@ func _sync_plates() -> void:
 					icons.append({"kind": "attack", "n": int(prev["dmg"]), "hot": prev["hits"]})
 				"spread", "blight_self":
 					icons.append({"kind": "spread", "n": a.get("hexes", []).size()})
-				"collapse":
-					icons.append({"kind": "collapse", "n": a.get("hexes", []).size(), "hot": a.get("hexes", []).has(c.player["pos"])})
+				"collapse", "thorns":
+					icons.append({"kind": a["t"], "n": a.get("hexes", []).size(), "hot": a.get("hexes", []).has(c.player["pos"])})
 				"summon":
 					icons.append({"kind": "summon"})
 				"ward":
@@ -424,12 +425,15 @@ func _refresh_board_overlays() -> void:
 			if a["t"] in ["spread", "blight_self"]:
 				for h in a.get("hexes", []):
 					ov[h] = [COL_SPREAD, true]
-			elif a["t"] == "collapse":
+			elif a["t"] in ["collapse", "thorns"]:
+				var thorny: bool = a["t"] == "thorns"
+				var dmg := CombatState.THORN_DMG if thorny else CombatState.COLLAPSE_DMG
 				for h in a.get("hexes", []):
-					ov[h] = [COL_COLLAPSE, true]
-					marks.append({"hex": h, "from": e["pos"], "text": "-%d" % CombatState.COLLAPSE_DMG, "color": Color(1.0, 0.66, 0.25)})
+					ov[h] = [COL_THORNS if thorny else COL_COLLAPSE, true]
+					marks.append({"hex": h, "from": e["pos"], "text": "-%d" % dmg,
+						"color": Color(1.0, 0.55, 0.72) if thorny else Color(1.0, 0.66, 0.25)})
 				if a.get("hexes", []).has(c.player["pos"]):
-					incoming += CombatState.COLLAPSE_DMG
+					incoming += dmg
 		var pv := c.enemy_preview(e)
 		var col := Color(1, 0.3, 0.24, 0.95) if pv["attack"] else Color(0.8, 0.45, 1.0, 0.95)
 		if not pv["path"].is_empty():
@@ -472,6 +476,7 @@ func _refresh_board_overlays() -> void:
 	board.set_overlays(ov)
 	board.set_paths(paths)
 	board.set_marks(marks)
+	board.set_thorn_timers(c.thorn_timers)
 	board.set_incoming(0 if busy else maxi(0, incoming - int(c.player["ward"])), c.player["pos"])
 	for uid in plates:
 		plates[uid].pending_damage = int(pending.get(uid, 0))
@@ -772,6 +777,8 @@ func _update_info() -> void:
 					lines.append("• Rot %d marked hexes around itself" % a.get("hexes", []).size())
 				"collapse":
 					lines.append("• Cave-in: %d [color=#ffa040]amber[/color] hexes become rubble. Standing on one costs %d HP" % [a.get("hexes", []).size(), CombatState.COLLAPSE_DMG])
+				"thorns":
+					lines.append("• Thorn wall: %d [color=#ff8cb0]rose[/color] hexes become walls for %d enemy turns. Standing on one costs %d HP" % [a.get("hexes", []).size(), int(a.get("lasts", 2)), CombatState.THORN_DMG])
 				"summon":
 					lines.append("• Summon %s" % EnemyDB.ENEMIES[a["enemy"]]["name"])
 				"ward":
@@ -796,11 +803,17 @@ func _update_info() -> void:
 		"water":
 			lines.append("[color=#8fb8c0]Black water[/color]: impassable except to fliers.")
 		"stone":
-			lines.append("[color=#bbbbbb]%s[/color]: blocks movement." % ("Rubble" if board.theme.get("stone", "") == "hex_rubble" else "Standing stone"))
+			if c.thorn_timers.has(h):
+				var left := int(c.thorn_timers[h])
+				lines.append("[color=#ff8cb0]Thorn wall[/color]: blocks movement. %s" % ("Recedes at the start of this enemy turn, before any enemy moves." if left <= 1 else "Recedes in %d enemy turns." % left))
+			else:
+				lines.append("[color=#bbbbbb]%s[/color]: blocks movement." % ("Rubble" if board.theme.get("stone", "") == "hex_rubble" else ("Root-stone" if board.theme.get("stone", "") == "hex_crownstone" else "Standing stone")))
 	for e2 in c.enemies:
 		for a in e2["intent"].get("actions", []):
 			if a["t"] == "collapse" and a.get("hexes", []).has(h):
 				lines.append("[color=#ffa040]Cave-in[/color] (%s): becomes rubble this enemy turn; %d HP if you are standing here." % [e2["def"]["name"], CombatState.COLLAPSE_DMG])
+			elif a["t"] == "thorns" and a.get("hexes", []).has(h):
+				lines.append("[color=#ff8cb0]Thorn wall[/color] (%s): rises this enemy turn for %d turns; %d HP if you are standing here." % [e2["def"]["name"], int(a.get("lasts", 2)), CombatState.THORN_DMG])
 	match g:
 		"thicket":
 			lines.append("[color=#a6d86a]Thicket[/color]: enemies pay 2 Movement to enter.")
@@ -887,13 +900,22 @@ func _play_event(ev: Dictionary) -> void:
 					Sfx.play("ward")
 			await _wait(0.28)
 		"collapse":
-			board.collapse_hexes(ev["hexes"])
-			Sfx.play("burn", 0.1, -2)
-			rig.shake(0.7)
+			var thorny: bool = ev.get("thorns", false)
+			board.collapse_hexes(ev["hexes"], thorny)
+			Sfx.play("blight" if thorny else "burn", 0.1, -2)
+			rig.shake(0.4 if thorny else 0.7)
 			await _wait(0.45)
+		"recede":
+			board.recede_hexes(ev["hexes"])
+			Sfx.play("grow", 0.1, -4)
+			board.set_thorn_timers(c.thorn_timers)
+			await _wait(0.35)
 		"cave_in":
 			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.9, 0))
-			_float_text(sp, "Cave-in!", Color(1.0, 0.63, 0.25), 32, 1.1)
+			if ev.get("thorns", false):
+				_float_text(sp, "Thorns!", Color(1.0, 0.5, 0.68), 32, 1.1)
+			else:
+				_float_text(sp, "Cave-in!", Color(1.0, 0.63, 0.25), 32, 1.1)
 			board.growth_burst(ev["pos"], "none")
 			rig.shake(0.8)
 		"damage":

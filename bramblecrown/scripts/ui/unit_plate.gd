@@ -108,6 +108,13 @@ func _intent_icon(c: Vector2, ic: Dictionary) -> void:
 			draw_colored_polygon(PackedVector2Array([c + Vector2(-10, -2), c + Vector2(-4, -10), c + Vector2(1, -3)]), col)
 			draw_colored_polygon(PackedVector2Array([c + Vector2(2, -6), c + Vector2(9, -9), c + Vector2(8, 0)]), col)
 			draw_polyline(PackedVector2Array([c + Vector2(-11, 9), c + Vector2(-4, 4), c + Vector2(1, 9), c + Vector2(6, 3), c + Vector2(11, 8)]), col, 3, true)
+		"thorns":
+			# A thorn wall: two crossed canes with spikes.
+			col = Color(1.0, 0.5, 0.68)
+			draw_line(c + Vector2(-9, 10), c + Vector2(5, -10), col, 3, true)
+			draw_line(c + Vector2(9, 10), c + Vector2(-5, -10), col, 3, true)
+			for sp in [Vector2(-4, 3), Vector2(1, -5), Vector2(4, 3), Vector2(-1, -5)]:
+				draw_colored_polygon(PackedVector2Array([c + sp, c + sp + Vector2(sign(sp.x) * 5, -2), c + sp + Vector2(0, 3)]), col)
 		"summon":
 			col = UITheme.BLIGHT.lightened(0.2)
 			draw_line(c + Vector2(-8, 0), c + Vector2(8, 0), col, 4)
@@ -157,7 +164,7 @@ func _draw_rail() -> void:
 	var bits: PackedStringArray = []
 	var danger := false
 	for ic in intent.get("icons", []):
-		var labels := {"attack": "Hit", "spread": "Rot", "collapse": "Cave-in", "ward": "Ward", "ally_ward": "Ally Ward", "summon": "Summon", "daze": "Daze", "heal": "Heal", "strength": "Strength"}
+		var labels := {"attack": "Hit", "spread": "Rot", "collapse": "Cave-in", "thorns": "Thorns", "ward": "Ward", "ally_ward": "Ally Ward", "summon": "Summon", "daze": "Daze", "heal": "Heal", "strength": "Strength"}
 		var s: String = labels.get(ic["kind"], ic["kind"])
 		if ic.has("n"):
 			s += " %s" % ic["n"]

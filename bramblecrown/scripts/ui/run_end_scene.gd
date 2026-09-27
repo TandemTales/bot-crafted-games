@@ -11,13 +11,21 @@ func _ready() -> void:
 	add_child(bg)
 	var r := Game.run
 	var won := r != null and r.status == "victory"
+	if won:
+		add_child(RoomStage.create("finale", "crown", "top"))
+		add_child(RoomStage.shade("bottom"))
 	var v := VBoxContainer.new()
-	UITheme.anchor(v, Control.PRESET_CENTER, Vector2(-500, -260), Vector2(1000, 520))
+	if won:
+		UITheme.anchor(v, Control.PRESET_CENTER_BOTTOM, Vector2(-560, -470), Vector2(1120, 440))
+	else:
+		UITheme.anchor(v, Control.PRESET_CENTER, Vector2(-500, -260), Vector2(1000, 520))
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_theme_constant_override("separation", 24)
 	add_child(v)
 	var h := Label.new()
-	h.text = "The Road Continues" if won else "The Blight Takes Root"
+	h.text = "The Crown Is Replanted" if won else "The Blight Takes Root"
+	h.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	h.add_theme_constant_override("outline_size", 10)
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 64)
 	h.add_theme_color_override("font_color", UITheme.LEAF if won else UITheme.BLIGHT)
@@ -32,7 +40,8 @@ func _ready() -> void:
 	s.add_theme_font_size_override("font_size", 26)
 	v.add_child(s)
 	var note := Label.new()
-	note.text = "The Engine of Rot shudders still, and the Ironroot Deeps fall quiet. You have cleared the four regions in this development build. The Crown of Thorns is still to come." if won else "Another Grovewalker will take up the seed."
+	note.text = "The Withered Crown lets go at last. You press the seed into the ash where its heart stood, and before you have stood up, green canes are climbing the dead arches. From the Ashfen to the Deeps, the Blight has nothing left to feed on." if won else "Another Grovewalker will take up the seed."
+	note.add_theme_font_size_override("font_size", 22)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	note.add_theme_color_override("font_color", UITheme.INK_DIM)

@@ -2,7 +2,7 @@ class_name EncounterDB
 extends RefCounted
 ## Authored encounter layouts. Coordinates are axial (q, r) on a disc of `radius`.
 ## player: start hex; enemies: [[id, q, r]]; water/stone: impassable terrain;
-## blight/thicket: starting growth.
+## blight/thicket: starting growth; thorns: [[q, r, enemy phases]] thorn walls that recede.
 
 const REGIONS := [
 	{
@@ -40,6 +40,15 @@ const REGIONS := [
 		"boss": "iro_engine",
 		"easy": ["iro_shaft", "iro_rails", "iro_sump"],
 		"theme": "ironroot",
+	},
+	{
+		"id": "crown", "name": "Crown of Thorns",
+		"blurb": "The dying hedge crown, where thorn walls rise and fall like breath.",
+		"fights": ["crn_gate", "crn_heralds", "crn_tilt", "crn_maze", "crn_court", "crn_vigil"],
+		"elites": ["crn_gardener"],
+		"boss": "crn_crown",
+		"easy": ["crn_gate", "crn_heralds", "crn_tilt"],
+		"theme": "crown",
 	},
 ]
 
@@ -268,6 +277,75 @@ const ENCOUNTERS := {
 		"water": [[-4, 2], [4, -2], [2, -4]],
 		"stone": [[-2, -1], [2, -2], [-3, 2], [3, 0]],
 		"blight": [[0, -3], [-1, -3], [1, -3], [0, -4], [-1, -2], [1, -4]],
+		"thicket": [[0, 4], [1, 3], [-1, 4]],
+	},
+	# ---------------- Region 5: Crown of Thorns ----------------
+	# A wall of staggered thorns across the middle: one narrow gate is open, and more lanes open each turn.
+	"crn_gate": {
+		"name": "The Thorn Gate", "radius": 3, "player": [0, 3],
+		"enemies": [["thornling", -1, -2], ["thornling", 2, -3]],
+		"water": [[-3, 1], [3, -2]], "stone": [[-2, 2]],
+		"thorns": [[-2, 0, 1], [-1, 0, 2], [1, -1, 3], [2, -1, 1], [-3, 0, 2]],
+		"blight": [[-1, -2], [2, -3], [1, -3], [0, -2]], "thicket": [[0, 3], [1, 2]],
+	},
+	# Two fliers rot the lawn from range while a Thornling pins you; the wall splits the lawn.
+	"crn_heralds": {
+		"name": "The Heralds' Lawn", "radius": 3, "player": [-1, 3],
+		"enemies": [["withered_herald", -2, -1], ["withered_herald", 3, -2], ["thornling", 0, -2]],
+		"water": [[3, 0], [-3, 0]], "stone": [[1, 0]],
+		"thorns": [[0, 1, 2], [-1, 1, 1], [1, 1, 3]],
+		"blight": [[-2, -1], [3, -2], [0, -2], [1, -2], [-1, -1]], "thicket": [[-1, 3], [0, 2]],
+	},
+	# A Briar Knight walls you in and lances over the wall: keep moving out of its marks.
+	"crn_tilt": {
+		"name": "The Briar Tilt", "radius": 3, "player": [0, 3],
+		"enemies": [["briar_knight", 0, -2], ["thornling", -2, -1]],
+		"water": [[-3, 3], [3, -3]], "stone": [[-2, 1], [2, 0]],
+		"thorns": [[0, 0, 2]],
+		"blight": [[0, -2], [-1, -2], [1, -3], [-2, -1]], "thicket": [[0, 3], [-1, 3], [1, 2]],
+	},
+	# A living maze: rings of walls open on a schedule while the knight raises new ones.
+	"crn_maze": {
+		"name": "The Shifting Maze", "radius": 3, "player": [-2, 3],
+		"enemies": [["briar_knight", 2, -3], ["thornling", -1, -2], ["thornling", 3, -1]],
+		"water": [[3, 0]], "stone": [[0, 0], [-3, 1]],
+		"thorns": [[-1, 1, 1], [0, 1, 2], [1, 0, 3], [1, -1, 1], [-1, 0, 3], [0, -1, 2], [-2, 1, 2], [2, -1, 3]],
+		"blight": [[2, -3], [-1, -2], [3, -1], [1, -3], [2, -2]], "thicket": [[-2, 3], [-1, 3], [-2, 2]],
+	},
+	# Returned champions: a Glasswood Stag charges while a Herald shields it from range.
+	"crn_court": {
+		"name": "The Returning Court", "radius": 3, "player": [0, 3],
+		"enemies": [["prism_stag", 1, -2], ["withered_herald", -2, -1]],
+		"water": [[-3, 2], [3, -1]], "stone": [[-1, 0], [2, -1]],
+		"thorns": [[0, 1, 1], [1, 0, 2]],
+		"blight": [[1, -2], [0, -2], [-2, -1], [2, -3], [-1, -1]], "thicket": [[0, 3], [1, 2], [-1, 3]],
+	},
+	# A Marsh brute tramples the thicket, a Briar Knight walls the flanks: the last vigil.
+	"crn_vigil": {
+		"name": "The Last Vigil", "radius": 3, "player": [0, 2],
+		"enemies": [["husk_brute", -1, -2], ["briar_knight", 2, -3], ["thornling", 3, -1]],
+		"water": [[-3, 3], [3, -3]], "stone": [[-2, 0], [1, 0]],
+		"thorns": [[-1, 1, 2], [0, 0, 1], [2, -1, 3]],
+		"blight": [[-1, -2], [0, -2], [2, -3], [1, -3], [3, -1], [-2, -1]],
+		"thicket": [[0, 2], [-1, 3], [1, 2]],
+	},
+	# The Gardener trains the hedge around you and prunes what is left inside; its cuttings grow.
+	"crn_gardener": {
+		"name": "The Last Gardener", "radius": 3, "player": [0, 3], "elite": true,
+		"enemies": [["last_gardener", 0, -2], ["thornling", -2, -1]],
+		"water": [[-3, 1], [3, -2]], "stone": [[-1, 0], [2, -1]],
+		"thorns": [[0, 0, 2], [1, 0, 1]],
+		"blight": [[0, -2], [-1, -2], [1, -3], [0, -3], [-2, -1]],
+		"thicket": [[0, 3], [-1, 3], [1, 2]],
+	},
+	# The Crown is rooted at the head of the lawn. Reach it through the maze it keeps rebuilding.
+	"crn_crown": {
+		"name": "The Withered Crown", "radius": 4, "player": [0, 4], "boss": true,
+		"enemies": [["withered_crown", 0, -2]],
+		"water": [[-4, 2], [4, -2], [-2, -2], [2, -4]],
+		"stone": [[-3, 1], [3, -1]],
+		"thorns": [[-1, 1, 1], [0, 1, 2], [1, 0, 1], [-2, 2, 2], [2, 0, 3]],
+		"blight": [[0, -2], [-1, -2], [1, -3], [0, -3], [1, -2], [-1, -1]],
 		"thicket": [[0, 4], [1, 3], [-1, 4]],
 	},
 }

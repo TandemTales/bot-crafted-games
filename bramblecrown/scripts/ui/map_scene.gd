@@ -59,6 +59,9 @@ func _draw() -> void:
 	elif theme_id == "ironroot":
 		paper = Color(0.66, 0.58, 0.48)
 		backdrop = Color(0.07, 0.05, 0.04)
+	elif theme_id == "crown":
+		paper = Color(0.72, 0.62, 0.55)
+		backdrop = Color(0.08, 0.04, 0.05)
 	elif theme_id == "cloister":
 		paper = Color(0.66, 0.67, 0.63)
 		backdrop = Color(0.04, 0.045, 0.075)
@@ -98,6 +101,21 @@ func _draw() -> void:
 				draw_line(p + Vector2(-30, 45), p + Vector2(30, 45), ink, 3)
 			elif theme_id == "cloister":
 				draw_arc(p, 25, PI, TAU, 20, ink, 5, true)
+			elif theme_id == "crown":
+				# A thorned crown: a band with five spikes and a cane curling through it.
+				var crim := Color(0.42, 0.1, 0.12, 0.5)
+				draw_line(p + Vector2(-24, 14), p + Vector2(24, 14), ink, 5)
+				for k in 5:
+					var bx := -20.0 + k * 10.0
+					draw_colored_polygon(PackedVector2Array([p + Vector2(bx - 5, 12), p + Vector2(bx, -16 - (6 if k == 2 else 0)), p + Vector2(bx + 5, 12)]), ink)
+				var pts := PackedVector2Array()
+				for k in 13:
+					var t := k / 12.0
+					pts.append(p + Vector2(-30 + 60 * t, 24 + sin(t * TAU * 1.5) * 9))
+				draw_polyline(pts, crim, 3, true)
+				for k in 4:
+					var q: Vector2 = pts[2 + k * 3]
+					draw_line(q, q + Vector2(4, -7), crim, 2, true)
 				draw_line(p + Vector2(-25, 0), p + Vector2(-25, 45), ink, 5)
 				draw_line(p + Vector2(25, 0), p + Vector2(25, 45), ink, 5)
 			else:

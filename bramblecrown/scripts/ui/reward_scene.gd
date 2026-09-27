@@ -25,6 +25,8 @@ func _ready() -> void:
 		h.text = "The fractured light grows still"
 	elif r.region_def().get("theme", "") == "ironroot":
 		h.text = "The gallery settles into silence"
+	elif r.region_def().get("theme", "") == "crown":
+		h.text = "The thorns fall still around you"
 	h.add_theme_font_override("font", UITheme.font("title"))
 	h.add_theme_font_size_override("font_size", 52)
 	h.add_theme_color_override("font_color", UITheme.GOLD)

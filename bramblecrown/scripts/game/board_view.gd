@@ -19,6 +19,16 @@ void fragment() {
 const MODELS := "res://assets/models/%s.glb"
 ## Per-region look: tile models, surrounding props, and lighting.
 const THEMES := {
+	"crown": {
+		"plain": "hex_crown", "stone": "hex_crownstone", "water": "hex_sap", "thorn": "hex_thornwall",
+		"outer": [["hex_crown", 0.72], ["hex_crownstone", 0.14], ["hex_thornwall", 0.14]],
+		"props": [["hedge_arch", 0.10], ["withered_briar", 0.30], ["crown_shard", 0.05], ["blight", 0.10]],
+		"tall": ["hedge_arch"], "filler": "withered_briar", "tall_scale": {"hedge_arch": 1.1},
+		"bg": Color(0.07, 0.045, 0.05), "ambient": Color(0.56, 0.46, 0.46), "fog": Color(0.17, 0.09, 0.09),
+		"key": Color(1.0, 0.8, 0.6), "key_energy": 1.6, "rim": Color(0.78, 0.36, 0.52),
+		"pool": Color(0.05, 0.03, 0.025),
+		"water_color": Color(0.3, 0.15, 0.03),
+	},
 	"ironroot": {
 		"plain": "hex_mine", "stone": "hex_rubble", "water": "hex_sump", "rail": "hex_mine_rail",
 		"outer": [["hex_mine", 0.7], ["hex_rubble", 0.3]],
@@ -90,6 +100,7 @@ var _outline_mat: ShaderMaterial
 var _incoming: Label3D
 var _mark_root: Node3D
 var _candle_lights := 0
+var _thorn_root: Node3D
 var theme: Dictionary = THEMES["marsh"]
 
 
@@ -101,6 +112,8 @@ func _ready() -> void:
 	add_child(_path_root)
 	_mark_root = Node3D.new()
 	add_child(_mark_root)
+	_thorn_root = Node3D.new()
+	add_child(_thorn_root)
 	var osh := Shader.new()
 	osh.code = OUTLINE_SHADER
 	_outline_mat = ShaderMaterial.new()
@@ -183,7 +196,8 @@ func build(c: CombatState, region_seed: int = 1, theme_id: String = "marsh") -> 
 	for h in c.terrain:
 		var t: String = c.terrain[h]
 		var on_rail: bool = t == "plain" and theme.has("rail") and h.y == int(c.encounter.get("rail_row", 0))
-		var tile: Node3D = scene(theme["rail"] if on_rail else (theme["water"] if t == "water" else (theme["stone"] if t == "stone" else theme["plain"]))).instantiate()
+		var stone_tile: String = theme.get("thorn", theme["stone"]) if c.thorn_timers.has(h) else theme["stone"]
+		var tile: Node3D = scene(theme["rail"] if on_rail else (theme["water"] if t == "water" else (stone_tile if t == "stone" else theme["plain"]))).instantiate()
 		var hgt := rng.randf_range(-0.03, 0.04) if t != "water" else -0.0
 		tile_height[h] = hgt if t != "water" else -0.25
 		tile.position = Hex.to_world(h, HEX_SIZE) + Vector3(0, hgt, 0)
@@ -500,20 +514,65 @@ func kill_unit(key) -> void:
 
 
 ## Cave-in: the open tile is replaced by the theme's blocking tile, which drops from above.
-func collapse_hexes(hexes: Array) -> void:
+## A thorn wall instead bursts up out of the ground.
+func collapse_hexes(hexes: Array, thorns: bool = false) -> void:
 	for h in hexes:
 		_set_growth_node(h, "none", true)
 		if tiles.has(h):
 			tiles[h].queue_free()
-		var tile: Node3D = scene(theme["stone"]).instantiate()
+		var tile: Node3D = scene(theme.get("thorn", theme["stone"]) if thorns else theme["stone"]).instantiate()
 		tile.rotation.y = deg_to_rad(60.0 * (absi(hash(h)) % 6))
 		var rest := Hex.to_world(h, HEX_SIZE) + Vector3(0, float(tile_height.get(h, 0.0)), 0)
-		tile.position = rest + Vector3(0, 3.0, 0)
 		add_child(tile)
 		tiles[h] = tile
 		var tw := create_tween()
-		tw.tween_property(tile, "position", rest, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw.tween_callback(func(): _burst(rest + Vector3(0, 0.2, 0), Color(0.62, 0.52, 0.42), 16))
+		if thorns:
+			tile.position = rest
+			tile.scale = Vector3(1.0, 0.05, 1.0)
+			tw.tween_property(tile, "scale", Vector3.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			_burst(rest + Vector3(0, 0.3, 0), Color(0.75, 0.2, 0.25), 14)
+		else:
+			tile.position = rest + Vector3(0, 3.0, 0)
+			tw.tween_property(tile, "position", rest, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tw.tween_callback(func(): _burst(rest + Vector3(0, 0.2, 0), Color(0.62, 0.52, 0.42), 16))
+
+
+## Thorn walls recede: the wall sinks back into the ground and open ground returns.
+func recede_hexes(hexes: Array) -> void:
+	for h in hexes:
+		var rest := Hex.to_world(h, HEX_SIZE) + Vector3(0, float(tile_height.get(h, 0.0)), 0)
+		if tiles.has(h):
+			var old: Node3D = tiles[h]
+			var tw := create_tween()
+			tw.tween_property(old, "scale", Vector3(1.0, 0.05, 1.0), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tw.tween_callback(old.queue_free)
+		var tile: Node3D = scene(theme["plain"]).instantiate()
+		tile.rotation.y = deg_to_rad(60.0 * (absi(hash(h)) % 6))
+		tile.position = rest
+		add_child(tile)
+		tiles[h] = tile
+		_burst(rest + Vector3(0, 0.2, 0), Color(0.55, 0.42, 0.3), 10)
+		_set_growth_node(h, "none", false)
+
+
+## Countdown over every thorn wall: the number of enemy turns until it recedes.
+## "1" means it opens at the start of the coming enemy turn, before any enemy moves.
+func set_thorn_timers(timers: Dictionary) -> void:
+	for n in _thorn_root.get_children():
+		n.queue_free()
+	for h in timers:
+		var lb := Label3D.new()
+		lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		lb.font = UITheme.font("title")
+		lb.font_size = 56
+		lb.pixel_size = 0.005
+		lb.outline_size = 16
+		lb.modulate = Color(0.98, 0.9, 0.72) if int(timers[h]) > 1 else Color(0.62, 1.0, 0.55)
+		lb.outline_modulate = Color(0.12, 0.02, 0.03, 1)
+		lb.no_depth_test = true
+		lb.text = "%d" % int(timers[h])
+		lb.position = world(h) + Vector3(0, 1.65, 0)
+		_thorn_root.add_child(lb)
 
 
 func growth_burst(h: Vector2i, g: String) -> void:
