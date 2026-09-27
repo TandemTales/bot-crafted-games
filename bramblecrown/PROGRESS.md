@@ -11,6 +11,37 @@
 - Main runner owns every file and Git this run.
 - Next action: read region/encounter/enemy data paths, then author Crown of Thorns.
 
+### Run 6 working unit: Crown of Thorns (region 5 of 5)
+
+- **Content:**
+  - Six fights, The Last Gardener elite and the two-phase Withered Crown.
+  - Thornling, Briar Knight and Withered Herald, plus returning champions from earlier regions
+    (Prism Stag, Husk Brute) in two fights.
+  - Encounter contract met: 30 fights, 5 elites, 5 bosses.
+  - Clearing the Crown is a real campaign victory ("The Crown Is Replanted" with a 3D finale).
+    It replaces the development continuation screen.
+- **New rule, receding thorn walls (`thorns`):**
+  - Telegraphed like a cave-in. Standing on a mark costs 5 HP and keeps that hex open.
+  - Walls count down at the start of every enemy phase and recede before enemies move.
+  - Every wall shows a countdown number.
+  - Authored staggered walls let mazes open lane by lane.
+  - Walls never split the board and respect the 40% cap.
+- **Art:** twelve original Blender models (4 tiles, 3 props, 5 enemies; animated diadem). After
+  native inspection: greyed the ground (it read orange), gave the sap an amber glow (it read as
+  black holes, then as lava), and moved the finale Grovewalker off the Crown's face.
+- **HUD:** the turn banner moved into a band under the encounter title. The tour now asserts it
+  never covers an enemy (Run 5 critic item).
+- **Gate:** 2,003 passed / 0 failed. Forecast drift 0 of 1,800 (was 1,461 before the Crown fights).
+- **Package:** `build/windows/Bramblecrown.exe`, 120,613,672 bytes, SHA-256
+  `FAF5268F0BEEE4FEC923349FE092D6C254B0BC1DDDFC1FD77BF808E57DA2D06F`.
+- **Tour:** `--tour-only run6` passed at 1280x720, 1920x1080 and 2560x1440. 23 images each,
+  0 failures, player saves unchanged. The main runner read all 69 images, through 12 contact
+  sheets plus representative originals. Evidence is in `evidence/2026-09-27-run6/`.
+- **Blender:** `withered_crown.blend` (`diadem_turn`, frames 1-61), `hex_thornwall.blend` and
+  `last_gardener.blend` reopen with the expected meshes and materials.
+- **Limits:** balance is unverified; the bot has never cleared a boss run. The victory screen is
+  staged. Region-specific shrine events are still missing.
+
 ## 2026-09-26 — Run 5 checkpoint (Pacific Saturday 09:35, age 2 days)
 
 - STOP absent; worktree fast-forwarded to remote `dev` `4f65d1c` (Run 4 final). Work pushes to `dev`.

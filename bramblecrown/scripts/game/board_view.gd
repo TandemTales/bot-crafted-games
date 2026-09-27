@@ -24,10 +24,10 @@ const THEMES := {
 		"outer": [["hex_crown", 0.72], ["hex_crownstone", 0.14], ["hex_thornwall", 0.14]],
 		"props": [["hedge_arch", 0.10], ["withered_briar", 0.30], ["crown_shard", 0.05], ["blight", 0.10]],
 		"tall": ["hedge_arch"], "filler": "withered_briar", "tall_scale": {"hedge_arch": 1.1},
-		"bg": Color(0.07, 0.045, 0.05), "ambient": Color(0.56, 0.46, 0.46), "fog": Color(0.17, 0.09, 0.09),
-		"key": Color(1.0, 0.8, 0.6), "key_energy": 1.6, "rim": Color(0.78, 0.36, 0.52),
-		"pool": Color(0.05, 0.03, 0.025),
-		"water_color": Color(0.3, 0.15, 0.03),
+		"bg": Color(0.07, 0.05, 0.055), "ambient": Color(0.58, 0.52, 0.55), "fog": Color(0.16, 0.1, 0.11),
+		"key": Color(1.0, 0.9, 0.82), "key_energy": 1.45, "rim": Color(0.78, 0.4, 0.55),
+		"pool": Color(0.05, 0.035, 0.03),
+		"water_color": Color(0.26, 0.13, 0.035), "water_emit": Color(0.3, 0.13, 0.02),
 	},
 	"ironroot": {
 		"plain": "hex_mine", "stone": "hex_rubble", "water": "hex_sump", "rail": "hex_mine_rail",
@@ -312,6 +312,10 @@ func _water_disc() -> MeshInstance3D:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 		m.roughness = 0.28
 		m.metallic_specular = 0.5
+	if theme.has("water_emit"):
+		m.emission_enabled = true
+		m.emission = theme["water_emit"]
+		m.emission_energy_multiplier = 0.5
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mi.material_override = m
 	mi.position.y = -0.1
@@ -564,9 +568,9 @@ func set_thorn_timers(timers: Dictionary) -> void:
 		var lb := Label3D.new()
 		lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lb.font = UITheme.font("title")
-		lb.font_size = 56
-		lb.pixel_size = 0.005
-		lb.outline_size = 16
+		lb.font_size = 80
+		lb.pixel_size = 0.0062
+		lb.outline_size = 22
 		lb.modulate = Color(0.98, 0.9, 0.72) if int(timers[h]) > 1 else Color(0.62, 1.0, 0.55)
 		lb.outline_modulate = Color(0.12, 0.02, 0.03, 1)
 		lb.no_depth_test = true

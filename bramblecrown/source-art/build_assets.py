@@ -2080,8 +2080,8 @@ def crown_palette():
     """Ash-pale sward, blackened thorn wood and dried crimson hips under a failing gold crown."""
     return {
         "earth": mat("crown_earth", (0.09, 0.065, 0.055), 0.97),
-        "sward": mat("ash_sward", (0.30, 0.27, 0.20), 0.95),
-        "sward_dark": mat("ash_sward_dark", (0.19, 0.17, 0.13), 0.95),
+        "sward": mat("ash_sward", (0.25, 0.245, 0.225), 0.95),
+        "sward_dark": mat("ash_sward_dark", (0.15, 0.14, 0.12), 0.95),
         "straw": mat("dead_straw", (0.52, 0.45, 0.30), 0.9),
         "petal": mat("fallen_petal", (0.55, 0.12, 0.14), 0.7),
         "thornwood": mat("thornwood", (0.07, 0.05, 0.05), 0.75),

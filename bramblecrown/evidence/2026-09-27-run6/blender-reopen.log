@@ -1,0 +1,7 @@
+[reopen] withered_crown thorn_diadem verts 504 mats ['thornwood', 'rose_hip', 'crown_gold', 'crown_gold_tarnish'] dims (1.05, 1.16, 0.55)
+[reopen] withered_crown withered_crown_body verts 2686 mats ['thornwood_light', 'thornwood', 'bone_mask', 'thorn_eye', 'crown_blight_glow', 'crown_blight'] dims (1.38, 1.35, 1.36)
+[reopen] withered_crown actions [('diadem_turn', (1.0, 61.0))]
+[reopen] hex_thornwall hex_thornwall verts 9210 mats ['crown_earth', 'ash_sward', 'ash_sward_dark', 'dead_straw', 'fallen_petal', 'old_root'] dims (1.7, 1.96, 2.33)
+[reopen] hex_thornwall actions []
+[reopen] last_gardener last_gardener verts 2976 mats ['gardener_cloth', 'crown_bark', 'dead_straw', 'thorn_eye', 'thornwood_light', 'crimson_spike'] dims (0.72, 1.31, 1.6)
+[reopen] last_gardener actions []

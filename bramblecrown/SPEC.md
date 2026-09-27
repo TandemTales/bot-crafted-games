@@ -74,6 +74,43 @@ original to this project.
 
 ## Presentation
 
+### Implemented Crown of Thorns region (2026-09-27, Run 6)
+
+The fifth and final region adds six authored fights, The Last Gardener elite and the two-phase
+Withered Crown. The encounter contract is now met: 30 normal encounters, five elites and five
+bosses across five regions. Clearing the Withered Crown ends the run in a real campaign victory
+("The Crown Is Replanted", with a staged 3D finale), replacing the development continuation screen.
+
+New rule, **thorn walls** (`thorns` action, `{count, radius, lasts}`): like a cave-in, an enemy marks
+open hexes near the Grovewalker when it picks its intent (rose overlay, crossed-cane glyph, "Thorns N"
+label, "-5" per hex with a tether to the source). On the enemy turn each unoccupied mark becomes a
+thorn wall; a Grovewalker standing on a mark takes 5 damage (Ward applies) and the hex stays open.
+Unlike rubble, a wall **recedes**: each enemy phase starts by counting every wall down, and a wall
+at 0 becomes open ground before any enemy moves. A countdown number floats over every wall (green
+at 1: "opens this enemy turn"). Encounters can also start with authored walls on staggered timers
+(`thorns: [[q, r, phases]]`), so the maze opens lane by lane. Walls share the cave-in guarantees:
+they never split the walkable board and stop at the 40% blocked cap. Forecasts include receding
+walls because they simulate the whole enemy phase.
+
+| Encounter | Spatial decision |
+|---|---|
+| The Thorn Gate | One gate is open now; staggered walls open more lanes each turn. Push through or wait. |
+| The Heralds' Lawn | Two flying Heralds rot the lawn from range while a Thornling walls you in. |
+| The Briar Tilt | The Briar Knight walls you in, then lances over the wall: step out before it rises. |
+| The Shifting Maze | Eight walls on three timers plus new walls from a knight and two Thornlings. |
+| The Returning Court | A returned Glasswood Prism Stag charges while a Herald shields it. |
+| The Last Vigil | A returned Marsh Husk Brute tramples your Thicket while a Briar Knight walls the flanks. |
+| The Last Gardener | The elite trains long-lasting walls around you, prunes, grafts and takes cuttings. |
+| The Withered Crown | Rooted boss: reach it through a maze it rebuilds; phase 2 walls last longer and hit for 18. |
+
+Thornlings prick and take root (one wall and Ward). Briar Knights wall, lance at range 2 and guard.
+Withered Heralds fly, rot, dart and shield allies. Two fights bring back earlier regions' champions
+("mixed pairs"). Twelve original Blender models: ash sward, root-stone, thorn-wall and amber sap
+tiles; hedge arch, withered briar and crown shard props; the five enemies, with a turning thorn
+diadem animation on the Crown. The map margins, rooms, reward headline and camp text follow the region.
+The turn banner now sits in a band under the encounter title so it never covers enemies.
+Region-specific shrine events remain owed. Run 6 used no editing sub-agents.
+
 ### Implemented Ironroot Deeps region (2026-09-26, Run 5)
 
 The fourth region adds six authored fights, the Foundry Heart elite and the two-phase Engine of

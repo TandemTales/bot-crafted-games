@@ -230,12 +230,13 @@ func _build_ui() -> void:
 	# Turn banner.
 	banner = Label.new()
 	banner.add_theme_font_override("font", UITheme.font("title"))
-	banner.add_theme_font_size_override("font_size", 72)
+	banner.add_theme_font_size_override("font_size", 60)
 	banner.add_theme_color_override("font_color", UITheme.GOLD)
 	banner.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	banner.add_theme_constant_override("outline_size", 14)
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UITheme.anchor(banner, Control.PRESET_CENTER, Vector2(-700, -200), Vector2(1400, 100))
+	# A band under the encounter title, clear of the board so the banner never hides enemies.
+	UITheme.anchor(banner, Control.PRESET_CENTER_TOP, Vector2(-700, 62), Vector2(1400, 90))
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	banner.modulate.a = 0
 	root.add_child(banner)

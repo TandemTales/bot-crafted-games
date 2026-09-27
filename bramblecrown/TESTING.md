@@ -123,3 +123,28 @@ Run `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH --tour-onl
 (22 images): the map, all eight encounters, a staged cave-in telegraph and resolution (asserts the
 glyph, highlighted hexes and rubble tile), Engine phase two, the clear screen, four Ironroot rooms
 and the input/resize regression views. Run at 1280x720, 1920x1080 and 2560x1440 and read every image.
+
+## 9. Crown of Thorns and thorn-wall regression (Run 6)
+
+Generate only Crown assets:
+`blender -b -P source-art/build_assets.py -- only=crown_tiles,crown_props,thornling,briar_knight,withered_herald,last_gardener,withered_crown`.
+Reopen `withered_crown.blend` (one `diadem_turn` action, frames 1-61), `hex_thornwall.blend` and
+`last_gardener.blend`, and check meshes, materials and dimensions.
+
+`test_crown_thorns` covers authored walls, targeting, forecast purity (terrain, timers and RNG),
+standing on a mark (5 damage, hex stays open), new walls lasting two enemy phases, receding at the
+start of the enemy phase, countdowns, events and connectivity. `test_crown_patterns` runs every
+authored move in both boss phases and checks summon caps, positive timers, the blocked cap and a
+single walkable region. `test_crown_progression` covers Ironroot to Crown, map and checkpoint
+restarts (including timers), the easy pool and the five-region victory.
+`test_enemy_forecast_matches_resolution` now includes the eight Crown encounters (drift must be 0).
+`test_encounters_valid` also rejects overlapping water, stone and thorn hexes.
+
+Run `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH --tour-only run6`
+(23 images): the Crown map, all eight encounters, a staged Hedge Wall telegraph, the raised walls,
+the same walls after they recede, Crown phase two intent and resolution, the campaign victory
+screen, four Crown rooms and the input/resize regression views. Assertions cover the theme, a
+thorn model on every authored wall, one countdown per wall, the thorn intent icon, highlighted
+marks and tethers, raised and receded tiles, the turn banner staying clear of every enemy, the
+diadem animation, checkpoint resume and unchanged player saves. Run at 1280x720, 1920x1080 and
+2560x1440 and read every image. The victory screen is staged, not a won campaign.

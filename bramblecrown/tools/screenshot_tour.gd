@@ -35,6 +35,12 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "run6":
+		await _crown()
+		await _rooms(4)
+		await _rail_input()
+		_finish()
+		return
 	if only == "run5":
 		await _ironroot()
 		await _rooms(3)
@@ -251,6 +257,103 @@ func _ironroot() -> void:
 	Game.route_to_status()
 	await _wait(0.7)
 	await _shot("56_development_clear")
+	Game.goto_title()
+	await _wait(0.4)
+
+
+func _await_enemy_turn(sc) -> void:
+	for frame in 120:
+		await _wait(0.1)
+		if not sc.busy:
+			break
+
+
+func _crown() -> void:
+	Game.new_run(1005)
+	var r := Game.run
+	r.region = 4
+	r.generate_map()
+	Game.goto_map()
+	await _wait(1.2)
+	await _shot("60_crown_map")
+	var reg := r.region_def()
+	for enc in reg["fights"] + reg["elites"] + [reg["boss"]]:
+		r.current_encounter = enc
+		r.status = "combat"
+		Game.goto_combat()
+		await _wait(3.2)
+		var sc = get_tree().current_scene
+		_check(sc.banner.modulate.a < 0.01, "encounter title has cleared before capture")
+		_check(sc.board.theme == BoardView.THEMES["crown"], "Crown theme is active")
+		_check(sc.board.units.size() == sc.c.enemies.size() + 1, "every Crown unit has a model")
+		for h in sc.c.thorn_timers:
+			_check(sc.board.tiles[h].scene_file_path.ends_with("hex_thornwall.glb"), "authored thorn wall shows the thorn model")
+		_check(sc.board._thorn_root.get_child_count() == sc.c.thorn_timers.size(), "every thorn wall shows its countdown")
+		await _shot("61_" + enc)
+		if enc == "crn_tilt":
+			# Stage the Briar Knight's Hedge Wall, resolve it natively, then watch the walls recede.
+			var k: Dictionary = sc.c.enemies[0]
+			sc.c.player["hp"] = 999
+			sc.c.player["max_hp"] = 999
+			k["pattern_idx"] = 0
+			sc.c._choose_intent(k)
+			var marked: Array = k["intent"]["actions"][0]["hexes"]
+			sc._refresh_all()
+			var panel: UnitPlate = sc.plates[k["uid"]]
+			_check(panel.intent["icons"].any(func(ic): return ic["kind"] == "thorns"), "thorn intent has its own icon")
+			_check(marked.size() > 0 and sc.board.overlays[marked[0]].visible, "thorn marks are highlighted")
+			_check(sc.board._mark_root.get_child_count() >= marked.size(), "thorn marks show damage and a tether to the source")
+			await _shot("62_thorn_telegraph")
+			sc._on_end_turn()
+			await _await_enemy_turn(sc)
+			_check(not sc.busy, "thorn enemy turn finishes")
+			var rose := 0
+			for h in marked:
+				if sc.c.terrain[h] == "stone":
+					rose += 1
+					_check(sc.board.tiles[h].scene_file_path.ends_with("hex_thornwall.glb"), "a raised hex shows the thorn wall")
+			_check(rose > 0, "at least one marked hex became a thorn wall")
+			var band: Rect2 = sc.banner.get_global_rect()
+			for en in sc.c.enemies:
+				var sp: Vector2 = sc.rig.camera.unproject_position(sc.board.units[en["uid"]].position + Vector3(0, 0.8, 0))
+				_check(not band.has_point(sp), "turn banner stays clear of %s" % en["def"]["name"])
+			await _wait(1.0)
+			await _shot("63_thorns_raised")
+			for i in 2:
+				sc._on_end_turn()
+				await _await_enemy_turn(sc)
+			var opened := 0
+			for h in marked:
+				if sc.c.terrain[h] == "plain" and sc.board.tiles[h].scene_file_path.ends_with("hex_crown.glb"):
+					opened += 1
+			_check(opened == marked.size(), "every raised wall receded to open ground on schedule")
+			await _wait(1.0)
+			await _shot("64_thorns_receded")
+		if enc == reg["boss"]:
+			var boss: Dictionary = sc.c.enemies[0]
+			var animation: AnimationPlayer = sc.board.units[boss["uid"]].find_child("AnimationPlayer", true, false)
+			_check(animation != null and animation.is_playing(), "Crown diadem animation imported and playing")
+			sc.c._damage_enemy(boss, int(boss["hp"]) / 2 + 1)
+			_check(boss["phase2"], "Withered Crown switches phase")
+			sc.c._choose_intent(boss)
+			sc._refresh_all()
+			await _shot("65_crown_phase2_intent")
+			sc.c.player["hp"] = 999
+			sc._on_end_turn()
+			await _await_enemy_turn(sc)
+			_check(not sc.busy and sc.c.turn >= 2, "Crown phase-two enemy turn finishes")
+			await _wait(1.4)
+			await _shot("66_crown_phase2_resolved")
+		var expected: String = enc
+		Game.run = RunState.from_json(r.to_json())
+		Game.goto_combat()
+		await _wait(0.4)
+		_check(Game.combat.encounter["id"] == expected, "native checkpoint resume: " + expected)
+		r = Game.run
+	r.status = "victory"
+	Game.route_to_status()
+	await _wait(1.5)
+	await _shot("67_campaign_victory")
 	Game.goto_title()
 	await _wait(0.4)
 

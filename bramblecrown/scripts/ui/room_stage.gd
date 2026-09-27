@@ -217,7 +217,7 @@ func _finale() -> void:
 		_place("thicket", _hex(h) + Vector3(0, 0, -0.6), _rng.randf_range(0, 360), 1.05)
 	_place("hedge_arch", Vector3(-2.4, 0, -1.6), 20.0, 1.2)
 	_place("hedge_arch", Vector3(2.4, 0, -1.6), -20.0, 1.2)
-	_place("grovewalker", Vector3(0.9, 0, 1.2), 200.0, 1.35)
+	_place("grovewalker", Vector3(1.9, 0, 0.9), 235.0, 1.35)
 	_light(Vector3(0, 2.6, -0.2), Color(0.6, 1.0, 0.45), 6.0, 7.0, 0.15)
 	_light(Vector3(0.9, 1.4, 1.6), Color(1.0, 0.8, 0.5), 2.0, 4.0, 0.0)
 
