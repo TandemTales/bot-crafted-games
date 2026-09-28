@@ -1,5 +1,15 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-28 — Run 7 checkpoint (Pacific Monday 09:01, age 4 days)
+
+- STOP absent; worktree at remote `dev` `4dc1ecc` (Run 6 final). Work pushes to `dev`.
+- Polish night: forced release remains Saturday 2026-10-03 Pacific; no quality gate has passed.
+- Bounded plan: (1) Cassia, the second Grovewalker ("burns her own grove for burst"), with her own
+  20-card set, starter deck, progression unlock, walker select on the title screen, and
+  rules/save tests; (2) a stacked forecast label on the player's hex (Run 6 critic item) if time
+  remains.
+- Main runner owns every file and Git this run.
+
 ## 2026-09-27 — Run 6 checkpoint (Pacific Sunday 09:05, age 3 days)
 
 - STOP absent; worktree at remote `dev` `670cf3c` (Run 5 final). Work pushes to `dev`.
