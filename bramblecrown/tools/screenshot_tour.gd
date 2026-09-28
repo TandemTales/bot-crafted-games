@@ -35,6 +35,10 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "run7":
+		await _cassia()
+		_finish()
+		return
 	if only == "run6":
 		await _crown()
 		await _rooms(4)
@@ -552,3 +556,130 @@ func _shot(name_: String) -> void:
 	img.save_png(path)
 	_shots.append(path)
 	print("[tour] ", path)
+
+
+## Run 7: Cassia, the Ashwalker. Title lock/unlock, her Kindle combat, her cards and rooms.
+func _cassia() -> void:
+	Game.profile["bosses"] = 0
+	Game.goto_title()
+	await _wait(2.0)
+	var locked := get_tree().current_scene.find_children("*", "Button", true, false).filter(func(b): return b.text.begins_with("Locked: Cassia"))
+	_check(locked.size() == 1 and locked[0].disabled, "fresh profile shows Cassia locked")
+	await _shot("70_title_cassia_locked")
+	Game.profile["bosses"] = 1
+	Game.goto_title()
+	await _wait(2.0)
+	var open := get_tree().current_scene.find_children("*", "Button", true, false).filter(func(b): return b.text.begins_with("New Run: Cassia"))
+	_check(open.size() == 1 and not open[0].disabled, "a boss kill unlocks Cassia on the title screen")
+	await _shot("71_title_cassia_unlocked")
+	Game.clear_run()
+	Game.new_run(4242, "cassia")
+	_check(Game.run.walker == "cassia", "new run starts as Cassia")
+	var r := Game.run
+	r.enter_node(r.available_nodes()[0])
+	Game.goto_combat()
+	await _wait(3.5)
+	var sc = get_tree().current_scene
+	_check(sc.board.units["player"].scene_file_path.ends_with("cassia.glb"), "Cassia's model stands on the board")
+	await _shot("72_cassia_combat")
+	# Stage a Grove to burn and a Kindle hand, then preview Ember Lash on the nearest enemy.
+	var e: Dictionary = sc.c.enemies[0]
+	var p: Vector2i = sc.c.player["pos"]
+	var changes := {}
+	for h in [p] + Hex.neighbors(p):
+		if sc.c.passable(h) and not sc.c.occupied(h) or h == p:
+			sc.c.growth[h] = "thicket"
+			changes[h] = "thicket"
+	sc.board.apply_growth(changes)
+	sc.c.player["energy"] = 3
+	sc.c.hand = [{"id": "flashburn", "up": false, "uid": 9101}, {"id": "ember_lash", "up": false, "uid": 9102},
+		{"id": "blaze", "up": false, "uid": 9103}, {"id": "smokescreen", "up": false, "uid": 9104}, {"id": "cinder_strike", "up": true, "uid": 9105}]
+	sc._refresh_all()
+	await _wait(0.6)
+	sc.selected_uid = 9101
+	sc.hover_hex = p
+	sc._refresh_all()
+	await _wait(0.6)
+	await _shot("73_cassia_kindle_preview")
+	sc.hover_hex = null
+	var grove0: int = sc.c.grove().size()
+	sc._play(9101, p)
+	await _wait(2.0)
+	_check(int(sc.c.player["heat"]) == 2 and sc.c.grove().size() == grove0 - 2, "Flashburn kindles 2 hexes into 2 Heat")
+	_check(sc.heat_label.visible and sc.heat_label.text == "Heat 2", "Heat readout shows 2")
+	_check(sc.board.scorch_nodes.size() == 2, "both kindled hexes show an ash scar")
+	await _shot("74_cassia_heat")
+	# Ember Lash targeting preview: the forecast must include the Heat it is about to add.
+	var lash: Dictionary = sc.c.hand[sc.c.hand_index(9102)]
+	var targets: Array = sc.c.valid_targets(lash)
+	if targets.is_empty():
+		# Bring the nearest enemy into range so the preview can be judged.
+		for h in Hex.ring(p, 2):
+			if sc.c.passable(h) and not sc.c.occupied(h):
+				e["pos"] = h
+				sc.board.units[e["uid"]].position = sc.board.world(h)
+				break
+		targets = sc.c.valid_targets(lash)
+	if not targets.is_empty():
+		sc.selected_uid = 9102
+		sc.hover_hex = targets[0]
+		sc._refresh_all()
+		await _wait(0.6)
+		_check(sc.heat_label.text == "Heat 2 → 3", "targeting forecasts the Heat Ember Lash adds (%s)" % sc.heat_label.text)
+		await _shot("75_cassia_lash_preview")
+		var pv: Dictionary = sc.c.preview_card(lash, targets[0])
+		var tgt_e = sc.c.enemy_at(targets[0])
+		var hp0 := int(tgt_e["hp"]) + int(tgt_e["ward"])
+		sc.hover_hex = null
+		sc._play(9102, targets[0])
+		await _wait(2.0)
+		if sc.c.enemies.has(tgt_e):
+			_check(hp0 - int(tgt_e["hp"]) - int(tgt_e["ward"]) == int(pv["damage"].get(tgt_e["uid"], -1)), "Ember Lash lands exactly its preview")
+		await _shot("76_cassia_after_lash")
+	sc.c.player["ward"] = 60
+	sc._on_end_turn()
+	await _wait(1.6)
+	await _shot("77_cassia_enemy_turn")
+	await _wait(4.0)
+	# Every Cassia card, base and upgraded, must fit its frame.
+	var ids := CardDB.CARDS.keys().filter(func(id): return CardDB.CARDS[id]["owner"] == "cassia")
+	for up in [false, true]:
+		for page in 4:
+			var cards: Array = []
+			for id in ids.slice(page * 5, page * 5 + 5):
+				cards.append({"id": id, "up": up})
+			var dv := DeckViewer.open_pile(get_tree().current_scene, "Cassia's cards%s · %d / 4" % [" upgraded" if up else "", page + 1], cards, "Kindle your own Grove into Heat")
+			await _wait(0.7)
+			for cv in dv.find_children("*", "Control", true, false):
+				if cv is CardView:
+					_check(cv._desc.get_content_height() <= cv._desc.size.y + 1, "card rules fit: " + cv.def["name"])
+					_check(cv._art_tex != null, "card has its Blender illustration: " + cv.def["name"])
+			await _shot("78_cassia_cards_%s_%d" % ["up" if up else "base", page])
+			dv.queue_free()
+			await _wait(0.2)
+	# Her rooms: the shrine offers her own card in place of Wren's.
+	r = Game.run
+	for st in ["camp", "shrine"]:
+		r.status = st
+		if st == "shrine":
+			r.current_event = "willow_cairn" if EventDB.EVENTS.has("willow_cairn") else EventDB.EVENTS.keys()[0]
+			for id in EventDB.EVENTS:
+				for opt in EventDB.EVENTS[id]["options"]:
+					for op in opt["ops"]:
+						if op[0] == "card" and op[1] == "verdant_surge":
+							r.current_event = id
+		Game.route_to_status()
+		await _wait(1.8)
+		if st == "shrine":
+			var labels := get_tree().current_scene.find_children("*", "Button", true, false).map(func(b): return b.text)
+			_check(labels.any(func(t): return t.contains("Smolder")), "shrine offers Cassia's Smolder instead of Verdant Surge")
+			_check(not labels.any(func(t): return t.contains("Verdant Surge")), "shrine does not name Wren's card for Cassia")
+		await _shot("79_cassia_%s" % st)
+	# Cassia on the Crown's board.
+	r.region = 4
+	r.current_encounter = "crn_tilt"
+	r.status = "combat"
+	Game.goto_combat()
+	await _wait(3.2)
+	await _shot("80_cassia_crown")
+	Game.clear_run()

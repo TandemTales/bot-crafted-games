@@ -1,0 +1,3 @@
+[blendcheck] brazier_flame MESH dims=0.27,0.28,0.47 action=flame_flicker mats=2
+[blendcheck] cassia MESH dims=0.84,0.82,1.76 action=- mats=10
+[blendcheck] frames 1 25

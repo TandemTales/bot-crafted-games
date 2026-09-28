@@ -488,6 +488,9 @@ func _refresh_board_overlays() -> void:
 					ov[h] = [COL_BURN, false]
 				pending = pr["damage"]
 				ward_break = pr.get("ward_break", {})
+				if int(pr.get("heat", 0)) != int(c.player.get("heat", 0)):
+					heat_label.text = "Heat %d → %d" % [int(c.player.get("heat", 0)), int(pr["heat"])]
+					heat_label.visible = true
 				if c.card_def(inst)["target"] != "self":
 					ov[tgt] = [Color(1, 1, 0.8, 0.8), false]
 	if hover_hex != null and not ov.has(hover_hex):
@@ -907,6 +910,8 @@ func _play_event(ev: Dictionary) -> void:
 			board.apply_growth(ev["changes"])
 			for h in ev["changes"]:
 				board.growth_burst(h, ev["changes"][h] if cause != "burn" else "burn")
+				if cause == "burn":
+					board.mark_scorched(h)
 			match cause:
 				"grow":
 					Sfx.play("grow")

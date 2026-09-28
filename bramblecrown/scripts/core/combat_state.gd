@@ -445,7 +445,7 @@ func _apply_effect(def: Dictionary, fx: Dictionary, target: Vector2i, is_attack:
 		"scorch_area":
 			for e in enemies:
 				if Hex.distance(e["pos"], target) <= int(fx["radius"]):
-					_add_status(e, "scorch", CardDB.val(def, fx["n"]))
+					_add_status(e, "scorch", CardDB.val(def, fx["n"]) + int(player.get("heat", 0)) * CardDB.val(def, fx.get("heat_mult", 0)))
 		"scorch_grove_area":
 			var area := {}
 			var src: Array = g if not g.is_empty() else [player["pos"]]

@@ -124,6 +124,20 @@ Run `Bramblecrown.exe --screenshot-tour <abs-out-dir> --shot-size WxH --tour-onl
 glyph, highlighted hexes and rubble tile), Engine phase two, the clear screen, four Ironroot rooms
 and the input/resize regression views. Run at 1280x720, 1920x1080 and 2560x1440 and read every image.
 
+## 10. Cassia regression (Run 7)
+
+- Rule suite: `test_cassia_data`, `test_cassia_unlock`, `test_kindle_rules`,
+  `test_cassia_cards_resolve`, `test_cassia_powers`, `test_cassia_preview_matches_play` (every
+  Cassia card, base and upgraded: burned hexes, Heat and damage match the preview exactly),
+  `test_cassia_events`, `test_cassia_bot` (10 seeds; prints region-1 clears as a balance gauge).
+- Packaged tour: `Bramblecrown.exe --screenshot-tour <dir> --shot-size WxH --tour-only run7` at
+  1280x720, 1920x1080 and 2560x1440. It asserts the locked/unlocked title buttons, Cassia's model on
+  the board, Flashburn giving 2 Heat and 2 ash scars, the "Heat 2 → 3" targeting forecast, Ember
+  Lash landing exactly its preview, every Cassia card fitting its frame with Blender art, the
+  shrine naming Smolder instead of Verdant Surge, and unchanged player saves. Exit code must be 0.
+- Reopen `source-art/cassia.blend`: two meshes (`cassia`, `brazier_flame` with `flame_flicker`,
+  frames 1-25).
+
 ## 9. Crown of Thorns and thorn-wall regression (Run 6)
 
 Generate only Crown assets:

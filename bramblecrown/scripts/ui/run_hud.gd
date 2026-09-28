@@ -15,7 +15,7 @@ func _ready() -> void:
 	h.add_theme_constant_override("separation", 22)
 	add_child(h)
 	var name_l := Label.new()
-	name_l.text = "Wren"
+	name_l.text = WalkerDB.get_def(Game.run.walker if Game.run != null else "wren")["name"]
 	name_l.add_theme_font_override("font", UITheme.font("title"))
 	name_l.add_theme_font_size_override("font_size", 28)
 	name_l.add_theme_color_override("font_color", UITheme.GOLD)

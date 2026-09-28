@@ -1,6 +1,6 @@
 # BRAMBLECROWN — Progress
 
-## 2026-09-28 — Run 7 checkpoint (Pacific Monday 09:01, age 4 days)
+## 2026-09-28 — Run 7 checkpoint (Pacific Monday 02:01, age 4 days)
 
 - STOP absent; worktree at remote `dev` `4dc1ecc` (Run 6 final). Work pushes to `dev`.
 - Polish night: forced release remains Saturday 2026-10-03 Pacific; no quality gate has passed.
@@ -9,6 +9,63 @@
   rules/save tests; (2) a stacked forecast label on the player's hex (Run 6 critic item) if time
   remains.
 - Main runner owns every file and Git this run.
+
+### Run 7 result: Cassia, the Ashwalker (second Grovewalker)
+
+- **Rules:** Kindle (burn your own Grove, farthest first, never your hex), Heat (per turn,
+  scales her cards), Scorch (damage over time). Previews simulate Kindle inside a card, so the
+  burned hexes, Heat and damage shown before a play are exact.
+- **Content:** 20 Cassia cards with upgrades (4 starter, 7 common, 7 uncommon, 2 rare; three
+  powers). Per-walker reward pools. Shrine events swap Wren card grants for Cassia counterparts.
+- **Progression:** `WalkerDB` (new file); the profile keeps the best boss count, one boss kill
+  unlocks Cassia, and the combat victory flow shows an "unlocked" banner. The title screen lists
+  both walkers. The walker survives save/load; the combat, room and HUD names follow it.
+- **Art:** original Blender model with an animated brazier flame; 20 rendered card illustrations
+  (fire tuned so AgX keeps it orange, not white); ember ring and light on the board; grey-ash scar
+  decals on kindled hexes (first try sat inside the tile, then read as a red danger tile; fixed).
+- **Bug found by the tour:** the room top bar said "Wren" during a Cassia run. Fixed.
+- **Gate:** `tools/check.sh` → 3,122 passed / 0 failed (was 2,754).
+- **Balance gauge (bots, not humans):** Cassia bot 1/10 region-1 clears after the critic fixes
+  (2/10 before); Wren smart bot 3/20. The bot does not aim Kindle or plan Heat, so this
+  understates her; human balance is unverified.
+- **Package (final, after critic fixes):** `build/windows/Bramblecrown.exe`, 122,324,680 bytes,
+  SHA-256 `43B0C6B11ACCC93E8576868B9186C9111A9905AF41A9A769BCD685A77B0D061F`. The final
+  `--tour-only run7` passed again at all three sizes (19 images each, 0 failures).
+- **Tour:** `--tour-only run7` passed at 1280x720, 1920x1080 and 2560x1440 (19 images each,
+  0 failures, saves unchanged). The `run6` tour still passes at 1280x720 (23 images, 0 failures).
+  The main runner read the three contact sheets and eight full-size shots; sheets, originals,
+  the card-art sheet and the `cassia.blend` reopen log are in `evidence/2026-09-28-run7/`.
+- **Not verified:** human play, audio, controller, fullscreen, 4K, a real (non-staged) boss-kill
+  unlock.
+
+### Run 7 critic (independent, read-only; packaged screenshots vs Slay the Spire 2, Monster Train 2, Into the Breach)
+
+| Discipline | Verdict | Top complaint |
+|---|---|---|
+| Character identity / silhouette | loses badly | same hooded-stump body plan as Wren; a grey blob at board scale |
+| Card design / mechanic depth | loses | Kindle picks hexes automatically (no spatial choice); Heat never carries over; Scorch was a separate plan |
+| Card art | loses badly | about 12 of 20 cards are the same figurine pose; three shield cards look alike |
+| Board feedback for Kindle/Heat | parity-minus | burn preview and Heat forecast good; no final-damage number on the enemy plate |
+| Character-select UI | loses badly | text buttons only; no portrait, pitch, starter deck or relic preview |
+| Balance / decision density | loses | one Heat source in the starter; dominated duplicates (Tinderbox, Ash Sprout) |
+
+Fixed after the critic (not re-judged): the starter deck swaps an Ashen Guard for Ember Lash (two
+Kindle cards from turn 1); Ash Sprout is now an aimed 0-cost grow; Tinderbox is Kindle 3, Draw 2;
+Ashfall adds 1 Scorch per Heat. No discipline passes, so there is no quality release.
+
+### Exact next action (Run 8)
+
+1. **Aimed Kindle** (the critic's top item): let the player click which Grove hexes burn, or
+   give Kindle cards a line or cone origin. Burned ash should leave a lasting effect (for example,
+   enemies that enter ash gain Scorch). Add one card that keeps Heat into the next turn. Keep the
+   exact preview tests.
+2. **Character select screen**: large staged model per walker, a one-line pitch, the starter deck
+   and a lock condition. Also, a distinct Cassia silhouette (flame hair or mantle, not Wren's cowl).
+3. **Release prep before Saturday 2026-10-03**: itch page text, screenshots and system
+   requirements. Recheck the draft page. Do not start Thatch unless the rest is done.
+
+Card art debt: re-stage Cassia illustrations so each has its own composition (no repeated
+figurine pose, no white-ring template).
 
 ## 2026-09-27 — Run 6 checkpoint (Pacific Sunday 09:05, age 3 days)
 

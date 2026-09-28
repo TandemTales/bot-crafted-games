@@ -424,7 +424,43 @@ func _make_hex_mesh(radius: float) -> ArrayMesh:
 
 # ------------------------------------------------------------------ growth
 
+## Kindled hexes keep a smouldering ash scar until something grows (or rots) there again.
+var scorch_nodes := {}
+
+
+func mark_scorched(h: Vector2i) -> void:
+	if scorch_nodes.has(h):
+		return
+	var mi := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.66
+	cm.bottom_radius = 0.7
+	cm.height = 0.03
+	cm.radial_segments = 6
+	cm.rings = 1
+	mi.mesh = cm
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.16, 0.14, 0.13)
+	m.roughness = 1.0
+	m.emission_enabled = true
+	m.emission = Color(1.0, 0.32, 0.06)
+	m.emission_energy_multiplier = 0.6
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = world(h) + Vector3(0, 0.085, 0)
+	mi.rotation.y = deg_to_rad(30.0)
+	add_child(mi)
+	scorch_nodes[h] = mi
+	# The embers cool to a dull glow over a couple of seconds.
+	var tw := create_tween()
+	tw.tween_property(m, "emission_energy_multiplier", 0.03, 2.2).set_trans(Tween.TRANS_QUAD)
+	_burst(world(h) + Vector3(0, 0.25, 0), Color(1.0, 0.45, 0.1), 14)
+
+
 func _set_growth_node(h: Vector2i, g: String, animate: bool) -> void:
+	if g != "none" and scorch_nodes.has(h):
+		scorch_nodes[h].queue_free()
+		scorch_nodes.erase(h)
 	if growth_nodes.has(h):
 		var old: Node3D = growth_nodes[h]
 		growth_nodes.erase(h)

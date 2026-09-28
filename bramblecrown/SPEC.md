@@ -74,6 +74,27 @@ original to this project.
 
 ## Presentation
 
+### Implemented Cassia, the Ashwalker (2026-09-28, Run 7)
+
+The second Grovewalker. Cassia plants only to burn it: **Kindle N** burns N hexes of her own
+Grove, farthest from her first (never the hex she stands on). Each burned hex gives 1 **Heat**,
+which resets at the start of her turn, and her cards scale per Heat. **Scorch** is her
+damage-over-time status (ticks at the start of the enemy's action, then drops by 1). Her tension
+differs from Wren's: every hex she burns shrinks her Grove bonus and removes enemy-slowing Thicket,
+so she trades board control for one big turn.
+
+- 64 HP (Wren 72). Starter deck: 4 Cinder Strike, 3 Ashen Guard, 1 Ember Lash, 2 Kindling, 1 Flashburn.
+- 20 cards, each with an upgrade: 4 starters, 7 commons, 7 uncommons (including the powers
+  Phoenix Bark, Smolder), 2 rares (Crownfire, Ember Saint). Reward pools are per walker.
+- Shrine events that grant a named Wren card give Cassia her counterpart (`CardDB.EVENT_SWAP`),
+  and the button text names her card.
+- Unlock: the profile records the most bosses beaten in a run; one boss kill unlocks Cassia. The
+  title screen lists every walker (locked ones disabled with the unlock condition).
+- Art: original Blender model `source-art/cassia.blend` (animated `flame_flicker` brazier), 20
+  Blender-rendered card illustrations, an ember ring and light on the board, grey-ash scars on
+  kindled hexes, a Heat readout with a live "Heat 2 → 3" forecast while targeting.
+- Thatch (third walker), 10 more charms and Withering tiers remain owed.
+
 ### Implemented Crown of Thorns region (2026-09-27, Run 6)
 
 The fifth and final region adds six authored fights, The Last Gardener elite and the two-phase
@@ -240,6 +261,7 @@ tested headless. Scenes and views only read rule state and submit actions.
 | `scripts/core/hex.gd` | rules-engineer | axial hex math, neighbors, distance, rings, lines, pathfinding |
 | `scripts/core/rng.gd` | rules-engineer | seeded deterministic RNG wrapper |
 | `scripts/core/card_db.gd` | content-designer | card definitions and upgrades |
+| `scripts/core/walker_db.gd` | content-designer | playable Grovewalkers: HP, model, colours, unlock rule |
 | `scripts/core/enemy_db.gd` | content-designer | enemy definitions and intent patterns |
 | `scripts/core/encounter_db.gd` | content-designer | authored encounter layouts per region |
 | `scripts/core/charm_db.gd` | content-designer | charm (relic) definitions |

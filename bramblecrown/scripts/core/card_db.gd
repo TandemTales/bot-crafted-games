@@ -300,10 +300,10 @@ const CARDS := {
 		"up": {"vals": {"a": 3}},
 	},
 	"ash_sprout": {
-		"name": "Ash Sprout", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"name": "Ash Sprout", "cost": 0, "type": "skill", "target": "hex", "range": 2,
 		"rarity": "common", "owner": "cassia", "art": "grow",
-		"text": "Grow Thicket beneath you and {a} adjacent hexes.", "vals": {"a": 2},
-		"effects": [{"op": "grow_self", "count": "a"}],
+		"text": "Grow Thicket on {a} hexes around the target.", "vals": {"a": 2},
+		"effects": [{"op": "grow", "count": "a"}],
 		"up": {"vals": {"a": 4}},
 	},
 	"scorch_mark": {
@@ -372,15 +372,15 @@ const CARDS := {
 	"ashfall": {
 		"name": "Ashfall", "cost": 1, "type": "skill", "target": "hex", "range": 3,
 		"rarity": "uncommon", "owner": "cassia", "art": "pollen",
-		"text": "Enemies within 1 of the target gain {a} Scorch.", "vals": {"a": 3},
-		"effects": [{"op": "scorch_area", "radius": 1, "n": "a"}],
+		"text": "Enemies within 1 of the target gain {a} Scorch, plus 1 per Heat.", "vals": {"a": 3},
+		"effects": [{"op": "scorch_area", "radius": 1, "n": "a", "heat_mult": 1}],
 		"up": {"vals": {"a": 5}},
 	},
 	"tinderbox": {
 		"name": "Tinderbox", "cost": 1, "type": "skill", "target": "self", "range": 0,
 		"rarity": "uncommon", "owner": "cassia", "art": "sap",
-		"text": "Kindle 1. Draw {a}.", "vals": {"a": 2},
-		"effects": [{"op": "kindle", "n": 1}, {"op": "draw", "n": "a"}],
+		"text": "Kindle 3. Draw {a}.", "vals": {"a": 2},
+		"effects": [{"op": "kindle", "n": 3}, {"op": "draw", "n": "a"}],
 		"up": {"vals": {"a": 3}},
 	},
 	"crownfire": {
@@ -403,7 +403,7 @@ const STARTER_DECK := {
 	"wren": ["thornstrike", "thornstrike", "thornstrike", "thornstrike",
 		"barkskin", "barkskin", "barkskin", "barkskin", "sow", "sow", "taproot"],
 	"cassia": ["cinder_strike", "cinder_strike", "cinder_strike", "cinder_strike",
-		"ashen_guard", "ashen_guard", "ashen_guard", "ashen_guard", "kindling", "kindling", "flashburn"],
+		"ashen_guard", "ashen_guard", "ashen_guard", "ember_lash", "kindling", "kindling", "flashburn"],
 }
 
 

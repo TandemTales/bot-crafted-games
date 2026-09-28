@@ -460,8 +460,8 @@ def build_cassia():
     ash_light = mat("ash_cloth_light", (0.3, 0.28, 0.26), 0.9)
     char = mat("char", (0.05, 0.04, 0.035), 1.0)
     ember_cloth = mat("ember_cloth", (0.72, 0.24, 0.06), 0.8, emit=(1.0, 0.35, 0.05), emit_strength=0.35)
-    ember = mat("ember_glow", (1.0, 0.4, 0.08), 0.3, emit=(1.0, 0.36, 0.05), emit_strength=4.0)
-    flame_core = mat("flame_core", (1.0, 0.75, 0.3), 0.2, emit=(1.0, 0.7, 0.25), emit_strength=6.0)
+    ember = mat("ember_glow", (1.0, 0.4, 0.08), 0.3, emit=(1.0, 0.36, 0.05), emit_strength=2.5)
+    flame_core = mat("flame_core", (1.0, 0.75, 0.3), 0.2, emit=(1.0, 0.7, 0.25), emit_strength=3.0)
     parts = []
     # Cloak: taller and narrower than Wren's, with a ragged, burnt hem.
     cloak = cyl("cloak", 0.33, 1.02, (0, 0, 0.53), verts=20, r2=0.12)

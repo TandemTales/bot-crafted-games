@@ -1388,6 +1388,7 @@ func test_cassia_unlock() -> bool:
 	r.new_run(5, "cassia")
 	check(r.walker == "cassia" and r.hp == 64 and r.max_hp == 64, "Cassia starts at 64 HP")
 	check(r.deck.size() == 11 and r.deck.all(func(c): return CardDB.CARDS[c["id"]]["owner"] == "cassia"), "Cassia starter deck")
+	check(r.deck.filter(func(c): return CardDB.CARDS[c["id"]]["effects"].any(func(fx): return fx["op"] == "kindle")).size() >= 2, "starter deck can Kindle from turn 1")
 	var r2 := RunState.from_json(r.to_json())
 	check(r2.walker == "cassia", "walker survives save/load")
 	r2.enter_node(r2.available_nodes()[0])
@@ -1487,6 +1488,11 @@ func test_cassia_cards_resolve() -> bool:
 	uid = _give(c, "ashfall")
 	c.play_card(uid, e["pos"])
 	check(int(e["statuses"].get("scorch", 0)) == 3, "Ashfall applies 3 Scorch")
+	c.player["heat"] = 2
+	uid = _give(c, "ashfall")
+	c.play_card(uid, e["pos"])
+	check(int(e["statuses"].get("scorch", 0)) == 8, "Ashfall adds 3 + 1 per Heat (2) = 5 more Scorch")
+	e["statuses"]["scorch"] = 3
 	hp0 = int(e["hp"])
 	c.player["ward"] = 99
 	c.end_turn()
