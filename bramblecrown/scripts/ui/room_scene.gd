@@ -115,7 +115,7 @@ func _shrine() -> void:
 	_heading(ev["title"], ev["text"])
 	for i in ev["options"].size():
 		var idx: int = i
-		_button(ev["options"][i]["label"], func():
+		_button(CardDB.event_label(ev["options"][i]["label"], ev["options"][i]["ops"], Game.run.walker), func():
 			var note := r.choose_event_option(r.current_event, idx)
 			Sfx.play("card")
 			_done(note), r.event_option_enabled(r.current_event, i))

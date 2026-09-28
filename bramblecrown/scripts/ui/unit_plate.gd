@@ -80,7 +80,7 @@ func _draw() -> void:
 		var n := int(statuses[s])
 		if n <= 0:
 			continue
-		var col: Color = {"bleed": UITheme.BLOOD, "rooted": UITheme.LEAF, "weak": Color(0.9, 0.85, 0.4), "strength": Color(1, 0.55, 0.3), "dazed": UITheme.GOLD}.get(s, UITheme.INK)
+		var col: Color = {"bleed": UITheme.BLOOD, "scorch": Color(1.0, 0.55, 0.2), "rooted": UITheme.LEAF, "weak": Color(0.9, 0.85, 0.4), "strength": Color(1, 0.55, 0.3), "dazed": UITheme.GOLD}.get(s, UITheme.INK)
 		var label := "%s %d" % ["Reserve" if s == "ward_keep" else s.capitalize(), n]
 		var lw := fb.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 10
 		draw_style_box(UITheme.box(Color(0, 0, 0, 0.7), col, 1, 5, 0), Rect2(sx, y, lw, 18))

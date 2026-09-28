@@ -28,6 +28,7 @@ var hand: Array = []
 var discard: Array = []
 var exhausted: Array = []
 var charms: Array = []
+var walker := "wren"  # set by RunState before setup; only the board model depends on it
 var turn := 0
 var phase := "player"  # player | won | lost
 var attacks_this_turn := 0
@@ -60,7 +61,7 @@ func setup(enc: Dictionary, deck: Array, hp: int, max_hp: int, charm_ids: Array,
 		growth[Vector2i(p[0], p[1])] = "thicket"
 	player = {
 		"pos": Vector2i(enc["player"][0], enc["player"][1]), "hp": hp, "max_hp": max_hp,
-		"ward": 0, "energy": 0, "move": 0, "statuses": {}, "powers": {},
+		"ward": 0, "energy": 0, "move": 0, "statuses": {}, "powers": {}, "heat": 0,
 	}
 	for e in enc["enemies"]:
 		_spawn_enemy(e[0], Vector2i(e[1], e[2]), true)
@@ -130,9 +131,13 @@ func occupied(h: Vector2i) -> bool:
 
 ## Connected Thicket containing the Grovewalker's hex (empty if not standing on Thicket).
 func grove() -> Array[Vector2i]:
+	return _grove_in(growth)
+
+
+func _grove_in(gm: Dictionary) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	var start: Vector2i = player["pos"]
-	if growth.get(start, "none") != "thicket":
+	if gm.get(start, "none") != "thicket":
 		return out
 	var seen := {start: true}
 	var queue: Array[Vector2i] = [start]
@@ -140,10 +145,27 @@ func grove() -> Array[Vector2i]:
 		var h: Vector2i = queue.pop_front()
 		out.append(h)
 		for n in Hex.neighbors(h):
-			if not seen.has(n) and growth.get(n, "none") == "thicket":
+			if not seen.has(n) and gm.get(n, "none") == "thicket":
 				seen[n] = true
 				queue.append(n)
 	return out
+
+
+## Kindle: the Grove hexes that would burn, farthest from the Grovewalker first. The hex she
+## stands on never burns. Ties break by coordinates so preview and play always agree.
+func kindle_targets(n: int, gm: Dictionary = growth) -> Array[Vector2i]:
+	var cands: Array[Vector2i] = []
+	for h in _grove_in(gm):
+		if h != player["pos"]:
+			cands.append(h)
+	var p: Vector2i = player["pos"]
+	cands.sort_custom(func(a, b):
+		var da := Hex.distance(a, p)
+		var db := Hex.distance(b, p)
+		if da != db:
+			return da > db
+		return a.x < b.x or (a.x == b.x and a.y < b.y))
+	return cands.slice(0, n)
 
 
 func rooted_bonus() -> int:
@@ -206,10 +228,31 @@ func path_to(dest: Vector2i) -> Array[Vector2i]:
 ## What a card would do at `target`, without changing state: hexes that change and damage per enemy uid.
 func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
 	var def := card_def(inst)
-	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}, "ward_break": {}}
+	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}, "ward_break": {}, "heat": int(player.get("heat", 0))}
 	var g := grove()
+	var gm := growth
+	var heat := int(player.get("heat", 0))
 	for fx in def["effects"]:
 		match fx["op"]:
+			"kindle":
+				var hexes := kindle_targets(CardDB.val(def, fx["n"]), gm)
+				if not hexes.is_empty():
+					gm = gm.duplicate()
+					for h in hexes:
+						gm[h] = "none"
+					out["burn"] += hexes
+					heat += hexes.size()
+					g = _grove_in(gm)
+				out["heat"] = heat
+			"damage_radius":
+				var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + heat * CardDB.val(def, fx.get("heat_mult", 0))
+				for e in enemies:
+					if Hex.distance(e["pos"], player["pos"]) <= int(fx["radius"]) and amt > 0:
+						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
+			"scorch_area":
+				for h in Hex.disc(target, int(fx["radius"])):
+					if in_bounds(h):
+						out["blight_clear"].append(h)
 			"break_ward", "steal_ward":
 				var e = enemy_at(target)
 				if e != null:
@@ -221,7 +264,7 @@ func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
 			"damage":
 				var e = enemy_at(target)
 				if e != null:
-					var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0))
+					var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0)) + heat * CardDB.val(def, fx.get("heat_mult", 0))
 					if fx.get("double_if", "") != "" and int(e["statuses"].get(fx["double_if"], 0)) > 0:
 						amt *= 2
 					out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
@@ -380,11 +423,48 @@ func _apply_effect(def: Dictionary, fx: Dictionary, target: Vector2i, is_attack:
 			player["energy"] = int(player["energy"]) + refund
 			player["daze_lost"] = 0
 			_emit({"type": "energy", "n": player["energy"]})
+		"kindle":
+			var hexes := kindle_targets(CardDB.val(def, fx["n"]))
+			if hexes.is_empty():
+				return
+			var changes := {}
+			for h in hexes:
+				growth[h] = "none"
+				changes[h] = "none"
+			player["heat"] = int(player.get("heat", 0)) + hexes.size()
+			_emit({"type": "board", "changes": changes, "cause": "burn"})
+			_emit({"type": "heat", "n": player["heat"], "gain": hexes.size()})
+			var pb := int(player["powers"].get("phoenix_bark", 0))
+			if pb > 0:
+				_gain_ward(pb * hexes.size())
+		"damage_radius":
+			var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + int(player.get("heat", 0)) * CardDB.val(def, fx.get("heat_mult", 0))
+			for e in enemies.duplicate():
+				if Hex.distance(e["pos"], player["pos"]) <= int(fx["radius"]):
+					_damage_enemy(e, amt)
+		"scorch_area":
+			for e in enemies:
+				if Hex.distance(e["pos"], target) <= int(fx["radius"]):
+					_add_status(e, "scorch", CardDB.val(def, fx["n"]))
+		"scorch_grove_area":
+			var area := {}
+			var src: Array = g if not g.is_empty() else [player["pos"]]
+			for h in src:
+				area[h] = true
+				for n in Hex.neighbors(h):
+					area[n] = true
+			for e in enemies:
+				if area.has(e["pos"]):
+					_add_status(e, "scorch", CardDB.val(def, fx["n"]))
+		"energy_if_heat":
+			if int(player.get("heat", 0)) >= int(fx["min"]):
+				player["energy"] = int(player["energy"]) + CardDB.val(def, fx["n"])
+				_emit({"type": "energy", "n": player["energy"]})
 		"damage":
 			var e = enemy_at(target)
 			if e == null:
 				return
-			var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0))
+			var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0)) + int(player.get("heat", 0)) * CardDB.val(def, fx.get("heat_mult", 0))
 			if fx.get("double_if", "") != "" and int(e["statuses"].get(fx["double_if"], 0)) > 0:
 				amt *= 2
 			_damage_enemy(e, amt)
@@ -402,7 +482,7 @@ func _apply_effect(def: Dictionary, fx: Dictionary, target: Vector2i, is_attack:
 				if area.has(e["pos"]):
 					_damage_enemy(e, amt)
 		"ward":
-			var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0))
+			var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0)) + int(player.get("heat", 0)) * CardDB.val(def, fx.get("heat_mult", 0))
 			_gain_ward(amt)
 		"grow":
 			_grow_hexes(_cluster(target, CardDB.val(def, fx["count"]), func(h): return growth[h] != "thicket"))
@@ -641,6 +721,7 @@ func _start_player_turn(first: bool) -> void:
 	player["statuses"].erase("ward_keep")
 	player["statuses"].erase("clarity")
 	player["energy"] = BASE_ENERGY
+	player["heat"] = 0
 	player["daze_lost"] = 0
 	var dazed := int(player["statuses"].get("dazed", 0))
 	if dazed > 0:
@@ -670,6 +751,16 @@ func _start_player_turn(first: bool) -> void:
 				break
 			pick.append(h)
 		_grow_hexes(pick)
+	var smolder := int(player["powers"].get("smolder", 0))
+	if smolder > 0:
+		_grow_self(smolder)
+	var saint := int(player["powers"].get("ember_saint", 0))
+	if saint > 0:
+		var before := int(player["heat"])
+		_apply_effect({"vals": {}}, {"op": "kindle", "n": saint}, player["pos"], false)
+		if int(player["heat"]) > before:
+			player["energy"] = int(player["energy"]) + 1
+			_emit({"type": "energy", "n": player["energy"]})
 	if int(player["powers"].get("seed_of_ages", 0)) > 0:
 		var gs := grove().size()
 		if gs > 0:
@@ -887,12 +978,14 @@ func _enemy_phase() -> bool:
 
 
 func _enemy_act(e: Dictionary) -> void:
-	# Bleed ticks at the start of the enemy's action.
-	var bleed := int(e["statuses"].get("bleed", 0))
-	if bleed > 0:
-		e["hp"] = int(e["hp"]) - bleed
-		_emit({"type": "damage", "target": e["uid"], "amount": bleed, "blocked": 0, "cause": "bleed"})
-		e["statuses"]["bleed"] = bleed - 1
+	# Bleed and Scorch tick at the start of the enemy's action.
+	for dot in ["bleed", "scorch"]:
+		var n := int(e["statuses"].get(dot, 0))
+		if n <= 0:
+			continue
+		e["hp"] = int(e["hp"]) - n
+		_emit({"type": "damage", "target": e["uid"], "amount": n, "blocked": 0, "cause": dot})
+		e["statuses"][dot] = n - 1
 		if int(e["hp"]) <= 0:
 			_kill_enemy(e)
 			return

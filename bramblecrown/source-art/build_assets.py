@@ -450,6 +450,118 @@ def build_grovewalker():
     finish("grovewalker")
 
 
+def build_cassia():
+    """Cassia, the Ashwalker: soot-grey hooded cloak with a burnt, ragged hem, an ember mantle,
+    charred antler-twigs through the hood, and a brazier staff whose flame flickers."""
+    reset()
+    P = palette()
+    random.seed(1717)
+    ash = mat("ash_cloth", (0.16, 0.15, 0.15), 0.95)
+    ash_light = mat("ash_cloth_light", (0.3, 0.28, 0.26), 0.9)
+    char = mat("char", (0.05, 0.04, 0.035), 1.0)
+    ember_cloth = mat("ember_cloth", (0.72, 0.24, 0.06), 0.8, emit=(1.0, 0.35, 0.05), emit_strength=0.35)
+    ember = mat("ember_glow", (1.0, 0.4, 0.08), 0.3, emit=(1.0, 0.36, 0.05), emit_strength=4.0)
+    flame_core = mat("flame_core", (1.0, 0.75, 0.3), 0.2, emit=(1.0, 0.7, 0.25), emit_strength=6.0)
+    parts = []
+    # Cloak: taller and narrower than Wren's, with a ragged, burnt hem.
+    cloak = cyl("cloak", 0.33, 1.02, (0, 0, 0.53), verts=20, r2=0.12)
+    subsurf(cloak, 1)
+    noise_displace(cloak, 0.035, 0.12)
+    assign(cloak, ash)
+    smooth(cloak)
+    parts.append(cloak)
+    for i in range(14):
+        a = i / 14 * math.tau + random.uniform(-0.1, 0.1)
+        tat = cyl("tatter", 0.07, random.uniform(0.12, 0.22), (0.33 * math.cos(a), 0.33 * math.sin(a), 0.05), verts=4, r2=0.0,
+                  rot=(math.pi, 0, a))
+        assign(tat, char)
+        parts.append(tat)
+    # Charred band just above the hem, glowing embers caught in the cloth.
+    hem = cyl("hem", 0.335, 0.1, (0, 0, 0.12), verts=20, r2=0.31)
+    assign(hem, char)
+    parts.append(hem)
+    for i in range(9):
+        a = random.uniform(0, math.tau)
+        z = random.uniform(0.08, 0.3)
+        r = 0.33 - z * 0.18
+        parts.append(assign(sphere("cinder", random.uniform(0.012, 0.022), (r * math.cos(a), r * math.sin(a), z), seg=6, rings=4), ember))
+    # Hood with a deep shadow and two ember eyes.
+    hood = sphere("hood", 0.21, (0, 0.02, 1.12), scale=(1, 1.05, 1.2))
+    assign(hood, ash_light)
+    smooth(hood)
+    # A deep cowl rim frames the face so the hood reads as cloth, not a head.
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.105, minor_radius=0.032, location=(0, -0.17, 1.08),
+                                     rotation=(math.pi / 2, 0, 0))
+    tip = bpy.context.active_object
+    tip.name = "cowl_rim"
+    tip.scale = (1.0, 1.25, 1.0)
+    assign(tip, ash)
+    smooth(tip)
+    shadow = sphere("hoodshadow", 0.14, (0, -0.07, 1.1), scale=(1.0, 0.7, 0.95))
+    assign(shadow, char)
+    face = sphere("face", 0.085, (0, -0.13, 1.07), scale=(0.85, 0.6, 1.05))
+    assign(face, mat("ash_skin", (0.42, 0.3, 0.25), 0.7))
+    smooth(face)
+    for s in (-1, 1):
+        parts.append(assign(sphere("eye", 0.014, (s * 0.032, -0.18, 1.09), seg=8, rings=6), ember))
+    # Charred antler-twigs through the hood.
+    for s in (-1, 1):
+        parts.append(tube("twig", [(s * 0.1, 0.02, 1.22), (s * 0.2, 0.0, 1.38), (s * 0.24, 0.04, 1.52), (s * 0.3, 0.02, 1.58)], 0.018, char))
+        parts.append(tube("twig_fork", [(s * 0.2, 0.0, 1.38), (s * 0.28, -0.03, 1.44)], 0.012, char))
+        parts.append(assign(sphere("twig_ember", 0.02, (s * 0.3, 0.02, 1.58), seg=6, rings=4), ember))
+    # Ember mantle over the shoulders, a long scarf tail behind.
+    mantle = cyl("mantle", 0.25, 0.16, (0, 0, 0.94), verts=18, r2=0.17)
+    assign(mantle, ember_cloth)
+    smooth(mantle)
+    tail = tube("scarf", [(0.05, 0.18, 0.95), (0.1, 0.3, 0.75), (0.05, 0.36, 0.55), (0.12, 0.42, 0.4)], 0.05, ember_cloth)
+    # Arms: the right holds the staff forward, the left open with a cinder in the palm.
+    arm_r = cyl("arm", 0.065, 0.45, (0.25, -0.08, 0.74), verts=8, r2=0.05, rot=(0.5, 0.35, 0))
+    arm_l = cyl("arm", 0.065, 0.42, (-0.27, -0.1, 0.78), verts=8, r2=0.05, rot=(0.9, -0.5, 0))
+    for a in (arm_r, arm_l):
+        assign(a, ash)
+    hand_r = assign(sphere("hand", 0.05, (0.33, -0.17, 0.54)), face.data.materials[0])
+    hand_l = assign(sphere("hand", 0.05, (-0.36, -0.28, 0.62)), face.data.materials[0])
+    palm = assign(sphere("palm_ember", 0.045, (-0.36, -0.3, 0.7), seg=10, rings=8), ember)
+    # Brazier staff: blackened haft, iron cage, glowing coals.
+    staff = tube("staff", [(0.34, -0.18, 0.0), (0.35, -0.17, 0.7), (0.34, -0.18, 1.3), (0.33, -0.19, 1.5)], 0.028, char, taper=False)
+    cage = []
+    for k in range(5):
+        a = k / 5 * math.tau
+        cage.append(tube("cage_bar", [(0.33, -0.19, 1.48), (0.33 + 0.1 * math.cos(a), -0.19 + 0.1 * math.sin(a), 1.58),
+                                      (0.33 + 0.07 * math.cos(a), -0.19 + 0.07 * math.sin(a), 1.7)], 0.01, P["iron"], taper=False))
+    ring = cyl("cage_ring", 0.1, 0.02, (0.33, -0.19, 1.58), verts=16)
+    assign(ring, P["iron"])
+    coals = assign(ico("coals", 0.07, (0.33, -0.19, 1.56), scale=(1, 1, 0.6), sub=1), ember)
+    # Belt with a pouch of seeds and a tinder horn.
+    belt = cyl("belt", 0.25, 0.05, (0, 0, 0.64), verts=16)
+    assign(belt, P["bark"])
+    pouch = cube("pouch", 0.14, (-0.24, 0.05, 0.54), scale=(0.7, 1, 0.9))
+    assign(pouch, P["bark_light"])
+    horn = cyl("tinder_horn", 0.04, 0.2, (0.2, 0.14, 0.56), verts=8, r2=0.015, rot=(0.3, 1.2, 0))
+    assign(horn, P["thorn"])
+    parts += [hood, tip, shadow, face, mantle, tail, arm_r, arm_l, hand_r, hand_l, palm, staff, ring, coals,
+              belt, pouch, horn] + cage
+    join(parts, "cassia")
+    # The brazier flame is its own object so it can flicker.
+    fl = []
+    fl.append(assign(cyl("flame_outer", 0.075, 0.26, (0, 0, 0.13), verts=10, r2=0.0), ember))
+    fl.append(assign(cyl("flame_inner", 0.045, 0.18, (0, 0, 0.09), verts=8, r2=0.0), flame_core))
+    for k in range(3):
+        a = k / 3 * math.tau
+        fl.append(assign(cyl("flame_lick", 0.03, 0.14, (0.04 * math.cos(a), 0.04 * math.sin(a), 0.1), verts=6, r2=0.0,
+                             rot=(0.3 * math.sin(a), -0.3 * math.cos(a), 0)), ember))
+    flame = join(fl, "brazier_flame")
+    flame.location = Vector((0.33, -0.19, 1.57))
+    for frame, sx, sz in [(1, 1.7, 1.8), (7, 1.5, 2.2), (13, 1.85, 1.6), (19, 1.6, 2.05), (25, 1.7, 1.8)]:
+        flame.scale = (sx, sx, sz)
+        flame.keyframe_insert("scale", frame=frame)
+    flame.animation_data.action.name = "flame_flicker"
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = 25
+    bpy.context.scene.frame_set(1)
+    finish("cassia")
+
+
 def _eyes(parts, P, positions, r=0.035):
     for p in positions:
         e = sphere("eye", r, p, seg=8, rings=6)
@@ -2408,6 +2520,7 @@ BUILDERS = {
     "thicket": build_thicket,
     "blight": build_blight,
     "grovewalker": build_grovewalker,
+    "cassia": build_cassia,
     "blightling": build_blightling,
     "rotmoth": build_rotmoth,
     "husk_brute": build_husk_brute,

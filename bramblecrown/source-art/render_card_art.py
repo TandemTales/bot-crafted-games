@@ -68,6 +68,33 @@ SCENES.update({
 })
 
 
+# Cassia, the Ashwalker: soot, ember and burnt Thicket. "C" is her model; "embers" and "ash" extras.
+C = "cassia"
+ASH_BG = (0.09, 0.04, 0.025)
+SCENES.update({
+    "cinder_strike": ([(T, 0, 0, 0, 1), (T, 1.7, 0, 0, 1), (C, 0, 0, -70, 1.3), ("blightling", 1.7, 0, 110, 1.3)], FIRE, ASH_BG, (5.2, 2.0, 0), ["embers"]),
+    "ashen_guard": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 15, 1.5), ("thicket", -0.8, 0.4, 0, 0.7)], BLUE, (0.05, 0.05, 0.07), (4.0, 1.5, 0), ["shield", "ash"]),
+    "kindling": ([(T, 0, 0, 0, 1.2), ("thicket", 0, 0, 0, 1.15), (C, 0, 0, 20, 1.35), ("thicket", -1.6, 0.4, 40, 0.9), ("thicket", 1.6, 0.4, 80, 0.9)], GREEN, (0.06, 0.07, 0.03), (4.6, 1.4, 0), ["embers"]),
+    "flashburn": ([(T, -1.0, 0, 0, 1), (T, 1.0, 0, 0, 1), (C, -1.0, 0, -40, 1.25), ("thicket", 1.0, 0, 60, 1.1)], FIRE, ASH_BG, (4.8, 1.6, 0), ["fire", "embers"]),
+    "ember_lash": ([(T, 0, 0, 0, 1), (C, -0.9, 0.2, -60, 1.2), ("rotmoth", 1.0, -0.1, 200, 1.2)], FIRE, (0.12, 0.04, 0.03), (4.6, 1.8, 10), ["embers", "lance"]),
+    "smokescreen": ([(T, 0, 0, 0, 1.3), (C, 0, 0, 0, 1.4)], (0.8, 0.8, 0.85), (0.08, 0.08, 0.09), (4.2, 1.5, 0), ["ash", "shield"]),
+    "ash_sprout": ([(T, 0, 0, 0, 1.3), ("thicket", 0, 0, 0, 0.8), ("blight", 1.0, 0.6, 0, 0.6)], GREEN, (0.07, 0.06, 0.04), (3.4, 1.2, 0), ["ash"]),
+    "scorch_mark": ([(T, 0, 0, 0, 1.2), ("husk_brute", 0, 0, 180, 1.05)], FIRE, (0.14, 0.05, 0.02), (4.4, 1.6, 0), ["fire"]),
+    "backdraft": ([(T, 0, 0, 0, 1), (T, -1.75, 0, 0, 1), (T, 1.75, 0, 0, 1), (C, 0, 0, 0, 1.3), ("blightling", -1.75, 0, 60, 1.2), ("blightling", 1.75, 0, -60, 1.2)], FIRE, ASH_BG, (5.8, 2.2, 0), ["embers"]),
+    "cinderstep": ([(T, -1.75, 0.5, 0, 1), (T, 0, 0, 0, 1), (T, 1.75, -0.5, 0, 1), (C, 0, 0, -75, 1.3)], WARM, (0.1, 0.06, 0.04), (5.2, 2.4, 0), ["embers"]),
+    "ember_ward": ([(T, 0, 0, 0, 1.3), (C, 0, 0.1, 0, 1.35), ("thicket", -0.6, -0.35, 0, 0.9), ("thicket", 0.6, -0.35, 70, 0.9)], FIRE, (0.1, 0.05, 0.05), (4.0, 1.4, 0), ["shield", "embers"]),
+    "blaze": ([(T, 0, 0, 0, 1)] + [(T, 1.75 * math.cos(a), 1.75 * math.sin(a), 0, 1) for a in [i * math.pi / 3 + math.pi / 6 for i in range(6)]] + [(C, 0, 0, 0, 1.3)] + [("thicket", 1.75 * math.cos(a), 1.75 * math.sin(a), i * 30, 0.9) for i, a in enumerate([i * math.pi / 3 + math.pi / 6 for i in range(6)])], FIRE, (0.2, 0.06, 0.02), (6.0, 4.5, 0), ["fire"]),
+    "flare": ([(T, 0, 0, 0, 1.2), ("campfire", 0, 0, 0, 1.3)], GOLD, (0.12, 0.07, 0.03), (3.8, 1.3, 0), ["embers"]),
+    "phoenix_bark": ([(T, 0, 0, 0, 1.4), ("willow", 0, 0.3, 0, 0.9), (C, 0.4, -0.6, 10, 1.0)], FIRE, (0.14, 0.06, 0.03), (5.2, 1.6, 0), ["fire", "shield"]),
+    "smolder": ([(T, x * 1.75 + (0.87 if y % 2 else 0), y * 1.5 - 1.5, 0, 1) for x in (-1, 0, 1) for y in (0, 1, 2)] + [("thicket", x * 1.75 + (0.87 if y % 2 else 0), y * 1.5 - 1.5, x * 40 + y * 20, 0.9) for x in (-1, 0, 1) for y in (0, 1, 2) if (x + y) % 2 == 0], FIRE, (0.1, 0.05, 0.03), (7.0, 5.5, 0), ["embers", "ash"]),
+    "firestorm": ([(T, 0, 0, 0, 1), (T, -1.75, 0, 0, 1), (T, 1.75, 0, 0, 1), (C, 0, 0, 0, 1.35), ("husk_brute", 1.75, 0, -70, 1.0), ("rotmoth", -1.75, 0, 70, 1.1)], FIRE, (0.22, 0.06, 0.02), (5.8, 2.6, 0), ["fire"]),
+    "ashfall": ([(T, 0, 0, 0, 1.2), ("sporecaller", 0, 0, 170, 1.2)], (0.85, 0.8, 0.75), (0.1, 0.09, 0.09), (4.2, 1.8, 0), ["ash", "embers"]),
+    "tinderbox": ([(T, 0, 0, 0, 1.2), (C, -0.3, 0.2, 30, 1.2), ("candles", 0.6, -0.4, 0, 1.4)], GOLD, (0.11, 0.07, 0.03), (4.0, 1.4, 0), ["embers"]),
+    "crownfire": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 0, 1.5), ("withered_briar", -1.0, 0.6, 20, 0.9), ("withered_briar", 1.0, 0.6, -20, 0.9)], FIRE, (0.22, 0.07, 0.02), (3.8, 0.9, 0), ["fire"]),
+    "ember_saint": ([(T, 0, 0, 0, 1.3), ("menhir", 0, 0.3, 0, 1.1), (C, 0.3, -0.5, 0, 1.2)], GOLD, (0.14, 0.07, 0.02), (4.8, 1.6, 0), ["embers"]),
+})
+
+
 def emissive(name, col, strength):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
@@ -93,6 +120,29 @@ def place(model, x, y, rot, s):
 
 def extras(kinds, key):
     for k in kinds:
+        if k in ("embers", "ash"):
+            import random
+            random.seed(11 if k == "embers" else 29)
+            for i in range(34 if k == "embers" else 46):
+                bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=random.uniform(0.015, 0.04),
+                                                      location=(random.uniform(-1.8, 1.8), random.uniform(-1.0, 1.0), random.uniform(0.2, 2.2)))
+                if k == "embers":
+                    bpy.context.active_object.data.materials.append(emissive(f"em{i}", (1.0, 0.3 + random.uniform(0, 0.25), 0.05), 3.5))
+                else:
+                    m = bpy.data.materials.new(f"ash{i}")
+                    m.use_nodes = True
+                    g = random.uniform(0.35, 0.6)
+                    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (g, g, g * 0.95, 1)
+                    bpy.context.active_object.data.materials.append(m)
+            continue
+        if k == "fire":
+            # Layered orange tongues with a yellow core; low emission so AgX keeps the colour.
+            for i, (x, y, h) in enumerate([(-1.0, 0.1, 0.9), (1.0, 0.1, 1.0), (0.0, 0.5, 1.2), (-0.5, -0.4, 0.7), (0.6, -0.35, 0.8)]):
+                bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.26, radius2=0.0, depth=h, location=(x, y, h / 2))
+                bpy.context.active_object.data.materials.append(emissive(f"fo{i}", (1.0, 0.22, 0.02), 0.9))
+                bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.13, radius2=0.0, depth=h * 0.6, location=(x, y - 0.12, h * 0.3))
+                bpy.context.active_object.data.materials.append(emissive(f"fi{i}", (1.0, 0.6, 0.1), 1.4))
+            continue
         if k == "lance":
             for i in range(3):
                 bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.06, radius2=0, depth=2.5,

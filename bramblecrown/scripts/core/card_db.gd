@@ -254,12 +254,179 @@ const CARDS := {
 		"effects": [{"op": "damage", "amount": "a", "double_if": "rooted"}],
 		"up": {"vals": {"a": 10}},
 	},
+	# ---------------- Cassia, the Ashwalker ----------------
+	# Kindle N: burn N hexes of your own Grove, farthest from you first (never the hex you stand
+	# on). Every hex burned adds 1 Heat; Heat resets at the start of each turn.
+	"cinder_strike": {
+		"name": "Cinder Strike", "cost": 1, "type": "attack", "target": "enemy", "range": 1,
+		"rarity": "starter", "owner": "cassia", "art": "fire",
+		"text": "Deal {a} damage, plus {b} per Heat.", "vals": {"a": 5, "b": 2},
+		"effects": [{"op": "damage", "amount": "a", "heat_mult": "b"}],
+		"up": {"vals": {"a": 7, "b": 3}},
+	},
+	"ashen_guard": {
+		"name": "Ashen Guard", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"rarity": "starter", "owner": "cassia", "art": "ward",
+		"text": "Gain {a} Ward, plus 1 per Heat.", "vals": {"a": 5},
+		"effects": [{"op": "ward", "amount": "a", "heat_mult": 1}],
+		"up": {"vals": {"a": 8}},
+	},
+	"kindling": {
+		"name": "Kindling", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"rarity": "starter", "owner": "cassia", "art": "grow",
+		"text": "Grow Thicket beneath you and {a} adjacent hexes.", "vals": {"a": 3},
+		"effects": [{"op": "grow_self", "count": "a"}],
+		"up": {"vals": {"a": 5}},
+	},
+	"flashburn": {
+		"name": "Flashburn", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"rarity": "starter", "owner": "cassia", "art": "fire",
+		"text": "Kindle {a}. Draw 1.", "vals": {"a": 2},
+		"effects": [{"op": "kindle", "n": "a"}, {"op": "draw", "n": 1}],
+		"up": {"vals": {"a": 3}},
+	},
+	"ember_lash": {
+		"name": "Ember Lash", "cost": 1, "type": "attack", "target": "enemy", "range": 2,
+		"rarity": "common", "owner": "cassia", "art": "lash",
+		"text": "Kindle 1. Deal {a} damage, plus 2 per Heat.", "vals": {"a": 4},
+		"effects": [{"op": "kindle", "n": 1}, {"op": "damage", "amount": "a", "heat_mult": 2}],
+		"up": {"vals": {"a": 7}},
+	},
+	"smokescreen": {
+		"name": "Smokescreen", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"rarity": "common", "owner": "cassia", "art": "ward",
+		"text": "Kindle {a}. Gain 3 Ward per Heat.", "vals": {"a": 2},
+		"effects": [{"op": "kindle", "n": "a"}, {"op": "ward", "amount": 0, "heat_mult": 3}],
+		"up": {"vals": {"a": 3}},
+	},
+	"ash_sprout": {
+		"name": "Ash Sprout", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"rarity": "common", "owner": "cassia", "art": "grow",
+		"text": "Grow Thicket beneath you and {a} adjacent hexes.", "vals": {"a": 2},
+		"effects": [{"op": "grow_self", "count": "a"}],
+		"up": {"vals": {"a": 4}},
+	},
+	"scorch_mark": {
+		"name": "Scorch Mark", "cost": 1, "type": "attack", "target": "enemy", "range": 3,
+		"rarity": "common", "owner": "cassia", "art": "fire",
+		"text": "Deal {a} damage. Apply {b} Scorch.", "vals": {"a": 4, "b": 3},
+		"effects": [{"op": "damage", "amount": "a"}, {"op": "apply", "status": "scorch", "n": "b"}],
+		"up": {"vals": {"a": 6, "b": 4}},
+	},
+	"backdraft": {
+		"name": "Backdraft", "cost": 1, "type": "attack", "target": "self", "range": 0,
+		"rarity": "common", "owner": "cassia", "art": "burst",
+		"text": "Deal {a} damage, plus 1 per Heat, to every enemy within 2 of you.", "vals": {"a": 4},
+		"effects": [{"op": "damage_radius", "amount": "a", "radius": 2, "heat_mult": 1}],
+		"up": {"vals": {"a": 6}},
+	},
+	"cinderstep": {
+		"name": "Cinderstep", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"rarity": "common", "owner": "cassia", "art": "move",
+		"text": "Kindle 1. Gain {a} Movement.", "vals": {"a": 2},
+		"effects": [{"op": "kindle", "n": 1}, {"op": "move", "n": "a"}],
+		"up": {"vals": {"a": 3}},
+	},
+	"ember_ward": {
+		"name": "Ember Ward", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"rarity": "common", "owner": "cassia", "art": "ward",
+		"text": "Gain {a} Ward. Enemies touching your Grove gain {b} Scorch.", "vals": {"a": 5, "b": 2},
+		"effects": [{"op": "ward", "amount": "a"}, {"op": "scorch_grove_area", "n": "b"}],
+		"up": {"vals": {"a": 7, "b": 3}},
+	},
+	"blaze": {
+		"name": "Blaze", "cost": 2, "type": "attack", "target": "enemy", "range": 1,
+		"rarity": "uncommon", "owner": "cassia", "art": "fire",
+		"text": "Kindle your whole Grove. Deal {a} damage per Heat.", "vals": {"a": 3},
+		"effects": [{"op": "kindle", "n": 99}, {"op": "damage", "amount": 0, "heat_mult": "a"}],
+		"up": {"vals": {"a": 4}},
+	},
+	"flare": {
+		"name": "Flare", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"rarity": "uncommon", "owner": "cassia", "art": "sap", "exhaust": true,
+		"text": "If you have 2+ Heat, gain {a} Energy. Draw 1. Exhaust.", "vals": {"a": 1},
+		"effects": [{"op": "energy_if_heat", "min": 2, "n": "a"}, {"op": "draw", "n": 1}],
+		"up": {"vals": {"a": 2}},
+	},
+	"phoenix_bark": {
+		"name": "Phoenix Bark", "cost": 2, "type": "power", "target": "self", "range": 0,
+		"rarity": "uncommon", "owner": "cassia", "art": "ward",
+		"text": "Whenever you Kindle a hex, gain {a} Ward.", "vals": {"a": 2},
+		"effects": [{"op": "power", "id": "phoenix_bark", "n": "a"}],
+		"up": {"vals": {"a": 3}},
+	},
+	"smolder": {
+		"name": "Smolder", "cost": 1, "type": "power", "target": "self", "range": 0,
+		"rarity": "uncommon", "owner": "cassia", "art": "grow",
+		"text": "At the start of each turn, grow Thicket beneath you and {a} adjacent hexes.", "vals": {"a": 2},
+		"effects": [{"op": "power", "id": "smolder", "n": "a"}],
+		"up": {"vals": {"a": 3}},
+	},
+	"firestorm": {
+		"name": "Firestorm", "cost": 2, "type": "attack", "target": "self", "range": 0,
+		"rarity": "uncommon", "owner": "cassia", "art": "burst",
+		"text": "Kindle {a}. Deal 2 damage per Heat to every enemy within 2 of you.", "vals": {"a": 3},
+		"effects": [{"op": "kindle", "n": "a"}, {"op": "damage_radius", "amount": 0, "radius": 2, "heat_mult": 2}],
+		"up": {"vals": {"a": 5}},
+	},
+	"ashfall": {
+		"name": "Ashfall", "cost": 1, "type": "skill", "target": "hex", "range": 3,
+		"rarity": "uncommon", "owner": "cassia", "art": "pollen",
+		"text": "Enemies within 1 of the target gain {a} Scorch.", "vals": {"a": 3},
+		"effects": [{"op": "scorch_area", "radius": 1, "n": "a"}],
+		"up": {"vals": {"a": 5}},
+	},
+	"tinderbox": {
+		"name": "Tinderbox", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"rarity": "uncommon", "owner": "cassia", "art": "sap",
+		"text": "Kindle 1. Draw {a}.", "vals": {"a": 2},
+		"effects": [{"op": "kindle", "n": 1}, {"op": "draw", "n": "a"}],
+		"up": {"vals": {"a": 3}},
+	},
+	"crownfire": {
+		"name": "Crownfire", "cost": 2, "type": "attack", "target": "enemy", "range": 2,
+		"rarity": "rare", "owner": "cassia", "art": "fire", "exhaust": true,
+		"text": "Deal {a} damage, plus 4 per Heat. Exhaust.", "vals": {"a": 6},
+		"effects": [{"op": "damage", "amount": "a", "heat_mult": 4}],
+		"up": {"vals": {"a": 11}},
+	},
+	"ember_saint": {
+		"name": "Ember Saint", "cost": 3, "type": "power", "target": "self", "range": 0,
+		"rarity": "rare", "owner": "cassia", "art": "burst",
+		"text": "At the start of each turn, Kindle 1. If a hex burned, gain 1 Energy.", "vals": {},
+		"effects": [{"op": "power", "id": "ember_saint", "n": 1}],
+		"up": {"cost": 2},
+	},
 }
 
 const STARTER_DECK := {
 	"wren": ["thornstrike", "thornstrike", "thornstrike", "thornstrike",
 		"barkskin", "barkskin", "barkskin", "barkskin", "sow", "sow", "taproot"],
+	"cassia": ["cinder_strike", "cinder_strike", "cinder_strike", "cinder_strike",
+		"ashen_guard", "ashen_guard", "ashen_guard", "ashen_guard", "kindling", "kindling", "flashburn"],
 }
+
+
+## Shrine events name Wren's cards; another Grovewalker receives her own counterpart instead.
+const EVENT_SWAP := {
+	"cassia": {
+		"verdant_surge": "smolder", "pollen_cloud": "ashfall", "wildfire": "blaze",
+		"bellbreaker": "scorch_mark", "last_lantern": "ember_ward", "spinebreaker": "crownfire",
+		"briar_wall": "backdraft", "seed_of_ages": "ember_saint",
+	},
+}
+
+
+static func for_walker(id: String, walker: String) -> String:
+	return EVENT_SWAP.get(walker, {}).get(id, id)
+
+
+## An event label with swapped card names for this Grovewalker.
+static func event_label(label: String, ops: Array, walker: String) -> String:
+	for op in ops:
+		if op[0] == "card" and for_walker(op[1], walker) != op[1]:
+			label = label.replace(CARDS[op[1]]["name"], CARDS[for_walker(op[1], walker)]["name"])
+	return label
 
 
 static func has(id: String) -> bool:

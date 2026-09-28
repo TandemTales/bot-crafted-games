@@ -222,14 +222,15 @@ func build(c: CombatState, region_seed: int = 1, theme_id: String = "marsh") -> 
 	for h in c.growth:
 		_set_growth_node(h, c.growth[h], false)
 	# Units.
-	var p: Node3D = scene("grovewalker").instantiate()
+	var wdef := WalkerDB.get_def(c.walker)
+	var p: Node3D = scene(wdef["model"]).instantiate()
 	add_child(p)
 	units["player"] = p
 	p.position = world(c.player["pos"])
 	p.scale = Vector3.ONE * UNIT_SCALE
-	_decorate_unit(p, Color(0.55, 1.0, 0.4))
+	_decorate_unit(p, wdef["ring"])
 	player_light = OmniLight3D.new()
-	player_light.light_color = Color(0.7, 1.0, 0.45)
+	player_light.light_color = wdef["light"]
 	player_light.light_energy = 1.4
 	player_light.omni_range = 4.5
 	player_light.position = Vector3(0.3, 1.6, 0.2)

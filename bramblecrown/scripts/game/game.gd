@@ -7,7 +7,7 @@ const SETTINGS_PATH := "user://settings.json"
 
 var run: RunState
 var combat: CombatState
-var profile := {"runs": 0, "wins": 0, "best_floor": 0}
+var profile := {"runs": 0, "wins": 0, "best_floor": 0, "bosses": 0}
 var settings := {"sfx": 0.8, "music": 0.6, "fullscreen": false}
 ## Screenshot tour (packaged-build QA): --screenshot-tour <dir>
 var tour_dir := ""
@@ -32,11 +32,13 @@ func has_saved_run() -> bool:
 	return FileAccess.file_exists(RUN_PATH)
 
 
-func new_run(seed_value: int = -1) -> void:
+func new_run(seed_value: int = -1, walker: String = "wren") -> void:
 	if seed_value < 0:
 		seed_value = int(Time.get_unix_time_from_system()) % 1000000
+	if not WalkerDB.is_unlocked(walker, profile):
+		walker = "wren"
 	run = RunState.new()
-	run.new_run(seed_value)
+	run.new_run(seed_value, walker)
 	profile["runs"] = int(profile["runs"]) + 1
 	_save_profile()
 	save_run()
@@ -72,7 +74,16 @@ func clear_run() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(RUN_PATH))
 
 
+## Profile progress that unlocks Grovewalkers. Returns the ids newly unlocked.
+func note_progress() -> Array:
+	var before := WalkerDB.ORDER.filter(func(w): return WalkerDB.is_unlocked(w, profile))
+	profile["bosses"] = maxi(int(profile.get("bosses", 0)), int(run.stats["bosses"]))
+	_save_profile()
+	return WalkerDB.ORDER.filter(func(w): return WalkerDB.is_unlocked(w, profile) and not before.has(w))
+
+
 func record_end(victory: bool) -> void:
+	note_progress()
 	if victory:
 		profile["wins"] = int(profile["wins"]) + 1
 	profile["best_floor"] = maxi(int(profile["best_floor"]), run.floor_num)

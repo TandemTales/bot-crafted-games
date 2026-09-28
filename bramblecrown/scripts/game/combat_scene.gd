@@ -32,6 +32,7 @@ var _pad_cd := 0.0
 var hud_hp: UnitPlate
 var energy_label: Label
 var move_label: Label
+var heat_label: Label
 var grove_label: Label
 var draw_btn: Button
 var discard_btn: Button
@@ -96,7 +97,8 @@ func _build_ui() -> void:
 	var tlv := VBoxContainer.new()
 	tl.add_child(tlv)
 	var who := Label.new()
-	who.text = "Wren, Grovewalker"
+	var wdef := WalkerDB.get_def(c.walker)
+	who.text = "%s, %s" % [wdef["name"], wdef["title"]]
 	who.add_theme_font_override("font", UITheme.font("heading"))
 	who.add_theme_font_size_override("font_size", 24)
 	who.add_theme_color_override("font_color", UITheme.GOLD)
@@ -154,6 +156,19 @@ func _build_ui() -> void:
 	move_label.tooltip_text = UITheme.KEYWORDS["Movement"]
 	move_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	bl.add_child(move_label)
+	heat_label = Label.new()
+	heat_label.add_theme_font_override("font", UITheme.font("heading"))
+	heat_label.add_theme_font_size_override("font_size", 24)
+	heat_label.add_theme_color_override("font_color", Color(1.0, 0.62, 0.28))
+	heat_label.add_theme_color_override("font_outline_color", Color(0.12, 0.03, 0.0))
+	heat_label.add_theme_constant_override("outline_size", 6)
+	heat_label.position = Vector2(0, -34)
+	heat_label.size = Vector2(190, 30)
+	heat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heat_label.tooltip_text = UITheme.KEYWORDS["Heat"]
+	heat_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	heat_label.visible = c.walker == "cassia"
+	bl.add_child(heat_label)
 	# Clickable piles (A / S / X), like every modern deckbuilder.
 	var piles := HBoxContainer.new()
 	piles.position = Vector2(-6, 172)
@@ -341,6 +356,8 @@ func _refresh_hud() -> void:
 	hud_hp.update_from({"title": "", "hp": p["hp"], "max_hp": p["max_hp"], "ward": p["ward"], "statuses": p["statuses"]})
 	energy_label.text = "%d/%d" % [p["energy"], CombatState.BASE_ENERGY]
 	move_label.text = "Movement %d" % p["move"]
+	heat_label.text = "Heat %d" % int(p.get("heat", 0))
+	heat_label.visible = c.walker == "cassia" or int(p.get("heat", 0)) > 0
 	var g := c.grove().size()
 	grove_label.text = "Grove %d  (+%d)" % [g, g / 3] if g > 0 else "No Grove: stand in Thicket"
 	draw_btn.text = "Draw %d" % c.draw_pile.size()
@@ -798,7 +815,7 @@ func _update_info() -> void:
 		if e["def"].get("trample", false):
 			lines.append("[i]Tramples: destroys Thicket it walks through.[/i]")
 	elif h == c.player["pos"]:
-		lines.append("[b][color=#e8c070]Wren[/color][/b]  %d/%d HP" % [c.player["hp"], c.player["max_hp"]])
+		lines.append("[b][color=#e8c070]%s[/color][/b]  %d/%d HP" % [WalkerDB.get_def(c.walker)["name"], c.player["hp"], c.player["max_hp"]])
 	var g: String = c.growth[h]
 	var t: String = c.terrain[h]
 	match t:
@@ -939,6 +956,10 @@ func _play_event(ev: Dictionary) -> void:
 			_refresh_hud()
 			_sync_plates()
 			await _wait(0.16)
+		"heat":
+			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 2.0, 0))
+			_float_text(sp + Vector2(-60, 0), "Heat %d" % ev["n"], Color(1.0, 0.6, 0.25), 32, 0.9)
+			_refresh_hud()
 		"hp_loss":
 			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.3, 0))
 			_float_text(sp, "Rot -%d" % ev["amount"], UITheme.BLIGHT, 36)
@@ -1057,6 +1078,10 @@ func _on_won() -> void:
 	await _wait(1.6)
 	Game.run.finish_combat(c)
 	Game.combat = null
+	for w in Game.note_progress():
+		var wd := WalkerDB.get_def(w)
+		_show_banner("%s, %s unlocked" % [wd["name"], wd["title"]], 1.6)
+		await _wait(1.9)
 	Game.save_run()
 	Game.route_to_status()
 

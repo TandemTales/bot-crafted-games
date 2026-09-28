@@ -80,10 +80,24 @@ func _build_ui() -> void:
 	v.add_child(spacer)
 	_continue_btn = _btn(v, "Continue Run", func(): Sfx.play("click"); Game.continue_run())
 	_continue_btn.visible = Game.has_saved_run()
-	var nb := _btn(v, "New Run", func():
-		Sfx.play("click")
-		Game.clear_run()
-		Game.new_run())
+	var nb: Button = null
+	for w in WalkerDB.ORDER:
+		var wd := WalkerDB.get_def(w)
+		var open := WalkerDB.is_unlocked(w, Game.profile)
+		var b := _btn(v, "New Run: %s, %s" % [wd["name"], wd["title"]] if open else "Locked: %s" % wd["name"], func():
+			Sfx.play("click")
+			Game.clear_run()
+			Game.new_run(-1, w))
+		b.disabled = not open
+		b.tooltip_text = wd["blurb"] if open else wd.get("locked_text", "")
+		if nb == null:
+			nb = b
+		if not open:
+			var why := Label.new()
+			why.text = "      " + wd.get("locked_text", "")
+			why.add_theme_font_size_override("font_size", 18)
+			why.add_theme_color_override("font_color", UITheme.INK_DIM)
+			v.add_child(why)
 	_btn(v, "Toggle Fullscreen (F11)", func(): Sfx.play("click"); Game.toggle_fullscreen())
 	_btn(v, "Quit", func(): get_tree().quit())
 	(_continue_btn if _continue_btn.visible else nb).grab_focus()

@@ -95,6 +95,11 @@ func _th() -> Dictionary:
 	return BoardView.THEMES.get(theme_id, BoardView.THEMES["marsh"])
 
 
+func _walker_model() -> String:
+	var w: String = Game.run.walker if Game.run != null else "wren"
+	return WalkerDB.get_def(w)["model"]
+
+
 func _place(model: String, pos: Vector3, rot_deg: float = 0.0, sc: float = 1.0) -> Node3D:
 	var n: Node3D = (load(MODELS % model) as PackedScene).instantiate()
 	n.position = pos
@@ -163,7 +168,7 @@ func _build_ground() -> void:
 func _camp() -> void:
 	_place("campfire", Vector3(0.3, 0, -0.2), 0.0, 1.5)
 	_light(Vector3(0.3, 0.8, -0.2), Color(1.0, 0.55, 0.22), 5.0, 7.0, 1.0)
-	_place("grovewalker", Vector3(-0.9, 0, 0.5), 38.0, 1.35)
+	_place(_walker_model(), Vector3(-0.9, 0, 0.5), 38.0, 1.35)
 	_place("thicket", _hex(Vector2i(-1, 0)), 0.0, 1.0)
 	_place("thicket", _hex(Vector2i(0, -1)), 90.0, 0.9)
 	_place("thicket", _hex(Vector2i(1, 1)), 30.0, 0.8)
@@ -191,7 +196,7 @@ func _shrine() -> void:
 		_place("willow", _hex(Vector2i(-1, -1)) + Vector3(-0.4, 0, -0.4), 0.0, 1.3)
 	_place("thicket", _hex(Vector2i(1, 0)) + Vector3(0.2, 0, 0.3), 0.0, 0.9)
 	_place("thicket", _hex(Vector2i(-1, 1)), 45.0, 0.9)
-	_place("grovewalker", Vector3(-1.5, 0, 0.9), 118.0, 1.3)
+	_place(_walker_model(), Vector3(-1.5, 0, 0.9), 118.0, 1.3)
 
 
 func _market() -> void:
@@ -217,7 +222,7 @@ func _finale() -> void:
 		_place("thicket", _hex(h) + Vector3(0, 0, -0.6), _rng.randf_range(0, 360), 1.05)
 	_place("hedge_arch", Vector3(-2.4, 0, -1.6), 20.0, 1.2)
 	_place("hedge_arch", Vector3(2.4, 0, -1.6), -20.0, 1.2)
-	_place("grovewalker", Vector3(1.9, 0, 0.9), 235.0, 1.35)
+	_place(_walker_model(), Vector3(1.9, 0, 0.9), 235.0, 1.35)
 	_light(Vector3(0, 2.6, -0.2), Color(0.6, 1.0, 0.45), 6.0, 7.0, 0.15)
 	_light(Vector3(0.9, 1.4, 1.6), Color(1.0, 0.8, 0.5), 2.0, 4.0, 0.0)
 
@@ -227,7 +232,7 @@ func _reward() -> void:
 		_place("thicket", _hex(h), _rng.randf_range(0, 360), 1.0)
 	for h in [Vector2i(2, -1), Vector2i(1, -2), Vector2i(-2, 1)]:
 		_place("blight", _hex(h), _rng.randf_range(0, 360), 0.8)
-	_place("grovewalker", Vector3(0, 0.02, 0), 12.0, 1.3)
+	_place(_walker_model(), Vector3(0, 0.02, 0), 12.0, 1.3)
 	_light(Vector3(0.3, 2.0, 0.4), Color(0.7, 1.0, 0.45), 3.5, 6.0, 0.2)
 
 

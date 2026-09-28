@@ -23,6 +23,8 @@ func _init() -> void:
 		"test_enemy_forecast_matches_resolution",
 		"test_ironroot_progression", "test_ironroot_patterns", "test_ironroot_collapse",
 		"test_crown_progression", "test_crown_patterns", "test_crown_thorns",
+		"test_cassia_data", "test_cassia_unlock", "test_kindle_rules", "test_cassia_cards_resolve",
+		"test_cassia_powers", "test_cassia_preview_matches_play", "test_cassia_bot", "test_cassia_events",
 	]
 	for t in tests:
 		_current = t
@@ -417,7 +419,7 @@ func test_cloister_card_progression() -> bool:
 	var old_pool := CardDB.reward_pool("wren", 0)
 	var new_ids := pool.filter(func(id): return not old_pool.has(id))
 	check(new_ids.size() == 10, "ten additional region-2 reward cards")
-	check(CardDB.reward_pool("cassia", 1).is_empty(), "Wren cards do not leak to another walker")
+	check(not CardDB.reward_pool("cassia", 1).any(func(id): return CardDB.CARDS[id]["owner"] == "wren"), "Wren cards do not leak to another walker")
 	var r := RunState.new()
 	r.new_run(326)
 	r.region = 1
@@ -1356,4 +1358,261 @@ func test_region_transition() -> bool:
 		check(r.region_def()["fights"].has(enc), "region 2 fights come from the region 2 pool (%s)" % enc)
 	var r2 := RunState.from_json(r.to_json())
 	check(r2.region == 1, "region survives save/load")
+	return true
+
+
+# ---------------------------------------------------------------- Cassia, the Ashwalker
+
+func test_cassia_data() -> bool:
+	var own := CardDB.CARDS.keys().filter(func(id): return CardDB.CARDS[id]["owner"] == "cassia")
+	check(own.size() >= 20, "Cassia has at least 20 cards (%d)" % own.size())
+	for id in CardDB.STARTER_DECK["cassia"]:
+		check(CardDB.has(id) and CardDB.CARDS[id]["owner"] == "cassia", "Cassia starter %s is hers" % id)
+	var pool := CardDB.reward_pool("cassia", 4)
+	check(pool.size() >= 15, "Cassia reward pool size")
+	check(not pool.any(func(id): return CardDB.CARDS[id]["owner"] == "wren"), "no Wren cards in Cassia rewards")
+	check(not CardDB.reward_pool("wren", 4).any(func(id): return CardDB.CARDS[id]["owner"] == "cassia"), "no Cassia cards in Wren rewards")
+	for id in own:
+		check(ResourceLoader.exists("res://assets/textures/cards/%s.png" % id), "%s has Blender card art" % id)
+	check(ResourceLoader.exists("res://assets/models/cassia.glb"), "Cassia model exported")
+	for w in WalkerDB.ORDER:
+		check(CardDB.STARTER_DECK.has(w), "%s has a starter deck" % w)
+	return true
+
+
+func test_cassia_unlock() -> bool:
+	check(WalkerDB.is_unlocked("wren", {}), "Wren always open")
+	check(not WalkerDB.is_unlocked("cassia", {"runs": 3, "wins": 0}), "Cassia locked on a fresh profile")
+	check(WalkerDB.is_unlocked("cassia", {"bosses": 1}), "one boss kill unlocks Cassia")
+	var r := RunState.new()
+	r.new_run(5, "cassia")
+	check(r.walker == "cassia" and r.hp == 64 and r.max_hp == 64, "Cassia starts at 64 HP")
+	check(r.deck.size() == 11 and r.deck.all(func(c): return CardDB.CARDS[c["id"]]["owner"] == "cassia"), "Cassia starter deck")
+	var r2 := RunState.from_json(r.to_json())
+	check(r2.walker == "cassia", "walker survives save/load")
+	r2.enter_node(r2.available_nodes()[0])
+	var c := r2.make_combat()
+	check(c.walker == "cassia", "combat knows the walker")
+	# Events that strip a starter basic must find Cassia's basics too.
+	var found := false
+	for id in EventDB.EVENTS:
+		for i in EventDB.EVENTS[id]["options"].size():
+			if found:
+				break
+			for op in EventDB.EVENTS[id]["options"][i]["ops"]:
+				if op[0] == "remove_random_starter" and not found:
+					var rr := RunState.new()
+					rr.new_run(6, "cassia")
+					rr.gold = 999
+					var before := rr.deck.size()
+					rr.choose_event_option(id, i)
+					var carded: int = EventDB.EVENTS[id]["options"][i]["ops"].filter(func(o): return o[0] == "card").size()
+					check(rr.deck.size() == before - 1 + carded, "starter removal works for Cassia's deck (%s)" % id)
+					found = true
+	return true
+
+
+func test_kindle_rules() -> bool:
+	# Grove: (0,0) under her, a line east (1,0),(2,0),(3,0) and one west (-1,0).
+	var c := _blank_combat({"enemies": [["husk_brute", 0, -3]], "thicket": [[0, 0], [1, 0], [2, 0], [3, 0], [-1, 0]]})
+	var first := c.kindle_targets(2)
+	check(first.size() == 2 and first[0] == Vector2i(3, 0) and first[1] == Vector2i(2, 0), "kindle burns farthest first (%s)" % [first])
+	check(not c.kindle_targets(99).has(Vector2i(0, 0)), "never burns her own hex")
+	var uid := _give(c, "flashburn")
+	var hand0 := c.hand.size()
+	c.play_card(uid, c.player["pos"])
+	check(int(c.player["heat"]) == 2, "Flashburn: 2 Heat")
+	check(c.growth[Vector2i(3, 0)] == "none" and c.growth[Vector2i(2, 0)] == "none", "burned hexes are bare")
+	check(c.growth[Vector2i(0, 0)] == "thicket", "still standing in Thicket")
+	check(c.hand.size() == hand0, "Flashburn draws 1")
+	# Ember Lash: Kindle 1 (Heat 3), 4 + 2 x 3; the Grove is then 2 hexes, so no Grove bonus.
+	var e: Dictionary = c.enemies[0]
+	e["pos"] = Vector2i(0, -2)
+	var hp0 := int(e["hp"])
+	uid = _give(c, "ember_lash")
+	var pv := c.preview_card(c.hand[c.hand_index(uid)], e["pos"])
+	c.play_card(uid, e["pos"])
+	check(int(c.player["heat"]) == 3, "Ember Lash adds 1 Heat")
+	check(hp0 - int(e["hp"]) == 10, "Ember Lash 4 + 2 x 3 Heat = 10 (got %d)" % (hp0 - int(e["hp"])))
+	check(int(pv["damage"].get(e["uid"], -1)) == hp0 - int(e["hp"]), "Ember Lash preview exact")
+	check(pv["burn"].size() == 1, "Ember Lash previews its burned hex")
+	c.player["ward"] = 99
+	c.end_turn()
+	if c.phase == "player":
+		check(int(c.player["heat"]) == 0, "Heat resets each turn")
+	# Nothing to burn: no Heat, no crash.
+	var c2 := _blank_combat({"enemies": [["husk_brute", 0, -3]]})
+	uid = _give(c2, "flashburn")
+	c2.play_card(uid, c2.player["pos"])
+	check(int(c2.player["heat"]) == 0, "Kindle off-Grove does nothing")
+	return true
+
+
+func test_cassia_cards_resolve() -> bool:
+	# Blaze burns the whole Grove except her hex and hits for 3 per Heat.
+	var c := _blank_combat({"enemies": [["husk_brute", 1, -1]], "thicket": [[0, 0], [1, 0], [0, 1], [-1, 1], [-1, 0]]})
+	var e: Dictionary = c.enemies[0]
+	var hp0 := int(e["hp"])
+	c.player["energy"] = 5
+	var uid := _give(c, "blaze")
+	c.play_card(uid, e["pos"])
+	check(int(c.player["heat"]) == 4, "Blaze kindles all 4 other Grove hexes")
+	check(hp0 - int(e["hp"]) == 12, "Blaze 3 x 4 = 12 (got %d)" % (hp0 - int(e["hp"])))
+	check(c.grove().size() == 1, "only her hex remains")
+	# Smokescreen: 3 Ward per Heat.
+	c = _blank_combat({"enemies": [["husk_brute", 0, -3]], "thicket": [[0, 0], [1, 0], [2, 0]]})
+	uid = _give(c, "smokescreen")
+	c.play_card(uid, c.player["pos"])
+	check(int(c.player["ward"]) == 6, "Smokescreen 2 Heat x 3 = 6 Ward (got %d)" % c.player["ward"])
+	# Flare needs 2 Heat.
+	uid = _give(c, "flare")
+	var en := int(c.player["energy"])
+	c.play_card(uid, c.player["pos"])
+	check(int(c.player["energy"]) == en + 1, "Flare grants Energy at 2 Heat")
+	# Firestorm hits everything within 2.
+	c = _blank_combat({"enemies": [["husk_brute", 2, 0], ["husk_brute", -1, 0], ["husk_brute", 0, -3]], "thicket": [[0, 0], [0, 1], [1, 1], [-1, 2]]})
+	c.player["energy"] = 5
+	var hps := c.enemies.map(func(x): return int(x["hp"]))
+	uid = _give(c, "firestorm")
+	var pv := c.preview_card(c.hand[c.hand_index(uid)], c.player["pos"])
+	c.play_card(uid, c.player["pos"])
+	check(int(c.player["heat"]) == 3, "Firestorm kindles 3")
+	check(hps[0] - int(c.enemies[0]["hp"]) == 6 and hps[1] - int(c.enemies[1]["hp"]) == 6, "Firestorm 2 x 3 Heat to enemies within 2")
+	check(hps[2] == int(c.enemies[2]["hp"]), "Firestorm spares enemies 3 away")
+	for i in 3:
+		check(int(pv["damage"].get(c.enemies[i]["uid"], 0)) == hps[i] - int(c.enemies[i]["hp"]), "Firestorm preview exact for enemy %d" % i)
+	# Scorch ticks at the start of the enemy's action and decays.
+	c = _blank_combat({"enemies": [["husk_brute", 0, -3]]})
+	e = c.enemies[0]
+	uid = _give(c, "ashfall")
+	c.play_card(uid, e["pos"])
+	check(int(e["statuses"].get("scorch", 0)) == 3, "Ashfall applies 3 Scorch")
+	hp0 = int(e["hp"])
+	c.player["ward"] = 99
+	c.end_turn()
+	check(hp0 - int(e["hp"]) == 3 and int(e["statuses"]["scorch"]) == 2, "Scorch ticks 3 then drops to 2")
+	return true
+
+
+func test_cassia_powers() -> bool:
+	var c := _blank_combat({"enemies": [["husk_brute", 0, -3]], "thicket": [[0, 0], [1, 0], [2, 0], [0, 1]]})
+	c.player["energy"] = 9
+	var uid := _give(c, "phoenix_bark")
+	c.play_card(uid, c.player["pos"])
+	uid = _give(c, "flashburn")
+	c.play_card(uid, c.player["pos"])
+	check(int(c.player["ward"]) == 4, "Phoenix Bark: 2 Ward per hex kindled (got %d)" % c.player["ward"])
+	uid = _give(c, "smolder")
+	c.play_card(uid, c.player["pos"])
+	uid = _give(c, "ember_saint")
+	c.play_card(uid, c.player["pos"])
+	c.player["ward"] = 99
+	c.end_turn()
+	if c.phase == "player":
+		# Smolder regrows around her, then Ember Saint burns one hex for Heat and Energy.
+		check(int(c.player["heat"]) == 1, "Ember Saint kindles 1 at turn start")
+		check(int(c.player["energy"]) == CombatState.BASE_ENERGY + 1, "Ember Saint grants 1 Energy when a hex burns")
+		check(c.grove().size() >= 3, "Smolder regrows fuel each turn")
+	return true
+
+
+func test_cassia_preview_matches_play() -> bool:
+	for id in CardDB.CARDS:
+		if CardDB.CARDS[id]["owner"] != "cassia":
+			continue
+		for up in [false, true]:
+			var c := _blank_combat({"enemies": [["husk_brute", 1, -1], ["blightling", -2, 1], ["husk_brute", 0, -3]],
+				"thicket": [[0, 0], [1, 0], [2, 0], [0, 1], [-1, 1], [-1, 0], [2, -1]]})
+			c.player["energy"] = 9
+			c.player["heat"] = 1
+			var uid := _give(c, id, up)
+			var inst: Dictionary = c.hand[c.hand_index(uid)]
+			var targets := c.valid_targets(inst)
+			if targets.is_empty():
+				continue
+			var tgt: Vector2i = targets[0]
+			var pv := c.preview_card(inst, tgt)
+			var before := c.growth.duplicate()
+			var hps := {}
+			for e in c.enemies:
+				hps[e["uid"]] = int(e["hp"])
+			c.play_card(uid, tgt)
+			for h in c.growth:
+				if before[h] == "thicket" and c.growth[h] == "none":
+					check(pv["burn"].has(h), "%s: burned hex %s was previewed" % [id, h])
+			check(int(c.player["heat"]) == int(pv["heat"]), "%s: Heat preview %d == %d" % [id, pv["heat"], c.player["heat"]])
+			for e in c.enemies:
+				var lost: int = hps[e["uid"]] - int(e["hp"])
+				if pv["damage"].has(e["uid"]):
+					check(lost == int(pv["damage"][e["uid"]]), "%s%s: damage preview %d == %d" % [id, "+" if up else "", pv["damage"][e["uid"]], lost])
+	return true
+
+
+## Cassia's deck clears fights end to end with the smart bot (balance gauge, not a win-rate bar).
+func test_cassia_bot() -> bool:
+	var region1 := 0
+	var floors := []
+	for s in range(200, 210):
+		var r := RunState.new()
+		r.new_run(s, "cassia")
+		var guard := 0
+		while r.status != "victory" and r.status != "defeat" and guard < 80:
+			guard += 1
+			var opts: Array = r.available_nodes()
+			var pick: int = opts[0]
+			for id in opts:
+				if r.node(id)["type"] == ("camp" if r.hp < r.max_hp * 0.6 else "fight"):
+					pick = id
+			r.enter_node(pick)
+			match r.status:
+				"combat":
+					var c := r.make_combat()
+					var turns := 0
+					while c.phase == "player" and turns < 60:
+						_smart_turn(c)
+						turns += 1
+					check(c.phase != "player", "Cassia seed %d fight finished" % s)
+					r.finish_combat(c)
+					if r.status == "reward":
+						var cards: Array = r.reward["cards"]
+						for id in ["blaze", "firestorm", "smolder", "ember_lash", "backdraft", "kindling", "ash_sprout", "crownfire", "scorch_mark"]:
+							if cards.has(id) and r.deck.size() < 20:
+								r.take_reward_card(id)
+								break
+						r.take_reward_charm()
+						r.leave_reward()
+				"shrine":
+					r.choose_event_option(r.current_event, EventDB.EVENTS[r.current_event]["options"].size() - 1)
+				"market":
+					r.leave_room()
+				"camp":
+					r.camp_rest()
+		check(r.status in ["victory", "defeat"], "Cassia seed %d reached an end" % s)
+		if r.region >= 1 or r.status == "victory":
+			region1 += 1
+		floors.append(r.floor_num)
+	print("  cassia bot: %d/10 region-1 clears, floors %s" % [region1, floors])
+	return true
+
+
+## Shrine events that grant a named Wren card give Cassia her own counterpart, and say so.
+func test_cassia_events() -> bool:
+	for id in EventDB.EVENTS:
+		var opts: Array = EventDB.EVENTS[id]["options"]
+		for i in opts.size():
+			for op in opts[i]["ops"]:
+				if op[0] != "card":
+					continue
+				var swapped := CardDB.for_walker(op[1], "cassia")
+				check(CardDB.CARDS[swapped]["owner"] == "cassia", "%s gives Cassia her own card (%s)" % [id, swapped])
+				var label := CardDB.event_label(opts[i]["label"], opts[i]["ops"], "cassia")
+				check(label.contains(CardDB.CARDS[swapped]["name"]), "%s label names %s" % [id, swapped])
+				check(CardDB.event_label(opts[i]["label"], opts[i]["ops"], "wren") == opts[i]["label"], "%s label unchanged for Wren" % id)
+				var r := RunState.new()
+				r.new_run(9, "cassia")
+				r.gold = 999
+				r.hp = r.max_hp
+				r.choose_event_option(id, i)
+				check(r.deck.any(func(c): return c["id"] == swapped), "%s adds %s to Cassia's deck" % [id, swapped])
+				check(not r.deck.any(func(c): return CardDB.CARDS[c["id"]]["owner"] == "wren"), "%s adds no Wren card for Cassia" % id)
 	return true

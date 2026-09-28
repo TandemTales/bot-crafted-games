@@ -4,6 +4,8 @@ extends RefCounted
 
 const ROWS := 7
 const START_HP := 72
+## The plain strike and guard of every Grovewalker; events may strip one from the deck.
+const STARTER_BASICS := ["thornstrike", "barkskin", "cinder_strike", "ashen_guard"]
 const NODE_WEIGHTS := {"fight": 46, "shrine": 20, "elite": 12, "market": 12, "camp": 10}
 
 var seed_value := 0
@@ -32,8 +34,8 @@ func new_run(seed_in: int, walker_in: String = "wren") -> void:
 	seed_value = seed_in
 	rng = Rng.new(seed_in)
 	walker = walker_in
-	hp = START_HP
-	max_hp = START_HP
+	hp = int(WalkerDB.get_def(walker)["hp"])
+	max_hp = hp
 	gold = 99
 	deck = []
 	for id in CardDB.STARTER_DECK[walker]:
@@ -197,6 +199,7 @@ func make_combat() -> CombatState:
 	if not used_encounters.has(enc_id):
 		used_encounters.append(enc_id)
 	var c := CombatState.new()
+	c.walker = walker
 	var combat_rng := Rng.new(seed_value * 1000 + floor_num)
 	c.setup(EncounterDB.get_def(enc_id), deck, hp, max_hp, charms, combat_rng)
 	return c
@@ -397,8 +400,9 @@ func choose_event_option(event_id: String, idx: int) -> String:
 				gold += int(op[1])
 				notes.append("Gold %+d." % int(op[1]))
 			"card":
-				deck.append({"id": op[1], "up": false})
-				notes.append("Gained %s." % CardDB.CARDS[op[1]]["name"])
+				var cid := CardDB.for_walker(op[1], walker)
+				deck.append({"id": cid, "up": false})
+				notes.append("Gained %s." % CardDB.CARDS[cid]["name"])
 			"upgrade_random":
 				var idxs := []
 				for i in deck.size():
@@ -410,7 +414,7 @@ func choose_event_option(event_id: String, idx: int) -> String:
 					notes.append("Upgraded %s." % CardDB.CARDS[deck[idxs[i]]["id"]]["name"])
 			"remove_random_starter":
 				for i in deck.size():
-					if deck[i]["id"] in ["thornstrike", "barkskin"]:
+					if deck[i]["id"] in STARTER_BASICS:
 						notes.append("Removed %s." % CardDB.CARDS[deck[i]["id"]]["name"])
 						deck.remove_at(i)
 						break
