@@ -1,0 +1,6 @@
+00:02.188  blend            | Read blend: "C:\dev\tandem_tales\bot-crafted-games\bramblecrown\source-art\cassia.blend"
+SOURCE_QA [('brazier_flame', 41, (0.165, 0.171, 0.299), ['ember_glow', 'flame_core']), ('cassia', 8278, (0.89, 0.869, 1.703), ['ash_cloth', 'ash_cloth_light', 'char', 'ember_cloth', 'ash_skin', 'copper_crest', 'ember_glow', 'iron', 'bark', 'bark_light', 'thorn'])]
+ACTIONS [('flame_flicker', (1.0, 25.0))]
+Blender 5.1.2 (hash ec6e62d40fa9 built 2026-05-19 01:37:34)
+
+Blender quit

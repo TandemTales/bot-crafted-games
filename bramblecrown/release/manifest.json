@@ -1,0 +1,24 @@
+{
+  "package": "build/windows/Bramblecrown.exe",
+  "bytes": 122461944,
+  "sha256": "F7F68BD14B5F10D22859FDD82F206BC2DB4E0CFABB2BE681183EE475714CF6E1",
+  "screenshots": [
+    {
+      "file": "screenshots/71_title_cassia_unlocked_1920x1080.png",
+      "sha256": "AA94DC39D0F9E3A5FF8BC206E906EABB7420ED47C542E07669101E416DF3BB05"
+    },
+    {
+      "file": "screenshots/73_cassia_kindle_preview_1920x1080.png",
+      "sha256": "6CE3C1F2A1A87304F39AC559C3292F0FF8474961AB2BC24DAC8C741F55D5B048"
+    },
+    {
+      "file": "screenshots/78_cassia_cards_base_0_1920x1080.png",
+      "sha256": "E175EDE1980EA87E443B07D9E599C5340895400ABB46BABEF91BD719D8057545"
+    },
+    {
+      "file": "screenshots/80_cassia_crown_1920x1080.png",
+      "sha256": "7BB50B71D0D668803A3A2F474AF0376291159E2EE6776A747549E4D293953897"
+    }
+  ],
+  "uploaded": false
+}

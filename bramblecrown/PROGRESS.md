@@ -31,6 +31,52 @@
   frames; **AAA FAIL / OURS LOSES** remains for posing/materials/repeated compositions.
 - Next: finish final 1080p/1440p capture review, retain logs/manifest/page copy and push the handoff.
 
+### Run 9 final result and next action
+
+- **Delivered:** Cassia's distinct flame crest, exposed face, split coat/boots, tighter mantle,
+  asymmetric offhand, reduced flame glare; fifteen matching card renders, six reframed source
+  cameras; readable starting deck and truthful Heat text. Fixed player animations not starting.
+- **Release preparation:** `release/itch-page.md` supplies next-build description, controls,
+  checkpoint-save explanation and measured hardware limits. Four original 1080p screenshots,
+  captions and exact SHA-256 manifest are ready locally. No invented minimum hardware claims.
+  The existing draft page still describes its actual September 24 first-region download.
+- **Final validation:** installed Godot import, scene smokes and full rules **3,122 / 0**;
+  clean Windows x64 export. The final executable ran 19 staged captures at each of 1280x720,
+  1920x1080 and 2560x1440: all exits 0, zero failures/errors, player-file hashes unchanged.
+  Animation start/advancement assertions pass with imported `flame_flicker`. Main runner read
+  all 57 images via twelve contact sheets plus representative originals; critic reviewed all
+  three select layouts, combat views and the six final original card illustrations.
+- **Blender:** final Cassia source reopens with 8,278 body vertices + 41 flame vertices,
+  materials, body dimensions 0.890 x 0.869 x 1.703 and `flame_flicker` frames 1-25.
+  Representative Ember Lash source reopens with 48 objects, camera and 396x224 render settings.
+- **Package:** `build/windows/Bramblecrown.exe`, embedded PCK, **122,461,944 bytes**;
+  SHA-256 `F7F68BD14B5F10D22859FDD82F206BC2DB4E0CFABB2BE681183EE475714CF6E1`.
+  This supersedes intermediate Run 9 package hashes. The export contains no source-art,
+  release-preparation or evidence paths. Raw logs/failed animation trace and visual evidence
+  are retained in `evidence/2026-09-29-run9/`; full raw PNGs remain in `build/run9/verified-*`.
+- **Critic:** bounded silhouette/readability and corrected card framing pass. Original broad
+  no-clipping claim missed art crops; six cameras were corrected and final PNGs re-read.
+  **AAA FAIL / OURS LOSES** remains: expressive posing/materials, repeated card compositions,
+  room glare and wider gameplay acceptance. No independent shipping-judge pass.
+- **Limits:** staged test routes, not a complete player-driven campaign. Manual keyboard/mouse,
+  focus/fullscreen, audio listening, physical controller, sustained performance, additional
+  hardware, 4K/ultrawide and player-path download/install remain unverified this run.
+- **Release:** no upload, page edit or publication; no `.aaa-complete`. Bramblecrown stays active.
+  Authenticated Draft page and Windows build #2014268 verified. Forced release: **2026-10-03 Pacific**.
+
+Exact next action for Run 10:
+1. Implement aimed Kindle with exact preview-versus-resolution and save/progression regressions;
+   keep the current burn order as compatibility behavior where needed. Do not silently change
+   the spatial rules without updating card text, controls, tests and release copy.
+2. Obtain a genuine five-region player-input route and audio/controller/focus/save evidence
+   before Saturday; diagnose the first reproducible failure rather than claiming staged success.
+3. Reuse `release/` materials, recapturing if the package changes. Apply copy/screenshots only
+   with the matching upload after the release gate, then verify the actual download/install.
+
+Full SPEC remains owed: Thatch with at least twenty cards, ten more charms, Withering tiers,
+balance and all discipline quality acceptance. Current authored content: five regions, thirty
+normal fights, five elites, five bosses, two walkers, fifty-four cards, thirteen events, ten charms.
+
 ## 2026-09-29 — Run 8 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent; started at `dev` 145b22b. Forced release remains Saturday 2026-10-03 Pacific.

@@ -1,0 +1,96 @@
+11:17:59 | INFO: Data are loaded, start creating Blender stuff
+11:17:59 | INFO: Blender create Mesh node body
+11:17:59 | INFO: glTF import finished in 0.03s
+11:17:59 | INFO: Data are loaded, start creating Blender stuff
+11:17:59 | INFO: Blender create Mesh node Cone
+11:17:59 | INFO: Blender create Mesh node Cone.006
+11:17:59 | INFO: glTF import finished in 0.05s
+11:17:59 | INFO: Data are loaded, start creating Blender stuff
+11:17:59 | INFO: Blender create Mesh node cane
+11:17:59 | INFO: glTF import finished in 0.03s
+C:\dev\tandem_tales\bot-crafted-games\bramblecrown\source-art\render_card_art.py:100: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+C:\dev\tandem_tales\bot-crafted-games\bramblecrown\source-art\render_card_art.py:133: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+C:\dev\tandem_tales\bot-crafted-games\bramblecrown\source-art\render_card_art.py:202: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+00:03.938  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\ashen_guard.png'
+Info: Saved as "card_ashen_guard.blend"
+[card-art] ashen_guard
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node body
+11:18:01 | INFO: glTF import finished in 0.03s
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node cane
+11:18:01 | INFO: glTF import finished in 0.03s
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node Cone
+11:18:01 | INFO: Blender create Mesh node Cone.006
+11:18:01 | INFO: glTF import finished in 0.05s
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node cane
+11:18:01 | INFO: glTF import finished in 0.03s
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node cane
+11:18:01 | INFO: glTF import finished in 0.03s
+00:04.578  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\kindling.png'
+Info: Saved as "card_kindling.blend"
+[card-art] kindling
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node body
+11:18:01 | INFO: glTF import finished in 0.03s
+11:18:01 | INFO: Data are loaded, start creating Blender stuff
+11:18:01 | INFO: Blender create Mesh node Cone
+11:18:01 | INFO: Blender create Mesh node Cone.006
+11:18:01 | INFO: glTF import finished in 0.04s
+00:05.125  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\smokescreen.png'
+Info: Saved as "card_smokescreen.blend"
+[card-art] smokescreen
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node body
+11:18:02 | INFO: glTF import finished in 0.03s
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node Cone
+11:18:02 | INFO: Blender create Mesh node Cone.006
+11:18:02 | INFO: glTF import finished in 0.04s
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node cane
+11:18:02 | INFO: glTF import finished in 0.03s
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node cane
+11:18:02 | INFO: glTF import finished in 0.03s
+00:05.703  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\ember_ward.png'
+Info: Saved as "card_ember_ward.blend"
+[card-art] ember_ward
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node body
+11:18:02 | INFO: glTF import finished in 0.03s
+11:18:02 | INFO: Data are loaded, start creating Blender stuff
+11:18:02 | INFO: Blender create Mesh node Cone
+11:18:03 | INFO: Blender create Mesh node Cone.006
+11:18:03 | INFO: glTF import finished in 0.04s
+11:18:03 | INFO: Data are loaded, start creating Blender stuff
+11:18:03 | INFO: Blender create Mesh node Cylinder
+11:18:03 | INFO: glTF import finished in 0.01s
+00:06.203  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\tinderbox.png'
+Info: Saved as "card_tinderbox.blend"
+[card-art] tinderbox
+11:18:03 | INFO: Data are loaded, start creating Blender stuff
+11:18:03 | INFO: Blender create Mesh node body
+11:18:03 | INFO: glTF import finished in 0.03s
+11:18:03 | INFO: Data are loaded, start creating Blender stuff
+11:18:03 | INFO: Blender create Mesh node Cone
+11:18:03 | INFO: Blender create Mesh node Cone.006
+11:18:03 | INFO: glTF import finished in 0.04s
+11:18:03 | INFO: Data are loaded, start creating Blender stuff
+11:18:03 | INFO: Blender create Mesh node thorn_cane
+11:18:03 | INFO: glTF import finished in 0.01s
+11:18:03 | INFO: Data are loaded, start creating Blender stuff
+11:18:03 | INFO: Blender create Mesh node thorn_cane
+11:18:03 | INFO: glTF import finished in 0.01s
+00:06.625  render           | Saved: 'C:\dev\tandem_tales\bot-crafted-games\bramblecrown\assets\textures\cards\crownfire.png'
+Info: Saved as "card_crownfire.blend"
+[card-art] crownfire
+Blender 5.1.2 (hash ec6e62d40fa9 built 2026-05-19 01:37:34)
+
+Blender quit

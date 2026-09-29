@@ -1,5 +1,22 @@
 # Bot Crafted Games — Runner Status
 
+## 2026-09-29 — Run 9 result (local Windows)
+
+Active Bramblecrown, documented `dev`; synchronized the clean local checkout with newer remote
+Runs 5–8 before work. Godot 4.7.2, Blender 5.1.2 and matching Windows export templates verified.
+
+Prepared future-build itch.io copy/screenshots/manifest locally; verified the actual page is Draft
+and still offers September 24's first-region build. Revised Cassia's model and fifteen card renders,
+fixed six cropped illustrations, improved select text and fixed player animation startup.
+Complete gate: 3,122 passed / 0 failed. Final package: 57 native staged captures across 720p/1080p/1440p,
+zero failures/errors, unchanged player files; all images inspected. Scoped critic accepts silhouette,
+readability and corrected framing; overall **AAA FAIL / OURS LOSES** remains.
+
+No upload/publication or complete marker. Forced release remains October 3 Pacific. Full manual
+campaign, audio/controller/focus and player download/install remain unverified. Next: aimed Kindle,
+genuine campaign/release evidence, then gated publishing. See the Run 9 section at the top of
+`bramblecrown/PROGRESS.md` and `bramblecrown/release/` for exact evidence and package hash.
+
 This file is the standing status log for the automated Godot + Blender game
 design/build/release runner. Every scheduled run should read this file first
 (per STEP 0/1 of the runner instructions) before doing anything else.
