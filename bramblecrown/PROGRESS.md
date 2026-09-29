@@ -1,5 +1,21 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-29 — Run 8 checkpoint (Pacific Tuesday, age 5 days)
+
+- STOP absent; started at `dev` 145b22b. Forced release remains Saturday 2026-10-03 Pacific.
+- **Done:** walker-select screen. Title "New Run" opens a two-panel screen: live rotating 3D model per
+  walker, name, title, HP, pitch, grouped starting deck with card text, lock condition, Begin button
+  (locked walkers show the unlock text and a disabled button). Tour updated to drive it.
+- **Evidence:** `tools/check.sh` -> 3,122 passed / 0 failed (re-run after the last font edit).
+  Packaged export (Godot 4.7.2) and `--tour-only run7` at 1280x720 and 1920x1080: exit 0, no ERROR
+  lines; I read the locked and unlocked select screenshots (`evidence/2026-09-29-run8/`). The final
+  starting-deck font change (19 to 22) was not re-shot, and 2560x1440 was not re-run this run.
+- **Not done:** aimed Kindle, a distinct Cassia silhouette, itch page text and screenshots (no
+  Butler or itch work this run), and no critic pass. No discipline has passed; the forced Saturday
+  release still applies.
+- **Next (Run 9):** release prep first (itch page copy, screenshots, system requirements; page
+  visibility needs the human), then aimed Kindle if time remains.
+
 ## 2026-09-28 — Run 7 checkpoint (Pacific Monday 02:01, age 4 days)
 
 - STOP absent; worktree at remote `dev` `4dc1ecc` (Run 6 final). Work pushes to `dev`.
