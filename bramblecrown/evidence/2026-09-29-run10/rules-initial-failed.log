@@ -1,0 +1,39 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FAIL [test_cards_valid] flashburn target kind
+FAIL [test_cards_valid] smokescreen target kind
+FAIL [test_cards_valid] cinderstep target kind
+FAIL [test_cards_valid] firestorm target kind
+FAIL [test_cards_valid] tinderbox target kind
+  seed 11: defeat on floor 5, hp 0, deck 15
+  seed 12: defeat on floor 4, hp 0, deck 14
+  seed 13: defeat on floor 8, hp 0, deck 15
+  autoplay bot region wins: 0/3
+    boss fight seed 100: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 54, deck 13
+    boss fight seed 101: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 20, deck 14
+    boss fight seed 102: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 61, deck 15
+    boss fight seed 103: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 56, deck 14
+    boss fight seed 104: entered hp ?, ended phase won after 12 turns, player hp 10, boss hp 0, deck 15
+    boss fight seed 105: entered hp ?, ended phase lost after 7 turns, player hp 0, boss hp 73, deck 14
+    boss fight seed 106: entered hp ?, ended phase lost after 20 turns, player hp 0, boss hp 58, deck 13
+    boss fight seed 107: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 59, deck 15
+    boss fight seed 108: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 71, deck 15
+    boss fight seed 109: entered hp ?, ended phase won after 8 turns, player hp 17, boss hp 0, deck 14
+    boss fight seed 112: entered hp ?, ended phase lost after 15 turns, player hp 0, boss hp 45, deck 14
+    boss fight seed 113: entered hp ?, ended phase won after 9 turns, player hp 23, boss hp 0, deck 14
+    boss fight seed 114: entered hp ?, ended phase lost after 15 turns, player hp 0, boss hp 20, deck 11
+    boss fight seed 115: entered hp ?, ended phase lost after 10 turns, player hp 0, boss hp 75, deck 14
+    boss fight seed 116: entered hp ?, ended phase lost after 11 turns, player hp 0, boss hp 92, deck 13
+    boss fight seed 117: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 74, deck 15
+    boss fight seed 119: entered hp ?, ended phase lost after 8 turns, player hp 0, boss hp 12, deck 15
+  smart bot: 3/20 region-1 clears, 0 full-run wins, floors reached [8, 8, 8, 8, 14, 8, 8, 8, 8, 11, 6, 6, 8, 12, 8, 8, 8, 8, 5, 8]
+  enemy forecasts compared: 1800, drift: 0
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed Phoenix Bark and Smokescreen Ward: smokescreen
+FAIL [test_aimed_kindle] aimed deck checkpoint preserves walker upgrades RNG
+  cassia bot: 1/10 region-1 clears, floors [8, 8, 8, 6, 5, 6, 16, 8, 8, 5]
+---- 3418 passed, 12 failed ----

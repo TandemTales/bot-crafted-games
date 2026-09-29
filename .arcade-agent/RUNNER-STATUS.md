@@ -1,5 +1,16 @@
 # Bot Crafted Games — Runner Status
 
+## 2026-09-29 — Run 10 result (local Windows)
+
+Aimed Kindle now gives Cassia five spatial burn cards, retaining automatic self targeting.
+Fixed stale Heat previews and critic-found tooltip/enemy-rail overlap. Rules/import/smokes:
+3,435 / 0. Final Windows package passes 20 staged captures at each 720p/1080p/1440p; all 60 read,
+normal player files unchanged. Scoped critic PASS; AAA FAIL / OURS LOSES remains. Code pushed
+as 959270f and e6a3322. Final package SHA-256 starts 5B0BD7D188F8DA89; exact manifest in release/.
+No upload/publication; old itch Windows channel #2014268 verified by Butler. Forced release
+October 3 Pacific. Next: genuine player-input campaign/completion evidence, remaining Thatch/
+charms/Withering content, readability and hardware/audio gates. See latest PROGRESS for limits.
+
 ## 2026-09-29 — Run 9 result (local Windows)
 
 Active Bramblecrown, documented `dev`; synchronized the clean local checkout with newer remote

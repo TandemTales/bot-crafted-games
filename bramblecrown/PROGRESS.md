@@ -32,6 +32,48 @@
   final package recapture pending. Earlier screenshots do not certify this final tooltip fix.
 
 
+### Run 10 final result and next action
+
+- **Delivered:** five Aim Kindle cards with deterministic spatial burn choice and exact previews;
+  automatic self aim remains compatible, including no-fuel utility. Card text, keywords, controls,
+  SPEC, tests and future itch copy updated. Heat previews clear correctly. Hex tooltips follow
+  the aimed hex and stay out of enemy panels/hand rather than following the old OS pointer.
+- **Final validation:** import, title/combat/map smokes and rules **3,435 passed / 0 failed**;
+  1,800 enemy forecasts, drift 0. Installed Godot Windows x64 export passes. Twenty staged native
+  captures at each of 1280x720, 1920x1080 and 2560x1440: exits 0, zero failures/errors, player-file
+  hashes unchanged. Main runner inspected all 60 final images via 15 contact sheets; critic
+  inspected final aimed frames at all three resolutions. Viewport synthetic mouse/keyboard
+  assertions prove aiming, cancellation, single cast, exact ash scars and nonoverlapping tooltip.
+- **Package:** build/windows/Bramblecrown.exe, embedded PCK, **122,464,232 bytes**;
+  SHA-256 `5B0BD7D188F8DA89E1996313FFF653F37EEAE83DD1F50D77AC1DE1270B720447`.
+  Five original final 1080p release screenshots and manifest refreshed. Source-art/evidence/release
+  paths excluded from export. Game code pushed in 959270f and e6a3322; final handoff follows.
+- **Blender:** existing Cassia source reopened with installed Blender 5.1.2, two meshes and
+  flame_flicker frames 1-25. No new art this run. Native animation checks still pass.
+- **Critic:** bounded aimed Kindle and tooltip fix PASS. **AAA FAIL / OURS LOSES** persists versus
+  Into the Breach: terrain/state differentiation, small/scattered HUD information, objective
+  prominence and tooltips obscuring board content. No discipline-wide or shipping-judge pass.
+- **Limits:** synthetic staged input is not a player-completed campaign. No human enjoyment,
+  physical controller, audio listening/mix, focus/fullscreen, sustained performance, extra hardware,
+  4K/ultrawide or player-facing itch download/install verification. No release this run.
+- **Evidence:** evidence/2026-09-29-run10; final-* sheets/logs identify the final package;
+  verified-* sheets precede the tooltip fix. Initial failed rules/input logs retained explicitly.
+  Full-resolution raw images remain under build/run10/final-<resolution>/.
+- **Release state:** Butler read-only check confirms windows #2014268 / 2026.09.24-10aa561;
+  page Draft was last browser-verified in Run 9, not rechecked in a browser here. No page edits,
+  upload, publication or .aaa-complete. Forced release remains **Saturday 2026-10-03 Pacific**.
+
+Exact next action for Run 11:
+1. Start a genuine player-input campaign route in the packaged build; capture actions and the
+   first reproducible failure before balancing. Keep staged fixtures and high-HP bots separate.
+   Current balance gauges: Wren 3/20 region-1 clears, zero full-run wins; Cassia 1/10 region-1 clears.
+2. Complete remaining authored SPEC scope: Thatch with twenty cards, ten more charms, Withering
+   tiers. Prioritize meaningful progression and tactical readability over additional portrait polish.
+3. Before Saturday, obtain audio/controller/focus/checkpoint evidence and resolve functional
+   completion blockers. Apply release copy/screenshots only with its matching gated upload;
+   then verify actual player-facing download/install. Do not reuse an older package manifest.
+
+
 ## 2026-09-29 — Run 9 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent. Clean local `dev` fast-forwarded from `4f65d1c` to remote `b64f430` before edits.
