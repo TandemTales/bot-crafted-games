@@ -613,11 +613,54 @@ func _cassia() -> void:
 	sc._refresh_all()
 	await _wait(0.6)
 	await _shot("73_cassia_kindle_preview")
-	sc.hover_hex = null
-	var grove0: int = sc.c.grove().size()
-	sc._play(9101, p)
+	# Compare auto with an aimed burn using the viewport's real input handlers.
+	var flash: Dictionary = sc.c.hand[sc.c.hand_index(9101)]
+	var auto_burn: Array = sc.c.preview_card(flash, p)["burn"]
+	var aim: Vector2i = p
+	for h in sc.c.valid_targets(flash):
+		if h != p and not auto_burn.has(h):
+			aim = h
+			break
+	_check(aim != p, "staged Grove offers a distinct aimed burn")
+	var aim_screen: Vector2 = sc.rig.camera.unproject_position(sc.board.world(aim))
+	var motion := InputEventMouseMotion.new()
+	motion.position = aim_screen
+	get_viewport().push_input(motion, true)
+	await _wait(0.3)
+	_check(sc.hover_hex == aim, "board mouse hover selects aimed Grove hex")
+	var aimed: Dictionary = sc.c.preview_card(flash, aim)
+	_check(aimed["burn"].has(aim) and not auto_burn.has(aim), "aim changes the burn set")
+	_check(sc.heat_label.text == "Heat 0 → 2", "aim hover forecasts Heat")
+	await _shot("73b_cassia_aimed_preview")
+	# Cancel must clear the forecast and leave the hand/fuel intact.
+	var cancel := InputEventKey.new()
+	cancel.keycode = KEY_ESCAPE
+	cancel.physical_keycode = KEY_ESCAPE
+	cancel.pressed = true
+	get_viewport().push_input(cancel, true)
+	await _wait(0.2)
+	_check(sc.selected_uid == -1 and sc.c.hand_index(9101) >= 0 and sc.heat_label.text == "Heat 0", "cancel preserves card and clears Heat preview")
+	cancel.pressed = false
+	get_viewport().push_input(cancel, true)
+	var select := InputEventKey.new()
+	select.keycode = KEY_1
+	select.pressed = true
+	get_viewport().push_input(select, true)
+	await _wait(0.2)
+	select.pressed = false
+	get_viewport().push_input(select, true)
+	_check(sc.selected_uid == 9101, "keyboard selects aimed Flashburn")
+	for down in [true, false]:
+		var click := InputEventMouseButton.new()
+		click.position = aim_screen
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = down
+		get_viewport().push_input(click, true)
+		await _wait(0.1)
 	await _wait(2.0)
-	_check(int(sc.c.player["heat"]) == 2 and sc.c.grove().size() == grove0 - 2, "Flashburn kindles 2 hexes into 2 Heat")
+	_check(int(sc.c.player["heat"]) == 2 and sc.c.hand_index(9101) < 0, "mouse click resolves aimed Flashburn once")
+	for h in aimed["burn"]:
+		_check(sc.c.growth[h] == "none" and sc.board.scorch_nodes.has(h), "aimed preview matches burned hex and native ash scar %s" % h)
 	_check(sc.heat_label.visible and sc.heat_label.text == "Heat 2", "Heat readout shows 2")
 	_check(sc.board.scorch_nodes.size() == 2, "both kindled hexes show an ash scar")
 	await _shot("74_cassia_heat")

@@ -25,7 +25,7 @@ const KEYWORDS := {
 	"Blight": "Rot spread by enemies. Enemies on Blight deal +2 damage. Ending your turn on Blight costs 2 HP.",
 	"Ward": "Blocks damage until your next turn.",
 	"Bleed": "Loses HP equal to Bleed at the start of its turn, then Bleed drops by 1.",
-	"Kindle": "Burn hexes of your own Grove, farthest from you first. The hex you stand on never burns. Each hex burned gives 1 Heat.",
+	"Kindle": "Burn your Grove for 1 Heat per hex. Aim Kindle burns nearest your chosen Grove hex first; choose your own hex for farthest-first auto. Other Kindle is automatic. Your own hex never burns.",
 	"Heat": "Hexes Kindled this turn. Cassia's cards grow stronger with Heat. Resets to 0 at the start of your turn.",
 	"Scorch": "Loses HP equal to Scorch at the start of its turn, then Scorch drops by 1.",
 	"Root": "A Rooted enemy cannot move during its next turn.",

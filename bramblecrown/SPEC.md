@@ -87,6 +87,20 @@ Next-build page copy and a screenshot manifest live in `release/`, excluded from
 game. The current itch.io draft remains tied to its older first-region download. The main runner
 owns every edited file this run; the separate critic edits no files.
 
+### Aimed Kindle (2026-09-29, Run 10)
+
+Flashburn, Smokescreen, Cinderstep, Firestorm and Tinderbox now say **Aim Kindle**.
+Select the card, then a connected Grove hex: it burns first, followed by the nearest other
+Grove hexes (hex distance, coordinate ties). Fuel is selected from the Grove before burning,
+so cutting a bridge does not cancel the rest of that burn. The Grovewalker's hex never burns.
+Selecting your own hex uses the original farthest-first order. It remains available even
+without fuel, preserving the card's draw, movement or existing-Heat effects. Disconnected
+Thicket and bare hexes are invalid aims. Hover previews the exact burn and resulting Heat.
+Esc/right-click cancels; 1-9 selects cards, mouse click or Enter on the hovered hex commits.
+Enemy-targeted Kindle cards and Ember Saint retain their automatic farthest-first behavior.
+Firestorm's damage radius still centers on Cassia, not the burn aim. Saves keep the same
+card IDs/upgrades and node-checkpoint format. Main runner owns all Run 10 edits; critic is read-only.
+
 ### Implemented Cassia, the Ashwalker (2026-09-28, Run 7)
 
 The second Grovewalker. Cassia plants only to burn it: **Kindle N** burns N hexes of her own

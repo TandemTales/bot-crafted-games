@@ -176,3 +176,17 @@ diadem animation, checkpoint resume and unchanged player saves. Run at 1280x720,
 first and only in their region. `test_map_generation` requires an elite, shrine and pedlar on
 every region map over 40 seeds. `tools/check.sh` does not parse `tools/screenshot_tour.gd`; the
 tour itself reports parse errors, so read its log.
+
+## 11. Aimed Kindle regression (Run 10)
+
+`test_aimed_kindle` covers all five aimed cards and upgrades, four aim positions, exact
+preview/resolution burn sets, Heat, damage, Phoenix Bark/Smokescreen Ward, preview purity
+(including RNG), severed bridges, isolated Thicket, empty fuel, stale invalid targets and
+Cassia deck/upgrade/RNG checkpoint round trips. Existing automatic Kindle tests remain.
+
+The `--tour-only run7` packaged route additionally compares automatic and aimed Flashburn,
+uses synthetic viewport mouse hover/click and keyboard selection/cancellation, checks the
+Heat forecast clears on cancel, and checks native ash scars match the previewed burn set.
+`73b_cassia_aimed_preview` is the added image (20 total). Run at 720p/1080p/1440p and inspect
+all images, especially the longer Aim Kindle card rules and targeting instructions. This is
+staged input regression evidence, not human play or a five-region completion route.

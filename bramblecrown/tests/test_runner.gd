@@ -24,7 +24,7 @@ func _init() -> void:
 		"test_ironroot_progression", "test_ironroot_patterns", "test_ironroot_collapse",
 		"test_crown_progression", "test_crown_patterns", "test_crown_thorns",
 		"test_cassia_data", "test_cassia_unlock", "test_kindle_rules", "test_cassia_cards_resolve",
-		"test_cassia_powers", "test_cassia_preview_matches_play", "test_cassia_bot", "test_cassia_events",
+		"test_cassia_powers", "test_cassia_preview_matches_play", "test_aimed_kindle", "test_cassia_bot", "test_cassia_events",
 	]
 	for t in tests:
 		_current = t
@@ -619,7 +619,9 @@ func test_cards_valid() -> bool:
 		check(not CardDB.describe(d).contains("{"), "%s text filled" % id)
 		check(not CardDB.describe(u).contains("{"), "%s upgraded text filled" % id)
 		check(u["name"].ends_with("+"), "%s upgraded name" % id)
-		check(d["target"] in ["self", "enemy", "hex"], "%s target kind" % id)
+		check(d["target"] in ["self", "enemy", "hex", "kindle"], "%s target kind" % id)
+		if d["target"] == "kindle":
+			check(d["effects"][0]["op"] == "kindle", "%s aimed card starts with Kindle" % id)
 	check(CardDB.reward_pool("wren").size() >= 15, "reward pool size")
 	for id in CardDB.STARTER_DECK["wren"]:
 		check(CardDB.has(id), "starter card %s exists" % id)
@@ -1446,6 +1448,69 @@ func test_kindle_rules() -> bool:
 	uid = _give(c2, "flashburn")
 	c2.play_card(uid, c2.player["pos"])
 	check(int(c2.player["heat"]) == 0, "Kindle off-Grove does nothing")
+	return true
+
+
+func test_aimed_kindle() -> bool:
+	var layout := {"enemies": [["husk_brute", 0, -2]],
+		"thicket": [[0, 0], [1, 0], [2, 0], [3, 0], [-1, 0], [-2, 0], [0, 3]]}
+	var c := _blank_combat(layout)
+	check(c.kindle_targets(2, c.growth, Vector2i(-1, 0)) == [Vector2i(-1, 0), Vector2i(-2, 0)], "aim west preserves the eastern lane")
+	check(c.kindle_targets(2, c.growth, Vector2i(1, 0)) == [Vector2i(1, 0), Vector2i(2, 0)], "aim selects fuel before severing a bridge")
+	check(c.kindle_targets(2, c.growth, Vector2i.ZERO) == c.kindle_targets(2), "self aim retains old farthest-first order")
+	check(c.kindle_targets(99, c.growth, Vector2i(-1, 0)).size() == 5, "oversized burn excludes self and disconnected thicket")
+	for id in ["flashburn", "smokescreen", "cinderstep", "firestorm", "tinderbox"]:
+		for up in [false, true]:
+			for aim in [Vector2i.ZERO, Vector2i(-1, 0), Vector2i(1, 0), Vector2i(3, 0)]:
+				c = _blank_combat(layout)
+				c.player["energy"] = 9
+				c.player["heat"] = 1
+				c.player["powers"]["phoenix_bark"] = 2
+				var uid := _give(c, id, up)
+				var inst: Dictionary = c.hand[c.hand_index(uid)]
+				var before := c.growth.duplicate()
+				var player0 := c.player.duplicate(true)
+				var rng0 := c.rng.get_state()
+				var hand0 := c.hand.duplicate(true)
+				var pv := c.preview_card(inst, aim)
+				check(c.growth == before and c.player == player0 and c.rng.get_state() == rng0 and c.hand == hand0, "aim preview is pure: %s" % id)
+				check(c.can_play(inst, aim), "aim is legal: %s" % id)
+				check(not c.can_play(inst, Vector2i(0, 3)) and not c.can_play(inst, Vector2i(0, 1)), "reject isolated Thicket and bare ground: %s" % id)
+				var e: Dictionary = c.enemies[0]
+				var hp0 := int(e["hp"])
+				c.play_card(uid, aim)
+				var burned: Array[Vector2i] = []
+				for h in before:
+					if before[h] == "thicket" and c.growth[h] == "none":
+						burned.append(h)
+				check(burned.size() == pv["burn"].size() and burned.all(func(h): return pv["burn"].has(h)), "exact aimed burn set: %s" % id)
+				check(int(c.player["heat"]) == int(pv["heat"]), "aimed Heat exact: %s" % id)
+				check(hp0 - int(e["hp"]) == int(pv["damage"].get(e["uid"], 0)), "aimed damage exact: %s" % id)
+				var expected_ward: int = burned.size() * 2
+				if id == "smokescreen":
+					expected_ward += int(c.player["heat"]) * 3 + c.grove().size() / 3
+				check(c.player["ward"] == expected_ward, "aimed Phoenix Bark and Smokescreen Ward: %s" % id)
+			# A card remains useful with no fuel (draw/movement/previous Heat).
+			c = _blank_combat()
+			var uid := _give(c, id, up)
+			var inst: Dictionary = c.hand[c.hand_index(uid)]
+			check(c.valid_targets(inst) == [c.player["pos"]], "no fuel offers self only: %s" % id)
+			check(not c.play_card(uid, c.player["pos"]).is_empty() and c.player["heat"] == 0, "no fuel still resolves: %s" % id)
+	# Invalid aim spends no resources or RNG, even after the originally hovered Grove changed.
+	c = _blank_combat(layout)
+	var uid := _give(c, "tinderbox")
+	var rng0 := c.rng.get_state()
+	var energy0: int = c.player["energy"]
+	c.growth[Vector2i(1, 0)] = "none"
+	check(c.play_card(uid, Vector2i(2, 0)).is_empty(), "stale disconnected aim rejected")
+	check(c.hand_index(uid) >= 0 and c.player["energy"] == energy0 and c.rng.get_state() == rng0, "rejected aim preserves card energy RNG")
+	# Checkpoint saves contain card identity, not target types: old IDs/upgrades retain new aiming.
+	var r := RunState.new()
+	r.new_run(103, "cassia")
+	r.deck.append({"id": "tinderbox", "up": true})
+	var restored := RunState.from_json(r.to_json())
+	check(restored.walker == r.walker and restored.deck == r.deck and restored.rng.get_state() == r.rng.get_state(), "aimed deck checkpoint preserves walker upgrades RNG")
+	check(CardDB.get_def("tinderbox", true)["target"] == "kindle", "restored upgraded card uses aimed rules")
 	return true
 
 

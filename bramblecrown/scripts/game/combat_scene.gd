@@ -372,6 +372,8 @@ func _refresh_hud() -> void:
 	elif not sel.is_empty():
 		var d := c.card_def(sel)
 		match d["target"]:
+			"kindle":
+				hint_label.text = "[center]Aim at your Grove: burn nearest first. Choose your own hex for auto. Right-click cancels.[/center]"
 			"self":
 				hint_label.text = "[center]Click [b]%s[/b] again, or click the board, to cast. Right-click cancels.[/center]" % d["name"]
 			"enemy":
@@ -463,6 +465,7 @@ func _refresh_board_overlays() -> void:
 	var inst := _selected_inst()
 	var pending := {}
 	var ward_break := {}
+	heat_label.text = "Heat %d" % int(c.player.get("heat", 0))
 	if not busy and c.phase == "player":
 		if inst.is_empty():
 			for h in c.reachable():

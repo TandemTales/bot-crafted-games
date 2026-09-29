@@ -152,18 +152,20 @@ func _grove_in(gm: Dictionary) -> Array[Vector2i]:
 
 
 ## Kindle: the Grove hexes that would burn, farthest from the Grovewalker first. The hex she
-## stands on never burns. Ties break by coordinates so preview and play always agree.
-func kindle_targets(n: int, gm: Dictionary = growth) -> Array[Vector2i]:
+## stands on never burns. With an aim, burn nearest that hex in the pre-burn Grove first.
+## Ties break by coordinates; all fuel is selected before burning, even across a cut bridge.
+func kindle_targets(n: int, gm: Dictionary = growth, aim: Variant = null) -> Array[Vector2i]:
 	var cands: Array[Vector2i] = []
 	for h in _grove_in(gm):
 		if h != player["pos"]:
 			cands.append(h)
 	var p: Vector2i = player["pos"]
+	var aimed: bool = aim != null and aim != p and cands.has(aim)
 	cands.sort_custom(func(a, b):
-		var da := Hex.distance(a, p)
-		var db := Hex.distance(b, p)
+		var da := Hex.distance(a, aim if aimed else p)
+		var db := Hex.distance(b, aim if aimed else p)
 		if da != db:
-			return da > db
+			return da < db if aimed else da > db
 		return a.x < b.x or (a.x == b.x and a.y < b.y))
 	return cands.slice(0, n)
 
@@ -194,6 +196,10 @@ func valid_targets(inst: Dictionary) -> Array[Vector2i]:
 	match def["target"]:
 		"self":
 			out.append(player["pos"])
+		"kindle":
+			# Self preserves automatic order and utility even with no fuel.
+			out.append(player["pos"])
+			out.append_array(kindle_targets(99))
 		"enemy":
 			for e in enemies:
 				if Hex.distance(player["pos"], e["pos"]) <= int(def["range"]):
@@ -235,7 +241,7 @@ func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
 	for fx in def["effects"]:
 		match fx["op"]:
 			"kindle":
-				var hexes := kindle_targets(CardDB.val(def, fx["n"]), gm)
+				var hexes := kindle_targets(CardDB.val(def, fx["n"]), gm, target if def.get("target", "") == "kindle" else null)
 				if not hexes.is_empty():
 					gm = gm.duplicate()
 					for h in hexes:
@@ -424,7 +430,7 @@ func _apply_effect(def: Dictionary, fx: Dictionary, target: Vector2i, is_attack:
 			player["daze_lost"] = 0
 			_emit({"type": "energy", "n": player["energy"]})
 		"kindle":
-			var hexes := kindle_targets(CardDB.val(def, fx["n"]))
+			var hexes := kindle_targets(CardDB.val(def, fx["n"]), growth, target if def.get("target", "") == "kindle" else null)
 			if hexes.is_empty():
 				return
 			var changes := {}

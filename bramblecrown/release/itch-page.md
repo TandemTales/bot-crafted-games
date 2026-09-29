@@ -24,8 +24,9 @@ with Blight. Enemy intentions and movement forecasts help you plan the next turn
 
 - Wren grows a connected Grove to strengthen strikes and Ward.
 - Defeat your first boss to unlock Cassia. Kindle burns parts of her Grove for Heat, trading
-  territory for stronger cards. Scorch wears enemies down over time. Kindle currently chooses
-  the farthest Grove hexes automatically; you cannot aim the burn.
+  territory for stronger cards. Scorch wears enemies down over time. Aim Kindle cards let
+  you choose where the burn starts; select Cassia herself for automatic farthest-first burns.
+  Enemy-targeted Kindle and turn-start Kindle remain automatic.
 
 **A route to the Crown**
 
@@ -44,7 +45,8 @@ procedural art and audio.
 Mouse and keyboard are the primary controls. Click a card or press 1–9, then click its target.
 Right-click or Esc cancels selection. Space or End Turn ends the turn. Q/E or right-drag rotates
 the camera; the mouse wheel zooms. A/S/X opens draw/discard/exhausted piles. Esc with no card
-selected opens the pause menu. Choose New Run on the title screen to select a Grovewalker.
+selected opens the pause menu. For Aim Kindle, select a connected Grove hex to burn nearest
+that hex first, or your own hex for automatic burns. Choose New Run on the title screen to select a Grovewalker.
 
 Controller bindings exist but have not been validated with a physical controller; do not tag
 this build as having verified controller support.

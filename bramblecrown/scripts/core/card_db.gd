@@ -1,7 +1,7 @@
 class_name CardDB
 extends RefCounted
 ## Card definitions. `up` holds overrides applied to upgraded copies.
-## target: "self" (no target), "enemy" (enemy within range), "hex" (any board hex within range).
+## target: self, enemy, hex, or kindle (Grove aim; self uses automatic burn order).
 ## Text placeholders {a}, {b}, ... are filled from `vals` (or `up.vals`).
 
 const CARDS := {
@@ -279,9 +279,9 @@ const CARDS := {
 		"up": {"vals": {"a": 5}},
 	},
 	"flashburn": {
-		"name": "Flashburn", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"name": "Flashburn", "cost": 0, "type": "skill", "target": "kindle", "range": 0,
 		"rarity": "starter", "owner": "cassia", "art": "fire",
-		"text": "Kindle {a}. Draw 1.", "vals": {"a": 2},
+		"text": "Aim Kindle {a}. Draw 1.", "vals": {"a": 2},
 		"effects": [{"op": "kindle", "n": "a"}, {"op": "draw", "n": 1}],
 		"up": {"vals": {"a": 3}},
 	},
@@ -293,9 +293,9 @@ const CARDS := {
 		"up": {"vals": {"a": 7}},
 	},
 	"smokescreen": {
-		"name": "Smokescreen", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"name": "Smokescreen", "cost": 1, "type": "skill", "target": "kindle", "range": 0,
 		"rarity": "common", "owner": "cassia", "art": "ward",
-		"text": "Kindle {a}. Gain 3 Ward per Heat.", "vals": {"a": 2},
+		"text": "Aim Kindle {a}. Gain 3 Ward per Heat.", "vals": {"a": 2},
 		"effects": [{"op": "kindle", "n": "a"}, {"op": "ward", "amount": 0, "heat_mult": 3}],
 		"up": {"vals": {"a": 3}},
 	},
@@ -321,9 +321,9 @@ const CARDS := {
 		"up": {"vals": {"a": 6}},
 	},
 	"cinderstep": {
-		"name": "Cinderstep", "cost": 0, "type": "skill", "target": "self", "range": 0,
+		"name": "Cinderstep", "cost": 0, "type": "skill", "target": "kindle", "range": 0,
 		"rarity": "common", "owner": "cassia", "art": "move",
-		"text": "Kindle 1. Gain {a} Movement.", "vals": {"a": 2},
+		"text": "Aim Kindle 1. Gain {a} Movement.", "vals": {"a": 2},
 		"effects": [{"op": "kindle", "n": 1}, {"op": "move", "n": "a"}],
 		"up": {"vals": {"a": 3}},
 	},
@@ -363,9 +363,9 @@ const CARDS := {
 		"up": {"vals": {"a": 3}},
 	},
 	"firestorm": {
-		"name": "Firestorm", "cost": 2, "type": "attack", "target": "self", "range": 0,
+		"name": "Firestorm", "cost": 2, "type": "attack", "target": "kindle", "range": 0,
 		"rarity": "uncommon", "owner": "cassia", "art": "burst",
-		"text": "Kindle {a}. Deal 2 damage per Heat to every enemy within 2 of you.", "vals": {"a": 3},
+		"text": "Aim Kindle {a}. Deal 2 damage per Heat to every enemy within 2 of you.", "vals": {"a": 3},
 		"effects": [{"op": "kindle", "n": "a"}, {"op": "damage_radius", "amount": 0, "radius": 2, "heat_mult": 2}],
 		"up": {"vals": {"a": 5}},
 	},
@@ -377,9 +377,9 @@ const CARDS := {
 		"up": {"vals": {"a": 5}},
 	},
 	"tinderbox": {
-		"name": "Tinderbox", "cost": 1, "type": "skill", "target": "self", "range": 0,
+		"name": "Tinderbox", "cost": 1, "type": "skill", "target": "kindle", "range": 0,
 		"rarity": "uncommon", "owner": "cassia", "art": "sap",
-		"text": "Kindle 3. Draw {a}.", "vals": {"a": 2},
+		"text": "Aim Kindle 3. Draw {a}.", "vals": {"a": 2},
 		"effects": [{"op": "kindle", "n": 3}, {"op": "draw", "n": "a"}],
 		"up": {"vals": {"a": 3}},
 	},
