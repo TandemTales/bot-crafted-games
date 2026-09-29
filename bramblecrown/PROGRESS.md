@@ -14,6 +14,24 @@
 - Main runner owns all edits/Git. Separate read-only critic will compare final native evidence.
 - Next: implement, test, export, inspect three native resolutions, then retain honest handoff.
 
+### Run 10 working unit
+
+- Aim Kindle implemented on Flashburn, Smokescreen, Cinderstep, Firestorm and Tinderbox.
+  Connected Grove aim burns nearest first; self aim preserves automatic order/no-fuel utility.
+  Enemy-targeted and turn-start Kindle retain previous behavior. Text/local release copy updated.
+- Fixed stale Heat forecast when hover leaves valid targets; cancellation clears it.
+- Full installed-engine gate: **3,435 passed / 0 failed**. Cassia Blender source reopened:
+  two meshes, flame_flicker frames 1-25. No asset regeneration or application changes.
+- First corrected Windows export passed all three resolutions (20 captures each), saves unchanged.
+  Viewport mouse aim/click and keyboard select/cancel exercised; ash scars match forecast.
+- Retained initial rule failures (new validator/fixture assumptions) and failed native log
+  (synthetic Escape missing physical key code). Corrected harness sends the bound physical key.
+- Gameplay unit pushed as 959270f. Separate critic accepts bounded unit, retains **AAA FAIL**.
+- Critic found hex tooltip following the old OS pointer and covering the enemy rail at 1440p.
+  Fixed anchor to hovered hex and constrained panel away from enemy rail/hand; full gate and
+  final package recapture pending. Earlier screenshots do not certify this final tooltip fix.
+
+
 ## 2026-09-29 — Run 9 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent. Clean local `dev` fast-forwarded from `4f65d1c` to remote `b64f430` before edits.

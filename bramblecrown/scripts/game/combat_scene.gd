@@ -747,13 +747,17 @@ func _place_plates() -> void:
 		index += 1
 	enemy_links.queue_redraw()
 	if info_panel.visible:
-		var mp := get_viewport().get_mouse_position()
+		# A hex can be aimed with keyboard/controller without moving the OS cursor.
+		var mp := cam.unproject_position(board.world(hover_hex)) if hover_hex != null else get_viewport().get_mouse_position()
 		info_panel.position = mp + Vector2(24, 24)
 		var vp := get_viewport().get_visible_rect().size
 		if info_panel.position.x + info_panel.size.x > vp.x:
 			info_panel.position.x = mp.x - info_panel.size.x - 24
 		if info_panel.position.y + info_panel.size.y > vp.y - 340:
 			info_panel.position.y = mp.y - info_panel.size.y - 24
+		# Keep the board tooltip out of the enemy intent rail and the hand.
+		info_panel.position.x = clampf(info_panel.position.x, 340, maxf(340, vp.x - UnitPlate.RAIL_SIZE.x - 40 - info_panel.size.x))
+		info_panel.position.y = clampf(info_panel.position.y, 100, maxf(100, vp.y - 340 - info_panel.size.y))
 
 
 func _hover_rail(uid: int) -> void:

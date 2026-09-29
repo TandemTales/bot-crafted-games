@@ -631,6 +631,9 @@ func _cassia() -> void:
 	var aimed: Dictionary = sc.c.preview_card(flash, aim)
 	_check(aimed["burn"].has(aim) and not auto_burn.has(aim), "aim changes the burn set")
 	_check(sc.heat_label.text == "Heat 0 → 2", "aim hover forecasts Heat")
+	_check(sc.info_panel.visible, "aimed hex information is visible")
+	for plate in sc.plates.values():
+		_check(not sc.info_panel.get_global_rect().intersects(plate.get_global_rect()), "hex information avoids enemy intent rail")
 	await _shot("73b_cassia_aimed_preview")
 	# Cancel must clear the forecast and leave the hand/fuel intact.
 	var cancel := InputEventKey.new()
