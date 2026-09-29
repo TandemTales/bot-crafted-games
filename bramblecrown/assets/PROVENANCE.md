@@ -18,3 +18,7 @@ from Windows system fonts at runtime; font files are not redistributed. The icon
 original SVG. Source art, tools, evidence and this document are excluded from the player export.
 
 Commercial games referenced in pitches or critique are design research only.
+
+Run 9 (2026-09-29) revises Cassia's original model with installed Blender 5.1.2 and rerenders
+the fifteen card illustrations that contain it. `cassia.blend`, the corresponding `card_*.blend`
+sources, the runtime GLB and rendered PNGs are retained. No reference-game art is included.

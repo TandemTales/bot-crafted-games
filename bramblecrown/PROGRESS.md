@@ -19,6 +19,18 @@
 - Next: author release materials and Cassia model; import, reopen Blender source, export Windows,
   inspect 720p/1080p/1440p tours and obtain harsh independent comparison. Aimed Kindle remains next.
 
+### Run 9 working unit
+
+- Revised Cassia model, fifteen matching card illustrations and six corrected close-up cameras;
+  enlarged/brighter starting-deck text and accurate Heat pitch. Original Blender sources retained.
+- Packaged regression exposed a pre-existing static player flame: enemies started animations,
+  players did not. Added player animation startup and native start/advancement assertions.
+- Final code/art full gate: **3,122 passed / 0 failed**; Windows export clean. Corrected package
+  passes 19 staged 720p captures with clean exit and unchanged normal saves. Larger sizes pending.
+- Independent critic accepts bounded silhouette/readability and the six corrected original art
+  frames; **AAA FAIL / OURS LOSES** remains for posing/materials/repeated compositions.
+- Next: finish final 1080p/1440p capture review, retain logs/manifest/page copy and push the handoff.
+
 ## 2026-09-29 — Run 8 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent; started at `dev` 145b22b. Forced release remains Saturday 2026-10-03 Pacific.

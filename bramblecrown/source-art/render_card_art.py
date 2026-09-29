@@ -73,24 +73,24 @@ C = "cassia"
 ASH_BG = (0.09, 0.04, 0.025)
 SCENES.update({
     "cinder_strike": ([(T, 0, 0, 0, 1), (T, 1.7, 0, 0, 1), (C, 0, 0, -70, 1.3), ("blightling", 1.7, 0, 110, 1.3)], FIRE, ASH_BG, (5.2, 2.0, 0), ["embers"]),
-    "ashen_guard": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 15, 1.5), ("thicket", -0.8, 0.4, 0, 0.7)], BLUE, (0.05, 0.05, 0.07), (4.0, 1.5, 0), ["shield", "ash"]),
-    "kindling": ([(T, 0, 0, 0, 1.2), ("thicket", 0, 0, 0, 1.15), (C, 0, 0, 20, 1.35), ("thicket", -1.6, 0.4, 40, 0.9), ("thicket", 1.6, 0.4, 80, 0.9)], GREEN, (0.06, 0.07, 0.03), (4.6, 1.4, 0), ["embers"]),
+    "ashen_guard": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 15, 1.5), ("thicket", -0.8, 0.4, 0, 0.7)], BLUE, (0.05, 0.05, 0.07), (5.3, 1.8, 0), ["shield", "ash"]),
+    "kindling": ([(T, 0, 0, 0, 1.2), ("thicket", 0, 0, 0, 1.15), (C, 0, 0, 20, 1.35), ("thicket", -1.6, 0.4, 40, 0.9), ("thicket", 1.6, 0.4, 80, 0.9)], GREEN, (0.06, 0.07, 0.03), (5.3, 1.7, 0), ["embers"]),
     "flashburn": ([(T, -1.0, 0, 0, 1), (T, 1.0, 0, 0, 1), (C, -1.0, 0, -40, 1.25), ("thicket", 1.0, 0, 60, 1.1)], FIRE, ASH_BG, (4.8, 1.6, 0), ["fire", "embers"]),
     "ember_lash": ([(T, 0, 0, 0, 1), (C, -0.9, 0.2, -60, 1.2), ("rotmoth", 1.0, -0.1, 200, 1.2)], FIRE, (0.12, 0.04, 0.03), (4.6, 1.8, 10), ["embers", "lance"]),
-    "smokescreen": ([(T, 0, 0, 0, 1.3), (C, 0, 0, 0, 1.4)], (0.8, 0.8, 0.85), (0.08, 0.08, 0.09), (4.2, 1.5, 0), ["ash", "shield"]),
+    "smokescreen": ([(T, 0, 0, 0, 1.3), (C, 0, 0, 0, 1.4)], (0.8, 0.8, 0.85), (0.08, 0.08, 0.09), (5.3, 1.8, 0), ["ash", "shield"]),
     "ash_sprout": ([(T, 0, 0, 0, 1.3), ("thicket", 0, 0, 0, 0.8), ("blight", 1.0, 0.6, 0, 0.6)], GREEN, (0.07, 0.06, 0.04), (3.4, 1.2, 0), ["ash"]),
     "scorch_mark": ([(T, 0, 0, 0, 1.2), ("husk_brute", 0, 0, 180, 1.05)], FIRE, (0.14, 0.05, 0.02), (4.4, 1.6, 0), ["fire"]),
     "backdraft": ([(T, 0, 0, 0, 1), (T, -1.75, 0, 0, 1), (T, 1.75, 0, 0, 1), (C, 0, 0, 0, 1.3), ("blightling", -1.75, 0, 60, 1.2), ("blightling", 1.75, 0, -60, 1.2)], FIRE, ASH_BG, (5.8, 2.2, 0), ["embers"]),
     "cinderstep": ([(T, -1.75, 0.5, 0, 1), (T, 0, 0, 0, 1), (T, 1.75, -0.5, 0, 1), (C, 0, 0, -75, 1.3)], WARM, (0.1, 0.06, 0.04), (5.2, 2.4, 0), ["embers"]),
-    "ember_ward": ([(T, 0, 0, 0, 1.3), (C, 0, 0.1, 0, 1.35), ("thicket", -0.6, -0.35, 0, 0.9), ("thicket", 0.6, -0.35, 70, 0.9)], FIRE, (0.1, 0.05, 0.05), (4.0, 1.4, 0), ["shield", "embers"]),
+    "ember_ward": ([(T, 0, 0, 0, 1.3), (C, 0, 0.1, 0, 1.35), ("thicket", -0.6, -0.35, 0, 0.9), ("thicket", 0.6, -0.35, 70, 0.9)], FIRE, (0.1, 0.05, 0.05), (5.2, 1.7, 0), ["shield", "embers"]),
     "blaze": ([(T, 0, 0, 0, 1)] + [(T, 1.75 * math.cos(a), 1.75 * math.sin(a), 0, 1) for a in [i * math.pi / 3 + math.pi / 6 for i in range(6)]] + [(C, 0, 0, 0, 1.3)] + [("thicket", 1.75 * math.cos(a), 1.75 * math.sin(a), i * 30, 0.9) for i, a in enumerate([i * math.pi / 3 + math.pi / 6 for i in range(6)])], FIRE, (0.2, 0.06, 0.02), (6.0, 4.5, 0), ["fire"]),
     "flare": ([(T, 0, 0, 0, 1.2), ("campfire", 0, 0, 0, 1.3)], GOLD, (0.12, 0.07, 0.03), (3.8, 1.3, 0), ["embers"]),
     "phoenix_bark": ([(T, 0, 0, 0, 1.4), ("willow", 0, 0.3, 0, 0.9), (C, 0.4, -0.6, 10, 1.0)], FIRE, (0.14, 0.06, 0.03), (5.2, 1.6, 0), ["fire", "shield"]),
     "smolder": ([(T, x * 1.75 + (0.87 if y % 2 else 0), y * 1.5 - 1.5, 0, 1) for x in (-1, 0, 1) for y in (0, 1, 2)] + [("thicket", x * 1.75 + (0.87 if y % 2 else 0), y * 1.5 - 1.5, x * 40 + y * 20, 0.9) for x in (-1, 0, 1) for y in (0, 1, 2) if (x + y) % 2 == 0], FIRE, (0.1, 0.05, 0.03), (7.0, 5.5, 0), ["embers", "ash"]),
     "firestorm": ([(T, 0, 0, 0, 1), (T, -1.75, 0, 0, 1), (T, 1.75, 0, 0, 1), (C, 0, 0, 0, 1.35), ("husk_brute", 1.75, 0, -70, 1.0), ("rotmoth", -1.75, 0, 70, 1.1)], FIRE, (0.22, 0.06, 0.02), (5.8, 2.6, 0), ["fire"]),
     "ashfall": ([(T, 0, 0, 0, 1.2), ("sporecaller", 0, 0, 170, 1.2)], (0.85, 0.8, 0.75), (0.1, 0.09, 0.09), (4.2, 1.8, 0), ["ash", "embers"]),
-    "tinderbox": ([(T, 0, 0, 0, 1.2), (C, -0.3, 0.2, 30, 1.2), ("candles", 0.6, -0.4, 0, 1.4)], GOLD, (0.11, 0.07, 0.03), (4.0, 1.4, 0), ["embers"]),
-    "crownfire": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 0, 1.5), ("withered_briar", -1.0, 0.6, 20, 0.9), ("withered_briar", 1.0, 0.6, -20, 0.9)], FIRE, (0.22, 0.07, 0.02), (3.8, 0.9, 0), ["fire"]),
+    "tinderbox": ([(T, 0, 0, 0, 1.2), (C, -0.3, 0.2, 30, 1.2), ("candles", 0.6, -0.4, 0, 1.4)], GOLD, (0.11, 0.07, 0.03), (5.0, 1.7, 0), ["embers"]),
+    "crownfire": ([(T, 0, 0, 0, 1.2), (C, 0, 0, 0, 1.5), ("withered_briar", -1.0, 0.6, 20, 0.9), ("withered_briar", 1.0, 0.6, -20, 0.9)], FIRE, (0.22, 0.07, 0.02), (5.2, 1.4, 0), ["fire"]),
     "ember_saint": ([(T, 0, 0, 0, 1.3), ("menhir", 0, 0.3, 0, 1.1), (C, 0.3, -0.5, 0, 1.2)], GOLD, (0.14, 0.07, 0.02), (4.8, 1.6, 0), ["embers"]),
 })
 
@@ -211,7 +211,12 @@ def render(card_id):
     bpy.context.active_object.data.color = (0.55, 0.45, 1.0)
     dist, height, yaw = cam
     yaw_r = math.radians(yaw)
-    target = (0, 0, 0.8)
+    # Tall Cassia close-ups need to frame the crest and brazier, not aim at the tile.
+    # Keep a little air above the silhouette in the final 396x224 art window.
+    cassia_portraits = {"ashen_guard", "smokescreen", "ember_ward", "crownfire", "kindling", "tinderbox"}
+    target = (0, 0, 1.3) if card_id in cassia_portraits else (0, 0, 0.8)
+    if card_id in cassia_portraits:
+        dist = max(dist, 6.0)
     loc = (target[0] + math.sin(yaw_r) * -dist * 0.0 + dist * math.sin(yaw_r), target[1] - dist * math.cos(yaw_r), target[2] + height)
     bpy.ops.object.camera_add(location=loc)
     camo = bpy.context.active_object

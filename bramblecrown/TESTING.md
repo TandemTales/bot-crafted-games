@@ -138,6 +138,15 @@ and the input/resize regression views. Run at 1280x720, 1920x1080 and 2560x1440 
 - Reopen `source-art/cassia.blend`: two meshes (`cassia`, `brazier_flame` with `flame_flicker`,
   frames 1-25).
 
+Run 9 adds a packaged assertion that Cassia's imported AnimationPlayer is playing. Inspect the
+revised model at both selection and board scale, including flame color, face, coat/leg separation
+and whether the smaller mantle obscures the head. Inspect the enlarged starter-deck text in both
+locked and unlocked selection screens at all three resolutions. Fifteen card illustrations that
+contain Cassia were rerendered; inspect all base/upgraded card sheets for framing and consistency.
+Reopen `source-art/card_ember_lash.blend` to check its editable camera and 396x224 render scene.
+Future-build itch copy and the exact screenshot/package mapping are under `release/`, excluded
+through both `.gdignore` and the export preset. No screenshot tour certifies a complete playthrough.
+
 ## 9. Crown of Thorns and thorn-wall regression (Run 6)
 
 Generate only Crown assets:

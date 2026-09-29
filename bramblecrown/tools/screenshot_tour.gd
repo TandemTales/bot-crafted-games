@@ -586,6 +586,13 @@ func _cassia() -> void:
 	await _wait(3.5)
 	var sc = get_tree().current_scene
 	_check(sc.board.units["player"].scene_file_path.ends_with("cassia.glb"), "Cassia's model stands on the board")
+	var flame_anim := sc.board.units["player"].find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_check(flame_anim != null and flame_anim.is_playing(), "Cassia's imported flame animation plays in the package")
+	if flame_anim != null:
+		var prior_time := flame_anim.current_animation_position
+		await _wait(0.17)
+		_check(not is_equal_approx(prior_time, flame_anim.current_animation_position), "Cassia's flame animation advances")
+		print("[tour] Cassia animation: ", flame_anim.current_animation)
 	await _shot("72_cassia_combat")
 	# Stage a Grove to burn and a Kindle hand, then preview Ember Lash on the nearest enemy.
 	var e: Dictionary = sc.c.enemies[0]

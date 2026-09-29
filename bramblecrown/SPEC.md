@@ -74,6 +74,19 @@ original to this project.
 
 ## Presentation
 
+### Cassia identity and release preparation (2026-09-29, Run 9)
+
+Cassia now has an uncovered face, swept copper flame crest, pointed ember mantle and split
+ash coat with visible boots. Her staff retains its animated flame, reduced in size and emission
+so it does not overwhelm the portrait. The fifteen card illustrations containing Cassia use the
+same revised model; their compositions still need further authored variety. Character-select
+starter-deck text is brighter and larger. The pitch explains that Heat strengthens cards for the
+turn rather than being spent on a single blow.
+
+Next-build page copy and a screenshot manifest live in `release/`, excluded from the exported
+game. The current itch.io draft remains tied to its older first-region download. The main runner
+owns every edited file this run; the separate critic edits no files.
+
 ### Implemented Cassia, the Ashwalker (2026-09-28, Run 7)
 
 The second Grovewalker. Cassia plants only to burn it: **Kindle N** burns N hexes of her own

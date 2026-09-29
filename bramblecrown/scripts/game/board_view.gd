@@ -228,6 +228,7 @@ func build(c: CombatState, region_seed: int = 1, theme_id: String = "marsh") -> 
 	units["player"] = p
 	p.position = world(c.player["pos"])
 	p.scale = Vector3.ONE * UNIT_SCALE
+	_start_anims(p)
 	_decorate_unit(p, wdef["ring"])
 	player_light = OmniLight3D.new()
 	player_light.light_color = wdef["light"]

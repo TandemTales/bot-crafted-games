@@ -12,7 +12,7 @@ const WALKERS := {
 	"cassia": {
 		"name": "Cassia", "title": "Ashwalker", "hp": 64, "model": "cassia",
 		"light": Color(1.0, 0.62, 0.3), "ring": Color(1.0, 0.6, 0.25), "unlock": "bosses",
-		"blurb": "Plants only to burn it. Kindle your own Grove into Heat, then spend it in one blow.",
+		"blurb": "Kindle your Grove into Heat to strengthen cards this turn. Heat resets next turn.",
 		"locked_text": "Defeat any region boss to unlock Cassia.",
 	},
 }

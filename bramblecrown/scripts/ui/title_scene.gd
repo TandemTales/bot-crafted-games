@@ -234,8 +234,9 @@ func _walker_panel(row: Control, w: String) -> Button:
 	var dl := Label.new()
 	dl.text = "Starting deck\n" + "\n".join(lines)
 	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dl.add_theme_font_size_override("font_size", 19)
-	dl.add_theme_color_override("font_color", UITheme.INK_DIM)
+	dl.add_theme_font_size_override("font_size", 24)
+	dl.add_theme_constant_override("line_spacing", 5)
+	dl.add_theme_color_override("font_color", UITheme.INK)
 	v.add_child(dl)
 	var sp := Control.new()
 	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
