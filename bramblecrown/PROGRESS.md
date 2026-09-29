@@ -1,4 +1,18 @@
 # BRAMBLECROWN — Progress
+## 2026-09-29 — Run 10 checkpoint (Pacific Tuesday, age 5 days)
+
+- STOP absent; clean `dev` at ff4e0d6, fast-forward pull confirms current remote state.
+- Godot `4.7.2.stable.official.ed1daf0bf`, Blender `5.1.2`, Butler `15.27.0` verified;
+  matching Windows x64 templates and embedded-PCK Windows Desktop preset present.
+- Official stable Godot CLI guide checked. Baseline import/scene/rules: **3,122 / 0**.
+- Butler verifies shoejunk/bramblecrown:windows still build #2014268 / 2026.09.24-10aa561.
+  No release gate; forced release remains October 3 Pacific. No upload/publication planned.
+- Scope: aimed Kindle for five formerly self-targeted burn cards, exact preview/rules
+  regressions, packaged input/visual verification. Aim at a Grove hex to burn nearest to it;
+  target Cassia for the existing farthest-first automatic order. Enemy-targeted cards and
+  Ember Saint retain automatic order. Preserve off-Grove draw/movement utility via self target.
+- Main runner owns all edits/Git. Separate read-only critic will compare final native evidence.
+- Next: implement, test, export, inspect three native resolutions, then retain honest handoff.
 
 ## 2026-09-29 — Run 9 checkpoint (Pacific Tuesday, age 5 days)
 
