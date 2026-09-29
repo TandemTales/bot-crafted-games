@@ -1,5 +1,24 @@
 # BRAMBLECROWN — Progress
 
+## 2026-09-29 — Run 9 checkpoint (Pacific Tuesday, age 5 days)
+
+- STOP absent. Clean local `dev` fast-forwarded from `4f65d1c` to remote `b64f430` before edits.
+  The newer Run 8 handoff supersedes the old local Run 4 plan.
+- Installed Godot `4.7.2.stable.official.ed1daf0bf`, Blender `5.1.2`, Butler `15.27.0`;
+  matching `4.7.2.stable` Windows x64 template and `Windows Desktop` embedded-PCK preset verified.
+  Checked the official stable Godot command-line guide. No applications installed or upgraded.
+- Baseline full import/scene/rules gate passes: **3,122 passed / 0 failed**.
+- Authenticated browser confirms `shoejunk/bramblecrown` is **Draft** with the September 24
+  first-region description and download. Butler confirms Windows build `#2014268`, version
+  `2026.09.24-10aa561`. No release gate passed; forced release remains 2026-10-03 Pacific.
+- Bounded scope: prepare next-build page copy, controls, honest system/quality limits and fresh
+  screenshots; revise Cassia's hooded silhouette into an uncovered flame crest and split mantle.
+  Main runner owns all edits and Git; separate read-only critic will inspect native evidence.
+- Keep future-build page copy local until that build is released: the current page must continue
+  describing its actual first-region download. No upload/publication this run.
+- Next: author release materials and Cassia model; import, reopen Blender source, export Windows,
+  inspect 720p/1080p/1440p tours and obtain harsh independent comparison. Aimed Kindle remains next.
+
 ## 2026-09-29 — Run 8 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent; started at `dev` 145b22b. Forced release remains Saturday 2026-10-03 Pacific.
