@@ -24,7 +24,7 @@ func _init() -> void:
 		"test_ironroot_progression", "test_ironroot_patterns", "test_ironroot_collapse",
 		"test_crown_progression", "test_crown_patterns", "test_crown_thorns",
 		"test_cassia_data", "test_cassia_unlock", "test_kindle_rules", "test_cassia_cards_resolve",
-		"test_cassia_powers", "test_cassia_preview_matches_play", "test_aimed_kindle", "test_cassia_bot", "test_cassia_events",
+		"test_cassia_powers", "test_cassia_preview_matches_play", "test_aimed_kindle", "test_cassia_bot", "test_cassia_events", "test_new_charms",
 	]
 	for t in tests:
 		_current = t
@@ -1686,4 +1686,53 @@ func test_cassia_events() -> bool:
 				r.choose_event_option(id, i)
 				check(r.deck.any(func(c): return c["id"] == swapped), "%s adds %s to Cassia's deck" % [id, swapped])
 				check(not r.deck.any(func(c): return CardDB.CARDS[c["id"]]["owner"] == "wren"), "%s adds no Wren card for Cassia" % id)
+	return true
+
+
+func test_new_charms() -> bool:
+	check(CharmDB.CHARMS.size() >= 20, "at least 20 charms")
+	for id in CharmDB.CHARMS:
+		var d := CharmDB.get_def(id)
+		check(d["name"] != "" and d["text"] != "", "charm text " + id)
+	# Dew Cup / Bramble Spool / Woven Satchel on the first turn.
+	var base := _blank_combat()
+	var c := _blank_combat({}, [], ["dew_cup", "bramble_spool", "woven_satchel"])
+	check(c.player["ward"] == 3, "dew cup ward")
+	check(int(c.player["energy"]) == int(base.player["energy"]) + 1, "bramble spool energy")
+	check(c.hand.size() == base.hand.size() + 1, "woven satchel draw")
+	# Carrion Bloom grows thicket where an enemy dies.
+	var cb := _blank_combat({"enemies": [["rotmoth", 2, 0]]}, [], ["carrion_bloom"])
+	if cb.enemies.size() > 0:
+		var pos: Vector2i = cb.enemies[0]["pos"]
+		cb._damage_enemy(cb.enemies[0], 9999)
+		check(cb.growth[pos] == "thicket", "carrion bloom grows on death")
+	# Last Bloom saves once per fight.
+	var lb := _blank_combat({}, [], ["last_bloom"])
+	lb._lose_hp(500, "test")
+	check(lb.phase == "player" and lb.player["hp"] == 1, "last bloom survives")
+	lb._lose_hp(500, "test")
+	check(lb.phase == "lost", "last bloom only once")
+	# Honey Jar heals at end of turn in Thicket.
+	var hj := _blank_combat({"thicket": [[0, 0]]}, [], ["honey_jar"])
+	hj.player["hp"] = 30
+	hj.end_turn()
+	check(hj.player["hp"] == 33, "honey jar heals 3")
+	# Run-level charms.
+	var r := RunState.new()
+	r.new_run(5)
+	var g0 := r.gold
+	r.add_charm("gilded_acorn")
+	check(r.gold == g0 + 60, "gilded acorn gold")
+	r.add_charm("cartographers_quill")
+	check(r._reward_choices() == 4, "quill offers four")
+	var plain := RunState.new()
+	plain.new_run(5)
+	plain._stock_market()
+	r.charms.append("haggler_tooth")
+	r._stock_market()
+	check(int(r.market["remove_price"]) < int(plain.market["remove_price"]), "haggler cheaper removal")
+	# Save/load keeps the charms.
+	var r2 := RunState.new()
+	r2.from_dict(r.to_dict())
+	check(r2.charms.has("last_bloom") == r.charms.has("last_bloom") and r2.charms.size() == r.charms.size(), "charms roundtrip")
 	return true

@@ -383,6 +383,11 @@ func end_turn() -> Array:
 	# Rot.
 	if growth.get(player["pos"], "none") == "blight" and not charms.has("rot_ward"):
 		_lose_hp(ROT_LOSS, "rot")
+	if charms.has("honey_jar") and growth.get(player["pos"], "none") == "thicket" and phase == "player":
+		var healed := mini(3, int(player["max_hp"]) - int(player["hp"]))
+		if healed > 0:
+			player["hp"] = int(player["hp"]) + healed
+			_emit({"type": "heal", "target": "player", "n": healed})
 	_tick_player_statuses()
 	if phase != "player":
 		return _flush()
@@ -682,6 +687,8 @@ func _kill_enemy(e: Dictionary) -> void:
 	_emit({"type": "death", "target": e["uid"], "pos": e["pos"]})
 	if e["def"].get("death_blight", false):
 		_blight_hexes([e["pos"]])
+	if charms.has("carrion_bloom"):
+		_grow_hexes([e["pos"]])
 	if e["def"].get("boss", false):
 		# Brood dies with its mother.
 		for other in enemies.duplicate():
@@ -695,6 +702,10 @@ func _damage_player(amount: int, attacker) -> void:
 	player["hp"] = int(player["hp"]) - dealt
 	_emit({"type": "damage", "target": "player", "amount": dealt, "blocked": blocked})
 	var thorns := int(player["powers"].get("thorns", 0))
+	if charms.has("burr_coat") and attacker != null:
+		thorns += 2
+	if dealt > 0 and int(player["hp"]) <= 0 and _last_bloom_saves():
+		player["hp"] = 1
 	if thorns > 0 and attacker != null and enemies.has(attacker):
 		_damage_enemy(attacker, thorns)
 	if int(player["hp"]) <= 0:
@@ -706,10 +717,21 @@ func _damage_player(amount: int, attacker) -> void:
 func _lose_hp(amount: int, cause: String) -> void:
 	player["hp"] = int(player["hp"]) - amount
 	_emit({"type": "hp_loss", "target": "player", "amount": amount, "cause": cause})
+	if int(player["hp"]) <= 0 and _last_bloom_saves():
+		player["hp"] = 1
 	if int(player["hp"]) <= 0:
 		player["hp"] = 0
 		phase = "lost"
 		_emit({"type": "lost"})
+
+
+## Last Bloom: the first killing blow of each fight leaves the player at 1 HP.
+func _last_bloom_saves() -> bool:
+	if not charms.has("last_bloom") or player.get("bloom_used", false):
+		return false
+	player["bloom_used"] = true
+	_emit({"type": "charm_save", "charm": "last_bloom"})
+	return true
 
 
 func _check_victory() -> void:
@@ -738,6 +760,10 @@ func _start_player_turn(first: bool) -> void:
 	player["move"] = BASE_MOVE + (1 if charms.has("heron_feather") else 0)
 	if first and charms.has("ironbark_husk"):
 		player["ward"] = 8
+	if first and charms.has("bramble_spool"):
+		player["energy"] = int(player["energy"]) + 1
+	if charms.has("dew_cup"):
+		_gain_ward(3)
 	_emit({"type": "turn_start", "turn": turn})
 	var og := int(player["powers"].get("overgrowth", 0))
 	if og > 0:
@@ -773,7 +799,7 @@ func _start_player_turn(first: bool) -> void:
 			_gain_ward(gs)
 	if charms.has("grove_bell") and grove().size() >= 6:
 		player["energy"] = int(player["energy"]) + 1
-	_draw(HAND_SIZE + (2 if first and charms.has("seed_pouch") else 0))
+	_draw(HAND_SIZE + (2 if first and charms.has("seed_pouch") else 0) + (1 if charms.has("woven_satchel") else 0))
 
 
 func _tick_player_statuses() -> void:

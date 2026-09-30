@@ -120,7 +120,7 @@ so she trades board control for one big turn.
 - Art: original Blender model `source-art/cassia.blend` (animated `flame_flicker` brazier), 20
   Blender-rendered card illustrations, an ember ring and light on the board, grey-ash scars on
   kindled hexes, a Heat readout with a live "Heat 2 → 3" forecast while targeting.
-- Thatch (third walker), 10 more charms and Withering tiers remain owed.
+- Thatch (third walker) and Withering tiers remain owed. Charms now number 20 (Run 11 added ten).
 
 ### Implemented Crown of Thorns region (2026-09-27, Run 6)
 

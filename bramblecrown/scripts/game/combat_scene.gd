@@ -997,6 +997,12 @@ func _play_event(ev: Dictionary) -> void:
 				_float_text(sp, "+%d" % ev["n"], UITheme.LEAF, 32)
 			Sfx.play("grow", 0.1, -6)
 			_sync_plates()
+		"charm_save":
+			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.8, 0))
+			_float_text(sp, "Last Bloom!", UITheme.LEAF, 34, 1.4)
+			Sfx.play("grow", 0.1, -3)
+			_refresh_hud()
+			_sync_plates()
 		"dazed":
 			var sp := rig.camera.unproject_position(board.units["player"].position + Vector3(0, 1.8, 0))
 			_float_text(sp, "Dazed: -%d energy" % ev["n"], UITheme.GOLD, 30, 1.3)

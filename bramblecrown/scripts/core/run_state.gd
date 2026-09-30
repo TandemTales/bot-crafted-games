@@ -218,14 +218,18 @@ func finish_combat(c: CombatState) -> void:
 	match t:
 		"elite":
 			stats["elites"] += 1
-			reward = {"gold": rng.randi_range(28, 38), "cards": roll_cards(3, 1.6), "charm": roll_charm()}
+			reward = {"gold": rng.randi_range(28, 38), "cards": roll_cards(_reward_choices(), 1.6), "charm": roll_charm()}
 		"boss":
 			stats["bosses"] += 1
-			reward = {"gold": rng.randi_range(80, 95), "cards": roll_cards(3, 3.0), "charm": roll_charm()}
+			reward = {"gold": rng.randi_range(80, 95), "cards": roll_cards(_reward_choices(), 3.0), "charm": roll_charm()}
 		_:
-			reward = {"gold": rng.randi_range(12, 20), "cards": roll_cards(3, 1.0), "charm": ""}
+			reward = {"gold": rng.randi_range(12, 20), "cards": roll_cards(_reward_choices(), 1.0), "charm": ""}
 	gold += int(reward["gold"])
 	status = "reward"
+
+
+func _reward_choices() -> int:
+	return 4 if charms.has("cartographers_quill") else 3
 
 
 func roll_cards(n: int, luck: float) -> Array:
@@ -266,6 +270,8 @@ func add_charm(id: String) -> void:
 	if charms.has(id):
 		return
 	charms.append(id)
+	if id == "gilded_acorn":
+		gold += 60
 	if id == "amber_heart":
 		max_hp += 10
 		hp += 10
@@ -318,7 +324,10 @@ func _stock_market() -> void:
 		var ch := roll_charm()
 		if ch != "" and not items.any(func(it): return it["id"] == ch):
 			items.append({"kind": "charm", "id": ch, "price": 150 + rng.randi_range(-10, 10), "sold": false})
-	market = {"items": items, "remove_price": 75, "removed": false}
+	if charms.has("haggler_tooth"):
+		for it in items:
+			it["price"] = int(round(int(it["price"]) * 0.75))
+	market = {"items": items, "remove_price": 56 if charms.has("haggler_tooth") else 75, "removed": false}
 
 
 func market_buy(index: int) -> bool:

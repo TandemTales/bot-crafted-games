@@ -44,6 +44,43 @@ static func draw_glyph(ci: CanvasItem, id: String, c: Vector2, s: float) -> void
 				var x := -7 + i * 7
 				ci.draw_colored_polygon(PackedVector2Array([c + Vector2(x - 3, 8) * s, c + Vector2(x + 3, 8) * s, c + Vector2(x, -10 + (4 if i != 1 else 0)) * s]), Color(0.75, 0.62, 0.36))
 			ci.draw_line(c + Vector2(-11, 8) * s, c + Vector2(11, 8) * s, leaf, 3 * s)
+		"dew_cup":
+			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-9, -4) * s, c + Vector2(9, -4) * s, c + Vector2(5, 9) * s, c + Vector2(-5, 9) * s]), Color(0.55, 0.75, 0.85))
+			ci.draw_circle(c + Vector2(0, -8) * s, 3 * s, Color(0.8, 0.92, 1.0))
+		"burr_coat":
+			ci.draw_circle(c, 8 * s, Color(0.5, 0.36, 0.2))
+			for i in 8:
+				var a := TAU * i / 8.0
+				ci.draw_line(c + Vector2(cos(a), sin(a)) * 8 * s, c + Vector2(cos(a), sin(a)) * 13 * s, gold, 2 * s)
+		"gilded_acorn":
+			ci.draw_circle(c + Vector2(0, 3) * s, 8 * s, gold)
+			ci.draw_rect(Rect2(c + Vector2(-9, -8) * s, Vector2(18, 7) * s), Color(0.6, 0.45, 0.15))
+		"honey_jar":
+			ci.draw_rect(Rect2(c + Vector2(-8, -6) * s, Vector2(16, 17) * s), Color(0.95, 0.65, 0.1))
+			ci.draw_rect(Rect2(c + Vector2(-6, -10) * s, Vector2(12, 4) * s), Color(0.5, 0.35, 0.15))
+		"haggler_tooth":
+			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-7, -10) * s, c + Vector2(7, -10) * s, c + Vector2(4, 12) * s, c + Vector2(-4, 12) * s]), Color(0.93, 0.9, 0.78))
+			ci.draw_line(c + Vector2(-5, -1) * s, c + Vector2(5, -1) * s, gold, 2 * s)
+		"carrion_bloom":
+			for i in 5:
+				var a := TAU * i / 5.0
+				ci.draw_circle(c + Vector2(cos(a), sin(a)) * 6 * s, 4.5 * s, Color(0.7, 0.3, 0.45))
+			ci.draw_circle(c, 3.5 * s, gold)
+		"bramble_spool":
+			ci.draw_circle(c, 9 * s, Color(0.4, 0.5, 0.25))
+			ci.draw_circle(c, 4 * s, Color(0.15, 0.2, 0.1))
+			ci.draw_line(c + Vector2(-9, 6) * s, c + Vector2(9, -6) * s, gold, 2 * s)
+		"cartographers_quill":
+			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(8, -12) * s, c + Vector2(3, 0) * s, c + Vector2(-9, 12) * s, c + Vector2(-2, -1) * s]), Color(0.9, 0.85, 0.7))
+			ci.draw_circle(c + Vector2(-9, 12) * s, 2 * s, Color(0.1, 0.1, 0.15))
+		"woven_satchel":
+			ci.draw_rect(Rect2(c + Vector2(-9, -3) * s, Vector2(18, 13) * s), Color(0.6, 0.45, 0.25))
+			ci.draw_arc(c + Vector2(0, -3) * s, 6 * s, PI, TAU, 12, Color(0.4, 0.28, 0.14), 2 * s)
+		"last_bloom":
+			for i in 6:
+				var a := TAU * i / 6.0
+				ci.draw_circle(c + Vector2(cos(a), sin(a)) * 6 * s, 4 * s, Color(0.95, 0.85, 0.9))
+			ci.draw_circle(c, 3.5 * s, leaf)
 		_:
 			var col := Color.from_hsv(float(hash(id) % 360) / 360.0, 0.5, 0.85)
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -12) * s, c + Vector2(10, 0) * s, c + Vector2(0, 12) * s, c + Vector2(-10, 0) * s]), col)

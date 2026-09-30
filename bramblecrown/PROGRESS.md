@@ -1,4 +1,20 @@
 # BRAMBLECROWN — Progress
+## 2026-09-30 — Run 11 (Pacific Wednesday, age 6 days)
+
+- STOP absent; dev synced at 4223590. Baseline gate 3,435 / 0 before edits.
+- **Delivered:** ten new charms (20 total, meeting the SPEC minimum): Dew Cup, Burr Coat,
+  Gilded Acorn, Honey Jar, Haggler's Tooth, Carrion Bloom, Bramble Spool, Cartographer's Quill,
+  Woven Satchel, Last Bloom. Effects in combat_state.gd/run_state.gd, vector glyphs in
+  charm_glyph.gd, a "Last Bloom!" combat float, new test_new_charms.
+- **Validation:** full gate (import, three scene smokes, rules) **3,468 passed / 0 failed**.
+- **Unverified:** no packaged export or native screenshots this run, so the new glyphs and float
+  text have not been seen in the built game; no balance rerun with the new charms; no critic run.
+  Toolchain versions not re-recorded this run (Run 10 installs used by check.sh).
+- No itch.io upload or page change; .aaa-complete absent. Forced release Saturday 2026-10-03 Pacific.
+- **Next (Run 12):** export Windows and inspect new glyphs in market/reward/HUD at three
+  resolutions; genuine player-input campaign route; Withering tiers; then the Saturday
+  forced-release procedure (full gate, export, packaged test, page check, Butler push, player-path verify).
+
 ## 2026-09-29 — Run 10 checkpoint (Pacific Tuesday, age 5 days)
 
 - STOP absent; clean `dev` at ff4e0d6, fast-forward pull confirms current remote state.
