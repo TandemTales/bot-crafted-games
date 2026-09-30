@@ -231,100 +231,46 @@ func path_to(dest: Vector2i) -> Array[Vector2i]:
 	return _build_path(res["prev"], player["pos"], dest)
 
 
-## What a card would do at `target`, without changing state: hexes that change and damage per enemy uid.
+## Resolve on a deep, RNG-isolated copy so previews share the real rules and effect order.
 func preview_card(inst: Dictionary, target: Vector2i) -> Dictionary:
-	var def := card_def(inst)
-	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}, "ward_break": {}, "heat": int(player.get("heat", 0))}
-	var g := grove()
-	var gm := growth
-	var heat := int(player.get("heat", 0))
-	for fx in def["effects"]:
-		match fx["op"]:
-			"kindle":
-				var hexes := kindle_targets(CardDB.val(def, fx["n"]), gm, target if def.get("target", "") == "kindle" else null)
-				if not hexes.is_empty():
-					gm = gm.duplicate()
-					for h in hexes:
-						gm[h] = "none"
-					out["burn"] += hexes
-					heat += hexes.size()
-					g = _grove_in(gm)
-				out["heat"] = heat
-			"damage_radius":
-				var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + heat * CardDB.val(def, fx.get("heat_mult", 0))
-				for e in enemies:
-					if Hex.distance(e["pos"], player["pos"]) <= int(fx["radius"]) and amt > 0:
-						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
-			"scorch_area":
-				for h in Hex.disc(target, int(fx["radius"])):
-					if in_bounds(h):
-						out["blight_clear"].append(h)
-			"break_ward", "steal_ward":
-				var e = enemy_at(target)
-				if e != null:
-					out["ward_break"][e["uid"]] = int(e["ward"]) if fx["op"] == "break_ward" else mini(int(e["ward"]), CardDB.val(def, fx["n"]))
-			"ward_strike":
-				var e = enemy_at(target)
-				if e != null:
-					out["damage"][e["uid"]] = CardDB.val(def, fx["amount"]) + g.size() / 3 + mini(int(player["ward"]), CardDB.val(def, fx["cap"]))
+	var out := {"grow": [], "blight_clear": [], "burn": [], "damage": {}, "ward_break": {}, "enemy_effects": {}, "heat": int(player.get("heat", 0))}
+	if not can_play(inst, target):
+		return out
+	var sim := CombatState.new()
+	for field in ["encounter", "terrain", "growth", "thorn_timers", "player", "enemies", "draw_pile", "hand", "discard", "exhausted", "charms"]:
+		sim.set(field, get(field).duplicate(true))
+	for field in ["radius", "walker", "turn", "phase", "attacks_this_turn", "_next_uid"]:
+		sim.set(field, get(field))
+	sim.rng = Rng.new()
+	sim.rng.set_state(rng.get_state())
+	var events := sim.play_card(inst["uid"], target)
+	out["heat"] = int(sim.player.get("heat", 0))
+	for ev in events:
+		if ev["type"] == "board":
+			for h in ev["changes"]:
+				var bucket: String = "grow" if ev["changes"][h] == "thicket" else ("burn" if ev["cause"] == "burn" else "blight_clear")
+				if not out[bucket].has(h):
+					out[bucket].append(h)
+		var uid = ev.get("target", "player")
+		if not uid is int:
+			continue
+		var bits: Array = out["enemy_effects"].get(uid, [])
+		match ev["type"]:
 			"damage":
-				var e = enemy_at(target)
-				if e != null:
-					var amt := CardDB.val(def, fx["amount"]) + g.size() / 3 + g.size() * CardDB.val(def, fx.get("grove_mult", 0)) + heat * CardDB.val(def, fx.get("heat_mult", 0))
-					if fx.get("double_if", "") != "" and int(e["statuses"].get(fx["double_if"], 0)) > 0:
-						amt *= 2
-					out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
-			"damage_grove_area":
-				var area := {}
-				var src: Array = g if not g.is_empty() else [player["pos"]]
-				for h in src:
-					area[h] = true
-					for n in Hex.neighbors(h):
-						area[n] = true
-				for e in enemies:
-					if area.has(e["pos"]):
-						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + CardDB.val(def, fx["amount"]) + g.size() / 3
-			"grow":
-				out["grow"] += _cluster(target, CardDB.val(def, fx["count"]), func(h): return growth[h] != "thicket")
-			"grow_self":
-				var hexes: Array[Vector2i] = [player["pos"]]
-				var n := 0
-				for h in Hex.neighbors(player["pos"]):
-					if n >= CardDB.val(def, fx["count"]):
-						break
-					if passable(h) and growth[h] != "thicket":
-						hexes.append(h)
-						n += 1
-				out["grow"] += hexes
-			"grow_line":
-				var dir: Vector2i = Hex.DIRS[Hex.direction_toward(player["pos"], target)]
-				for i in range(1, CardDB.val(def, fx["length"]) + 1):
-					var h: Vector2i = player["pos"] + dir * i
-					if not in_bounds(h):
-						break
-					if passable(h):
-						out["grow"].append(h)
-			"reclaim":
-				out["grow"] += _cluster(target, CardDB.val(def, fx["count"]), func(h): return growth[h] == "blight", true)
-			"cleanse":
-				for h in Hex.disc(player["pos"], CardDB.val(def, fx["radius"])):
-					if growth.get(h, "") == "blight":
-						out["blight_clear"].append(h)
-			"burn_grove":
-				out["burn"] = g.duplicate()
-				var touched := {}
-				for h in g:
-					touched[h] = true
-					for n in Hex.neighbors(h):
-						touched[n] = true
-				var amt := mini(g.size(), int(fx.get("cap", 99))) * CardDB.val(def, fx["per_hex"])
-				for e in enemies:
-					if touched.has(e["pos"]) and amt > 0:
-						out["damage"][e["uid"]] = int(out["damage"].get(e["uid"], 0)) + amt
-			"weak_area":
-				for h in Hex.disc(target, CardDB.val(def, fx["radius"])):
-					if in_bounds(h):
-						out["blight_clear"].append(h)
+				out["damage"][uid] = int(out["damage"].get(uid, 0)) + int(ev["amount"]) + int(ev["blocked"])
+				bits.append("%d HP / %d Ward" % [ev["amount"], ev["blocked"]])
+			"status":
+				bits.append("%s %d" % [String(ev["status"]).capitalize(), ev["n"]])
+			"ward":
+				if int(ev.get("gain", 0)) < 0:
+					out["ward_break"][uid] = int(out["ward_break"].get(uid, 0)) - int(ev["gain"])
+					bits.append("Remove %d Ward" % -int(ev["gain"]))
+			"death":
+				bits.append("Defeated")
+			"phase2":
+				bits.append("Phase 2")
+		if not bits.is_empty():
+			out["enemy_effects"][uid] = bits
 	return out
 
 

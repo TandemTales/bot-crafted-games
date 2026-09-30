@@ -47,6 +47,7 @@ var pause_layer: Control
 var float_root: Control
 var enemy_links: EnemyLinks
 var rail_hover := -1
+var preview_label: Label
 
 
 func _ready() -> void:
@@ -223,6 +224,15 @@ func _build_ui() -> void:
 	hint_label.add_theme_constant_override("outline_size", 6)
 	hint_label.add_theme_stylebox_override("normal", UITheme.box(Color(0.025, 0.04, 0.03, 0.96), Color(0.25, 0.32, 0.2), 1, 8, 4))
 	root.add_child(hint_label)
+	preview_label = Label.new()
+	preview_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	UITheme.anchor(preview_label, Control.PRESET_CENTER_BOTTOM, Vector2(-480, -358), Vector2(960, 32))
+	preview_label.add_theme_font_size_override("font_size", 20)
+	preview_label.add_theme_color_override("font_color", UITheme.GOLD)
+	preview_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	preview_label.add_theme_constant_override("outline_size", 5)
+	root.add_child(preview_label)
 	# Hand.
 	hand_root = Control.new()
 	UITheme.anchor(hand_root, Control.PRESET_CENTER_BOTTOM, Vector2(0, 0))
@@ -465,6 +475,8 @@ func _refresh_board_overlays() -> void:
 	var inst := _selected_inst()
 	var pending := {}
 	var ward_break := {}
+	var effects := {}
+	preview_label.text = ""
 	heat_label.text = "Heat %d" % int(c.player.get("heat", 0))
 	if not busy and c.phase == "player":
 		if inst.is_empty():
@@ -476,25 +488,36 @@ func _refresh_board_overlays() -> void:
 			for h in targets:
 				if not ov.has(h) or c.card_def(inst)["target"] == "enemy":
 					ov[h] = [COL_TARGET, false]
+			preview_label.text = "Hover a valid target to preview."
 			var tgt: Variant = null
 			if c.card_def(inst)["target"] == "self":
 				tgt = c.player["pos"]
 			elif hover_hex != null and targets.has(hover_hex):
 				tgt = hover_hex
+			if not c.can_afford(inst):
+				preview_label.text = "Not enough Energy to cast."
+				tgt = null
 			if tgt != null:
 				var pr := c.preview_card(inst, tgt)
 				for h in pr["grow"]:
 					ov[h] = [COL_GROW, false]
+					marks.append({"hex": h, "from": h, "text": "Grow", "color": COL_GROW})
 				for h in pr["blight_clear"]:
 					ov[h] = [COL_CLEAR, false]
+					marks.append({"hex": h, "from": h, "text": "Clear", "color": COL_CLEAR})
 				for h in pr["burn"]:
 					ov[h] = [COL_BURN, false]
+				effects = pr["enemy_effects"]
+				preview_label.text = "%d grow / %d clear / %d burn | %s" % [pr["grow"].size(), pr["blight_clear"].size(), pr["burn"].size(), "No enemy effects" if effects.is_empty() else "%d enemies affected (gold markers)" % effects.size()]
+				for e in c.enemies:
+					if effects.has(e["uid"]):
+						ov[e["pos"]] = [Color(1, 0.85, 0.3, 0.9), false]
 				pending = pr["damage"]
 				ward_break = pr.get("ward_break", {})
 				if int(pr.get("heat", 0)) != int(c.player.get("heat", 0)):
 					heat_label.text = "Heat %d → %d" % [int(c.player.get("heat", 0)), int(pr["heat"])]
 					heat_label.visible = true
-				if c.card_def(inst)["target"] != "self":
+				if c.card_def(inst)["target"] != "self" and not pr["grow"].has(tgt) and not pr["blight_clear"].has(tgt) and not pr["burn"].has(tgt) and c.enemy_at(tgt) == null:
 					ov[tgt] = [Color(1, 1, 0.8, 0.8), false]
 	if hover_hex != null and not ov.has(hover_hex):
 		ov[hover_hex] = [COL_HOVER, false]
@@ -506,7 +529,9 @@ func _refresh_board_overlays() -> void:
 	for uid in plates:
 		plates[uid].pending_damage = int(pending.get(uid, 0))
 		plates[uid].pending_ward_break = int(ward_break.get(uid, 0))
-		plates[uid].highlight = pending.has(uid)
+		plates[uid].pending_effects = " / ".join(effects.get(uid, []))
+		plates[uid].preview_active = not preview_label.text.is_empty() and preview_label.text != "Hover a valid target to preview." and preview_label.text != "Not enough Energy to cast."
+		plates[uid].highlight = effects.has(uid)
 		plates[uid].queue_redraw()
 
 
@@ -740,7 +765,7 @@ func _place_plates() -> void:
 		var pl: UnitPlate = plates[uid]
 		pl.rail_number = index + 1
 		pl.position = Vector2(vp_size.x - UnitPlate.RAIL_SIZE.x - 24, 104 + index * (UnitPlate.RAIL_SIZE.y + 8))
-		pl.highlight = pl.pending_damage > 0 or rail_hover == uid or hover_hex == e["pos"]
+		pl.highlight = not pl.pending_effects.is_empty() or rail_hover == uid or hover_hex == e["pos"]
 		pl.queue_redraw()
 		var sp := cam.unproject_position(n.position + Vector3(0, 0.15, 0)) + Vector2(0, 20)
 		enemy_links.marks.append({"pos": sp, "number": index + 1, "hot": pl.highlight, "end": pl.position + Vector2(0, 22)})

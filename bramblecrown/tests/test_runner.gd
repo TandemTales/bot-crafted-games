@@ -8,7 +8,7 @@ var _current := ""
 
 func _init() -> void:
 	var tests := [
-		"test_hex_math", "test_hex_world_roundtrip", "test_encounters_valid", "test_cards_valid",
+		"test_feedback_previews", "test_hex_math", "test_hex_world_roundtrip", "test_encounters_valid", "test_cards_valid",
 		"test_setup_and_draw", "test_grove_and_bonus", "test_growth_rules", "test_play_damage",
 		"test_player_move", "test_enemy_thicket_cost", "test_enemy_attack_and_ward",
 		"test_blight_empower_and_rot", "test_spread_locked", "test_burn_grove", "test_victory",
@@ -999,7 +999,7 @@ func test_preview_matches_play() -> bool:
 			if c.growth[h] != before[h]:
 				changed.append(h)
 		for h in changed:
-			check(pv["grow"].has(h), "%s: changed hex %s was previewed" % [id, h])
+			check(pv["grow" if c.growth[h] == "thicket" else "blight_clear"].has(h), "%s: changed hex %s was previewed" % [id, h])
 	var c := _blank_combat({"enemies": [["husk_brute", 1, 0]], "thicket": [[0, 0], [0, 1]]})
 	var e: Dictionary = c.enemies[0]
 	var uid := _give(c, "heartwood_maul")
@@ -1735,4 +1735,52 @@ func test_new_charms() -> bool:
 	var r2 := RunState.new()
 	r2.from_dict(r.to_dict())
 	check(r2.charms.has("last_bloom") == r.charms.has("last_bloom") and r2.charms.size() == r.charms.size(), "charms roundtrip")
+	return true
+
+
+func test_feedback_previews() -> bool:
+	for id in ["sow", "taproot", "briar_wall", "reclaim", "bellroot"]:
+		for up in [false, true]:
+			var c := _blank_combat({"enemies": [["moss_knight", 3, 0]], "blight": [[1, 0]], "stone": [[0, 1]], "thicket": [[-1, 0]]})
+			c.player["energy"] = 10
+			var uid := _give(c, id, up)
+			var inst: Dictionary = c.hand[c.hand_index(uid)]
+			for target in c.valid_targets(inst):
+				var before := c.growth.duplicate()
+				var hand := c.hand.duplicate(true)
+				var rng_state := c.rng.get_state()
+				var pv := c.preview_card(inst, target)
+				check(c.growth == before and c.hand == hand and c.rng.get_state() == rng_state, id + " retarget/cancel has no mutations")
+				var events: Array = []
+				for fx in c.card_def(inst)["effects"]:
+					c._apply_effect(c.card_def(inst), fx, target, false)
+				events = c._flush()
+				var actual := {"grow": [], "blight_clear": []}
+				for ev in events:
+					if ev["type"] == "board":
+						for h in ev["changes"]:
+							actual["grow" if ev["changes"][h] == "thicket" else "blight_clear"].append(h)
+				check(pv["grow"] == actual["grow"] and pv["blight_clear"] == actual["blight_clear"], id + " entire footprint matches committed growth")
+				c.growth = before
+	var c := _blank_combat({"enemies": [["moss_knight", 1, 0], ["moss_knight", 3, 0]], "thicket": [[0, 0], [1, 0]]})
+	var near_uid: int = c.enemies[0]["uid"]
+	var far_uid: int = c.enemies[1]["uid"]
+	for id in ["choir_thorns", "wildfire", "bramble_lash", "bellroot", "pollen_cloud"]:
+		c.player["energy"] = 10
+		var uid := _give(c, id)
+		var inst: Dictionary = c.hand[c.hand_index(uid)]
+		var target: Vector2i = c.player["pos"] if c.card_def(inst)["target"] == "self" else Vector2i(1, 0)
+		var enemies_before := c.enemies.duplicate(true)
+		var pv := c.preview_card(inst, target)
+		check(pv["enemy_effects"].has(near_uid) and not pv["enemy_effects"].has(far_uid), id + " identifies affected and unaffected enemies")
+		check(c.enemies == enemies_before, id + " preview preserves enemy HP/status")
+		check(c.preview_card(inst, Vector2i(99, 99))["enemy_effects"].is_empty(), id + " invalid retarget clears effects")
+		c.hand.remove_at(c.hand_index(uid))
+	var uid := _give(c, "bramble_lash")
+	var inst: Dictionary = c.hand[c.hand_index(uid)]
+	var pv := c.preview_card(inst, Vector2i(1, 0))
+	check("Bleed 3" in pv["enemy_effects"][near_uid], "conditional Thicket Bleed preview")
+	c.growth[Vector2i(1, 0)] = "none"
+	pv = c.preview_card(inst, Vector2i(1, 0))
+	check(not "Bleed 3" in pv["enemy_effects"][near_uid], "conditional status removed when enemy is off Thicket")
 	return true

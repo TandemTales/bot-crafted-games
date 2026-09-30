@@ -11,6 +11,8 @@ var ward := 0
 var statuses := {}
 var intent := {}  # {name, icons:[{kind, n, hot}]}
 var is_player := false
+var pending_effects := ""
+var preview_active := false
 var pending_damage := 0
 var pending_ward_break := 0
 var highlight := false
@@ -161,6 +163,9 @@ func _draw_rail() -> void:
 	if ward > 0:
 		hp_text += "   |   %d Ward" % ward
 	draw_string(fb, Vector2(18, 52), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+	if preview_active:
+		draw_multiline_string(fb, Vector2(12, 77), pending_effects if not pending_effects.is_empty() else "No effect", HORIZONTAL_ALIGNMENT_LEFT, 254, 16, 2, UITheme.GOLD if not pending_effects.is_empty() else UITheme.INK_DIM)
+		return
 	var bits: PackedStringArray = []
 	var danger := false
 	for ic in intent.get("icons", []):
@@ -176,7 +181,7 @@ func _draw_rail() -> void:
 		if int(statuses[s]) > 0:
 			states.append("%s %d" % [s.capitalize(), statuses[s]])
 	var detail: String = "  /  ".join(states) if not states.is_empty() else intent.get("name", "")
-	draw_string(fb, Vector2(12, 100), detail, HORIZONTAL_ALIGNMENT_LEFT, 254, 18, UITheme.INK_DIM)
+	draw_string(fb, Vector2(12, 100), detail, HORIZONTAL_ALIGNMENT_LEFT, 254, 16, UITheme.GOLD if preview_active else UITheme.INK_DIM)
 
 
 func _shield(c: Vector2, r: float, col: Color) -> void:

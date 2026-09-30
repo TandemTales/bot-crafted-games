@@ -747,7 +747,7 @@ func set_marks(marks: Array) -> void:
 				mi.transparency = 0.6
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			_mark_root.add_child(g)
-		if combat == null or h != combat.player["pos"]:
+		if mk.get("text", "") in ["Grow", "Clear"] or combat == null or h != combat.player["pos"]:
 			var lb := Label3D.new()
 			lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 			lb.font = UITheme.font("title")
