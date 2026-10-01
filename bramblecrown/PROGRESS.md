@@ -3,6 +3,18 @@
 
 - STOP absent; dev synced at 1ad475d. Plan: implement Withering difficulty tiers 0-10 (rules, meta save,
   select UI, tests), then gate and handoff. Forced release Saturday 2026-10-03 Pacific remains.
+- **Delivered:** Withering tiers 0-10 (`scripts/core/withering.gd`), stacking: 1 enemies +10% HP, 2 fight gold -20%,
+  3 enemies +1 Strength, 4 -8 Max HP, 5 market +25%, 6 elites/bosses +15% HP more, 7 camp heals 20%,
+  8 one fewer reward card (min 2), 9 Blight costs 3 HP, 10 enemies +1 further Strength and 50 less starting gold.
+  Tier saved in the run (legacy saves load as 0); profile `withering` = highest unlocked tier, a win at the top
+  unlocked tier opens the next; picker (-/+) on the Grovewalker select screen.
+- **Validation:** full gate (import, three scene smokes, rules) **3,990 passed / 0 failed**, new `test_withering`.
+- **Unverified:** the select-screen picker was only parse/compile-checked (headless script mode has no autoloads);
+  never seen in a packaged build or screenshot. No balance rerun at any tier, no export, no critic, no itch upload.
+  Tier 3+ forecasts rely on the enemy `strength` stat; shown on plates but not checked visually.
+- **Next (Run 13, Friday):** export Windows, inspect the picker and new charm glyphs at 720p/1080p/1440p, fix issues,
+  then Saturday forced release: full gate, packaged test, itch page check, Butler push to shoejunk/bramblecrown:windows,
+  player-path verify, `.aaa-complete` only if all of it truly passes (record debt honestly).
 
 ## 2026-09-30 — Run 11 (Pacific Wednesday, age 6 days)
 

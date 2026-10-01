@@ -11,6 +11,7 @@ const NODE_WEIGHTS := {"fight": 46, "shrine": 20, "elite": 12, "market": 12, "ca
 var seed_value := 0
 var rng: Rng
 var walker := "wren"
+var withering := 0  # difficulty tier 0-10, see Withering
 var hp := START_HP
 var max_hp := START_HP
 var gold := 99
@@ -30,13 +31,16 @@ var current_encounter := ""
 var stats := {"fights": 0, "elites": 0, "bosses": 0, "cards_played": 0}
 
 
-func new_run(seed_in: int, walker_in: String = "wren") -> void:
+func new_run(seed_in: int, walker_in: String = "wren", withering_in: int = 0) -> void:
 	seed_value = seed_in
 	rng = Rng.new(seed_in)
 	walker = walker_in
+	withering = Withering.clamp_tier(withering_in)
 	hp = int(WalkerDB.get_def(walker)["hp"])
+	if withering >= 4:
+		hp -= 8
 	max_hp = hp
-	gold = 99
+	gold = 49 if withering >= 10 else 99
 	deck = []
 	for id in CardDB.STARTER_DECK[walker]:
 		deck.append({"id": id, "up": false})
@@ -200,6 +204,7 @@ func make_combat() -> CombatState:
 		used_encounters.append(enc_id)
 	var c := CombatState.new()
 	c.walker = walker
+	c.withering = withering
 	var combat_rng := Rng.new(seed_value * 1000 + floor_num)
 	c.setup(EncounterDB.get_def(enc_id), deck, hp, max_hp, charms, combat_rng)
 	return c
@@ -224,12 +229,15 @@ func finish_combat(c: CombatState) -> void:
 			reward = {"gold": rng.randi_range(80, 95), "cards": roll_cards(_reward_choices(), 3.0), "charm": roll_charm()}
 		_:
 			reward = {"gold": rng.randi_range(12, 20), "cards": roll_cards(_reward_choices(), 1.0), "charm": ""}
+	if withering >= 2:
+		reward["gold"] = int(round(int(reward["gold"]) * 0.8))
 	gold += int(reward["gold"])
 	status = "reward"
 
 
 func _reward_choices() -> int:
-	return 4 if charms.has("cartographers_quill") else 3
+	var n := 4 if charms.has("cartographers_quill") else 3
+	return maxi(2, n - 1) if withering >= 8 else n
 
 
 func roll_cards(n: int, luck: float) -> Array:
@@ -297,7 +305,7 @@ func leave_reward() -> void:
 # ------------------------------------------------------------------ camp / market / shrine
 
 func camp_rest() -> int:
-	var heal := int(ceil(max_hp * 0.3))
+	var heal := int(ceil(max_hp * (0.2 if withering >= 7 else 0.3)))
 	var before := hp
 	hp = mini(max_hp, hp + heal)
 	status = "map"
@@ -327,6 +335,9 @@ func _stock_market() -> void:
 	if charms.has("haggler_tooth"):
 		for it in items:
 			it["price"] = int(round(int(it["price"]) * 0.75))
+	if withering >= 5:
+		for it in items:
+			it["price"] = int(round(int(it["price"]) * 1.25))
 	market = {"items": items, "remove_price": 56 if charms.has("haggler_tooth") else 75, "removed": false}
 
 
@@ -443,7 +454,7 @@ func to_dict() -> Dictionary:
 		"version": 1, "seed": seed_value, "rng": rng.get_state(), "walker": walker, "hp": hp,
 		"max_hp": max_hp, "gold": gold, "deck": deck, "charms": charms, "region": region, "map": map,
 		"node_id": node_id, "floor": floor_num, "used_encounters": used_encounters,
-		"used_events": used_events, "reward": reward, "market": market, "status": status,
+		"used_events": used_events, "reward": reward, "market": market, "withering": withering, "status": status,
 		"current_event": current_event, "current_encounter": current_encounter, "stats": stats,
 	}
 
@@ -453,6 +464,7 @@ func from_dict(d: Dictionary) -> void:
 	rng = Rng.new(seed_value)
 	rng.set_state(d["rng"])
 	walker = d["walker"]
+	withering = Withering.clamp_tier(int(d.get("withering", 0)))
 	hp = int(d["hp"])
 	max_hp = int(d["max_hp"])
 	gold = int(d["gold"])

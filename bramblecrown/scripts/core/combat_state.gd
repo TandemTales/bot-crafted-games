@@ -29,6 +29,7 @@ var discard: Array = []
 var exhausted: Array = []
 var charms: Array = []
 var walker := "wren"  # set by RunState before setup; only the board model depends on it
+var withering := 0  # Withering tier set by RunState before setup
 var turn := 0
 var phase := "player"  # player | won | lost
 var attacks_this_turn := 0
@@ -84,9 +85,15 @@ func _uid() -> int:
 func _spawn_enemy(id: String, pos: Vector2i, initial: bool) -> Dictionary:
 	var def := EnemyDB.get_def(id)
 	var hp := rng.randi_range(def["hp"][0], def["hp"][1])
+	var hp_mult := 1.0
+	if withering >= 1:
+		hp_mult += 0.10
+	if withering >= 6 and (def.get("boss", false) or def.get("elite", false)):
+		hp_mult += 0.15
+	hp = int(round(hp * hp_mult))
 	var e := {
 		"uid": _uid(), "id": id, "def": def, "pos": pos, "hp": hp, "max_hp": hp, "ward": 0,
-		"strength": 0, "statuses": {}, "pattern_idx": 0, "phase2": false, "intent": {},
+		"strength": (1 if withering >= 3 else 0) + (1 if withering >= 10 else 0), "statuses": {}, "pattern_idx": 0, "phase2": false, "intent": {},
 	}
 	if initial and not def.get("boss", false) and not def.get("elite", false):
 		e["pattern_idx"] = rng.randi_range(0, def["pattern"].size() - 1)
@@ -328,7 +335,7 @@ func end_turn() -> Array:
 	hand.clear()
 	# Rot.
 	if growth.get(player["pos"], "none") == "blight" and not charms.has("rot_ward"):
-		_lose_hp(ROT_LOSS, "rot")
+		_lose_hp(ROT_LOSS + (1 if withering >= 9 else 0), "rot")
 	if charms.has("honey_jar") and growth.get(player["pos"], "none") == "thicket" and phase == "player":
 		var healed := mini(3, int(player["max_hp"]) - int(player["hp"]))
 		if healed > 0:

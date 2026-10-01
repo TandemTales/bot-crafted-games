@@ -1784,3 +1784,61 @@ func test_feedback_previews() -> bool:
 	pv = c.preview_card(inst, Vector2i(1, 0))
 	check(not "Bleed 3" in pv["enemy_effects"][near_uid], "conditional status removed when enemy is off Thicket")
 	return true
+
+
+func test_withering() -> bool:
+	check(Withering.TIERS.size() == Withering.MAX_TIER, "ten tier modifiers")
+	check(Withering.unlocked({}) == 0, "tier 0 by default")
+	check(Withering.after_win({}, 0) == 1, "win at 0 unlocks 1")
+	check(Withering.after_win({"withering": 3}, 1) == 3, "win below top keeps unlock")
+	check(Withering.after_win({"withering": 3}, 3) == 4, "win at top unlocks next")
+	check(Withering.after_win({"withering": 10}, 10) == 10, "tier capped at ten")
+	var base := RunState.new()
+	base.new_run(7, "wren", 0)
+	var w4 := RunState.new()
+	w4.new_run(7, "wren", 4)
+	check(w4.max_hp == base.max_hp - 8 and w4.hp == w4.max_hp, "tier 4 frail start")
+	var w10 := RunState.new()
+	w10.new_run(7, "wren", 10)
+	check(w10.gold == 49 and base.gold == 99, "tier 10 starts with 50 less gold")
+	# Enemy HP / strength.
+	var enc := {"enemies": [["rotmoth", 2, 0]]}
+	var c1 := CombatState.new()
+	c1.withering = 1
+	c1.setup({"radius": 3, "player": [-2, 0], "enemies": enc["enemies"]}, [], 30, 30, [], Rng.new(1))
+	var c0b := CombatState.new()
+	c0b.setup({"radius": 3, "player": [-2, 0], "enemies": enc["enemies"]}, [], 30, 30, [], Rng.new(1))
+	check(int(c1.enemies[0]["max_hp"]) == int(round(int(c0b.enemies[0]["max_hp"]) * 1.1)), "tier 1 enemies +10% HP")
+	var c3 := CombatState.new()
+	c3.withering = 3
+	c3.setup({"radius": 3, "player": [-2, 0], "enemies": enc["enemies"]}, [], 30, 30, [], Rng.new(1))
+	check(int(c3.enemies[0]["strength"]) == 1, "tier 3 +1 strength")
+	var c10 := CombatState.new()
+	c10.withering = 10
+	c10.setup({"radius": 3, "player": [-2, 0], "enemies": enc["enemies"]}, [], 30, 30, [], Rng.new(1))
+	check(int(c10.enemies[0]["strength"]) == 2, "tier 10 +2 strength")
+	# Economy modifiers.
+	var r7 := RunState.new()
+	r7.new_run(9, "wren", 7)
+	r7.hp = 1
+	check(r7.camp_rest() == int(ceil(r7.max_hp * 0.2)), "tier 7 camp heals 20%")
+	var r8 := RunState.new()
+	r8.new_run(9, "wren", 8)
+	check(r8._reward_choices() == 2, "tier 8 offers two cards")
+	var r0 := RunState.new()
+	r0.new_run(9, "wren", 0)
+	r0._stock_market()
+	var r5 := RunState.new()
+	r5.new_run(9, "wren", 5)
+	r5._stock_market()
+	check(r5.market["items"].size() > 0 and r0.market["items"].size() > 0, "markets stocked")
+	# Save/load round trip keeps the tier.
+	var back := RunState.from_json(r8.to_json())
+	check(back != null and back.withering == 8, "withering survives save/load")
+	# Old saves without the field load as tier 0.
+	var d := r0.to_dict()
+	d.erase("withering")
+	var old := RunState.new()
+	old.from_dict(d)
+	check(old.withering == 0, "legacy save is tier 0")
+	return true

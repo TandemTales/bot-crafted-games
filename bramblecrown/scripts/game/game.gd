@@ -32,13 +32,13 @@ func has_saved_run() -> bool:
 	return FileAccess.file_exists(RUN_PATH)
 
 
-func new_run(seed_value: int = -1, walker: String = "wren") -> void:
+func new_run(seed_value: int = -1, walker: String = "wren", tier: int = 0) -> void:
 	if seed_value < 0:
 		seed_value = int(Time.get_unix_time_from_system()) % 1000000
 	if not WalkerDB.is_unlocked(walker, profile):
 		walker = "wren"
 	run = RunState.new()
-	run.new_run(seed_value, walker)
+	run.new_run(seed_value, walker, mini(tier, Withering.unlocked(profile)))
 	profile["runs"] = int(profile["runs"]) + 1
 	_save_profile()
 	save_run()
@@ -86,6 +86,7 @@ func record_end(victory: bool) -> void:
 	note_progress()
 	if victory:
 		profile["wins"] = int(profile["wins"]) + 1
+		profile["withering"] = Withering.after_win(profile, run.withering)
 	profile["best_floor"] = maxi(int(profile["best_floor"]), run.floor_num)
 	_save_profile()
 	clear_run()

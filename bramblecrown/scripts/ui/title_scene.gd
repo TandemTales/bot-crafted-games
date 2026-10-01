@@ -5,6 +5,8 @@ var rig: CameraRig
 var _t := 0.0
 var _continue_btn: Button
 var _new_btn: Button
+var _tier := 0
+var _tier_label: Label
 
 
 func _ready() -> void:
@@ -138,6 +140,8 @@ func _open_select() -> void:
 	row.offset_right = -80
 	row.add_theme_constant_override("separation", 40)
 	root.add_child(row)
+	_tier = Withering.unlocked(Game.profile)
+	_add_tier_picker(root)
 	var first: Button = null
 	for w in WalkerDB.ORDER:
 		var pick := _walker_panel(row, w)
@@ -256,6 +260,51 @@ func _walker_panel(row: Control, w: String) -> Button:
 	b.pressed.connect(func():
 		Sfx.play("click")
 		Game.clear_run()
-		Game.new_run(-1, w))
+		Game.new_run(-1, w, _tier))
 	v.add_child(b)
 	return b if open else null
+
+
+## Withering picker: tiers up to the highest unlocked; each one keeps the lower tiers' penalties.
+func _add_tier_picker(root: Control) -> void:
+	var box := HBoxContainer.new()
+	box.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	box.offset_left = 80
+	box.offset_top = -100
+	box.offset_bottom = -30
+	box.add_theme_constant_override("separation", 12)
+	root.add_child(box)
+	var minus := Button.new()
+	minus.text = "-"
+	minus.custom_minimum_size = Vector2(60, 60)
+	minus.add_theme_font_size_override("font_size", 30)
+	box.add_child(minus)
+	_tier_label = Label.new()
+	_tier_label.custom_minimum_size = Vector2(980, 0)
+	_tier_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_tier_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tier_label.add_theme_font_size_override("font_size", 22)
+	_tier_label.add_theme_color_override("font_color", Color(0.95, 0.85, 0.6))
+	box.add_child(_tier_label)
+	var plus := Button.new()
+	plus.text = "+"
+	plus.custom_minimum_size = Vector2(60, 60)
+	plus.add_theme_font_size_override("font_size", 30)
+	box.add_child(plus)
+	var top := Withering.unlocked(Game.profile)
+	minus.pressed.connect(func():
+		Sfx.play("click")
+		_tier = maxi(0, _tier - 1)
+		_refresh_tier())
+	plus.pressed.connect(func():
+		Sfx.play("click")
+		_tier = mini(top, _tier + 1)
+		_refresh_tier())
+	_refresh_tier()
+
+
+func _refresh_tier() -> void:
+	if _tier == 0:
+		_tier_label.text = "Withering 0 - the forest as it was."
+	else:
+		_tier_label.text = "Withering %d - %s: %s" % [_tier, Withering.TIERS[_tier - 1]["name"], Withering.TIERS[_tier - 1]["text"]]
