@@ -1,4 +1,9 @@
 # BRAMBLECROWN — Progress
+## 2026-10-01 — Run 12 (Pacific Thursday, age 7 days)
+
+- STOP absent; dev synced at 1ad475d. Plan: implement Withering difficulty tiers 0-10 (rules, meta save,
+  select UI, tests), then gate and handoff. Forced release Saturday 2026-10-03 Pacific remains.
+
 ## 2026-09-30 — Run 11 (Pacific Wednesday, age 6 days)
 
 - STOP absent; dev synced at 4223590. Baseline gate 3,435 / 0 before edits.
