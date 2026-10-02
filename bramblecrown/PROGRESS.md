@@ -1,4 +1,9 @@
 # BRAMBLECROWN — Progress
+## 2026-10-02 — Run 13 (Pacific Friday, age 8 days)
+
+- STOP absent; branch at origin/dev b593747. Plan: full gate, Windows export, inspect Withering picker and new
+  charm glyphs at 720p/1080p/1440p, fix issues. Saturday 2026-10-03 Pacific is the forced release.
+
 ## 2026-10-01 — Run 12 (Pacific Thursday, age 7 days)
 
 - STOP absent; dev synced at 1ad475d. Plan: implement Withering difficulty tiers 0-10 (rules, meta save,
