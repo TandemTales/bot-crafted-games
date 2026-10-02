@@ -267,23 +267,31 @@ func _walker_panel(row: Control, w: String) -> Button:
 
 ## Withering picker: tiers up to the highest unlocked; each one keeps the lower tiers' penalties.
 func _add_tier_picker(root: Control) -> void:
+	var backing := PanelContainer.new()
+	backing.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	backing.offset_left = 80
+	backing.offset_right = 800
+	backing.offset_top = -100
+	backing.offset_bottom = -20
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.03, 0.05, 0.04, 0.96)
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(6)
+	backing.add_theme_stylebox_override("panel", sb)
+	root.add_child(backing)
 	var box := HBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	box.offset_left = 80
-	box.offset_top = -100
-	box.offset_bottom = -30
 	box.add_theme_constant_override("separation", 12)
-	root.add_child(box)
+	backing.add_child(box)
 	var minus := Button.new()
 	minus.text = "-"
 	minus.custom_minimum_size = Vector2(60, 60)
 	minus.add_theme_font_size_override("font_size", 30)
 	box.add_child(minus)
 	_tier_label = Label.new()
-	_tier_label.custom_minimum_size = Vector2(980, 0)
+	_tier_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tier_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_tier_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tier_label.add_theme_font_size_override("font_size", 22)
+	_tier_label.add_theme_font_size_override("font_size", 20)
 	_tier_label.add_theme_color_override("font_color", Color(0.95, 0.85, 0.6))
 	box.add_child(_tier_label)
 	var plus := Button.new()

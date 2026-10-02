@@ -577,6 +577,13 @@ func _cassia() -> void:
 	var open := get_tree().current_scene.find_children("*", "Button", true, false).filter(func(b): return b.text == "Begin as Cassia")
 	_check(open.size() == 1 and not open[0].disabled, "a boss kill unlocks Cassia on the select screen")
 	await _shot("71_title_cassia_unlocked")
+	Game.profile["withering"] = 10
+	Game.goto_title()
+	await _wait(2.0)
+	get_tree().current_scene._open_select()
+	await _wait(1.5)
+	await _shot("71b_withering_10_picker")
+	Game.profile["withering"] = 0
 	Game.clear_run()
 	Game.new_run(4242, "cassia")
 	_check(Game.run.walker == "cassia", "new run starts as Cassia")

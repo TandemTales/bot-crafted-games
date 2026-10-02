@@ -3,6 +3,16 @@
 
 - STOP absent; branch at origin/dev b593747. Plan: full gate, Windows export, inspect Withering picker and new
   charm glyphs at 720p/1080p/1440p, fix issues. Saturday 2026-10-03 Pacific is the forced release.
+- **Delivered:** Packaged export (Godot 4.7.2) showed the Withering picker overlapping the Back button and bleeding
+  into background text at 720p; moved it into a backed 720px panel left of Back, tier 10 text wraps cleanly.
+  Added a Withering-10 shot to the run7 tour. Gate **3,990 / 0**; run7 tour at 1280x720, 1920x1080, 2560x1440:
+  21 shots each, 0 failures, exit 0, player saves unchanged; I read the three tier-10 picker shots (kept, with
+  tour logs, in evidence/run13; other screenshots not committed).
+- **Unverified:** no hand-played campaign, audio, controller, balance at any Withering tier, critic, or itch upload.
+  Critic state remains AAA FAIL from Run 10.
+- **Next (Saturday forced release):** full gate, export, packaged launch + tour, verify itch page `shoejunk/bramblecrown`
+  (draft; public visibility needs the user's explicit OK), Butler push `:windows`, player-path verify; write
+  `.aaa-complete` only if truly shipped, else record the blocker.
 
 ## 2026-10-01 — Run 12 (Pacific Thursday, age 7 days)
 
