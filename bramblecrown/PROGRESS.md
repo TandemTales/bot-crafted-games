@@ -1,4 +1,18 @@
 # BRAMBLECROWN — Progress
+## 2026-10-03 — Run 14 (Pacific Saturday, age 9 days) — FORCED RELEASE ATTEMPT: BLOCKED AT UPLOAD
+
+- STOP absent; branch == origin/dev d602cab. Godot 4.7.2, Butler 15.27.0.
+- **Verified:** full gate 3,990 passed / 0 failed; Windows export OK (Bramblecrown.exe, SHA-256
+  0ec5bf1d5206eb5ce1f91a56d13adf722f6936e575fce0209b454077efff05db); packaged tour at 1280x720, 1920x1080,
+  2560x1440: 15 shots each, exit 0, 0 ERROR lines. I read the title, combat (720p/1080p) and 1440p map shots: they render correctly.
+- **Blocked:** `butler push` to shoejunk/bramblecrown:windows was denied by the session's auto-mode permission
+  classifier (public-surface action). Not retried or worked around. The itch channel still holds build #2014268
+  (2026.09.24-10aa561). NOT uploaded, NOT released, no .aaa-complete.
+- **Debt/unverified:** title footer says "Development build"; no hand-played campaign, audio, controller or balance
+  check; critic AAA FAIL since Run 10; itch page is Draft.
+- **Next:** with explicit user OK (or a Bash allow rule), copy build/windows/Bramblecrown.exe to a clean dir and
+  `butler push <dir> shoejunk/bramblecrown:windows`, verify on the page, set page Public, write .aaa-complete.
+
 ## 2026-10-02 — Run 13 (Pacific Friday, age 8 days)
 
 - STOP absent; branch at origin/dev b593747. Plan: full gate, Windows export, inspect Withering picker and new
