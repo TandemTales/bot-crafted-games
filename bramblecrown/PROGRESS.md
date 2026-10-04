@@ -1,4 +1,22 @@
 # BRAMBLECROWN — Progress
+## 2026-10-04 — Run 15 (Pacific Sunday, age 10 days) — release still blocked
+
+- STOP absent. Not a Saturday; the forced release (2026-10-03) was blocked at `butler push` by the permission
+  classifier in Run 14. I did not retry or work around it. itch channel still holds build #2014268; NOT released,
+  no .aaa-complete.
+- Changed the title footer from "Development build" to "Early access build". Gate 3,990 passed / 0 failed.
+  No new export, so the Run 14 package (SHA 0ec5bf1d...) predates this text change and needs a re-export before upload.
+- **Next:** user grants explicit OK / allow rule for Butler push + making the page Public; then re-export, push
+  `shoejunk/bramblecrown:windows`, player-path verify, write .aaa-complete. Otherwise next forced window is Saturday 2026-10-10.
+## 2026-10-04 — Run 15 (Pacific Sunday, age 10 days) — release still blocked
+
+- STOP absent. Not a Saturday; the forced release (2026-10-03) was blocked at `butler push` by the permission
+  classifier in Run 14. I did not retry or work around it. itch channel still holds build #2014268; NOT released,
+  no .aaa-complete.
+- Changed the title footer from "Development build" to "Early access build". Gate 3,990 passed / 0 failed.
+  No new export, so the Run 14 package (SHA 0ec5bf1d...) predates this text change and needs a re-export before upload.
+- **Next:** user grants explicit OK / allow rule for Butler push + making the page Public; then re-export, push
+  `shoejunk/bramblecrown:windows`, player-path verify, write .aaa-complete. Otherwise next forced window is Saturday 2026-10-10.
 ## 2026-10-03 — Run 14 (Pacific Saturday, age 9 days) — FORCED RELEASE ATTEMPT: BLOCKED AT UPLOAD
 
 - STOP absent; branch == origin/dev d602cab. Godot 4.7.2, Butler 15.27.0.
