@@ -1,0 +1,31 @@
+Accepted character checkpoint - 2026-10-07
+
+User accepted the rebuilt Wren and Cassia. Editable sources are
+source-art/grovewalker.blend and source-art/cassia.blend. Regeneration scripts
+build_wren.py/build_cassia.py and original PBR texture painters/maps are retained.
+Runtime GLBs retain Wren_Breathe and Cassia's flame_flicker animation contract.
+
+Selection Back now pauses and hides one cached preview layer. The previous
+native failure occurred after freeing its live SubViewports. Native synthetic
+mouse checks passed three Back/reopen/Begin cycles per character, animation
+checks, and 1080p/720p combat captures. Player files stayed unchanged.
+Blender reopening and Godot import/export passed. Physical input, full campaign,
+and the separately deferred crash are not certified by these checks.
+
+Local package: build/local-0.1.1-wren-cassia-2026.10.07
+Stable local launch: build/latest/windows/Bramblecrown.exe
+EXE SHA256: 54978FF626D7C658ADCFE2E4F23914FCB1EA49F56343B7A178F37DCFFCB3B6D5
+ZIP SHA256: A5404A50D05B5DA08806B43B471939FA5B5D004A6CEAEC4D38B49BA87AB20BC9
+Generated packages stay ignored. tools/promote_local_build.ps1 verifies a staged
+package, refuses to replace a running executable and retains the prior latest.
+
+Reproduce native checks on an exported Windows executable:
+Bramblecrown.exe -- --screenshot-tour <dir> --tour-only wren --wren-out <dir>
+Bramblecrown.exe -- --screenshot-tour <dir> --tour-only cassia-rebuild --cassia-out <dir>
+
+This checkpoint also includes the preceding Bramblecrown map art/icons, save
+validation and UI work present in the accepted local build. Earlier logs in
+PROGRESS.md/TESTING.md document their checks and remaining acceptance limits.
+The remote Run 15 footer/progress commit must be preserved when integrating.
+No release/publication claim is made. Remaining 3D art upgrades are a separate,
+local review task and are not authorized for automatic future Git pushes.

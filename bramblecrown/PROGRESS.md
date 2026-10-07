@@ -790,3 +790,137 @@ No discipline passes, so the game is **not** release-quality.
 2. Region 2 cards: about 10 new Wren cards that use daze and ward counterplay, with Blender art in `render_card_art.py` that uses the new cloister models. Add rarity frames to `card_view.gd`.
 3. Illustrated map backdrop per region, with a boss portrait at the top. Stage the Grafter NPC in the shrine vignette. Add Region 2 shrine events.
 4. Start Region 3 (Glasswood) if time remains. Rerun the critic on fresh packaged screenshots.
+
+## 2026-10-03 - Authorized local completion test: startup (Pacific Saturday)
+
+- Pacific start: Saturday 2026-10-03 15:00; marker started 2026-09-24, age 9 days. Forced Saturday completion applies; no new polish.
+- STOP absent. Initially clean documented dev at 1ad475d. Cached origin/dev five commits ahead (50a0aa7); no pull/reset/commit/push. Live ls-remote blocked by sandbox network (127.0.0.1:9); remote freshness unverified.
+- No Godot, Blender, Bramblecrown or bash process at startup; parent reports prior read-only task terminal. Several Codex host processes exist; detailed process query denied by OS. No runner lock in .arcade-agent. This selected LOCAL task does not recursively route or touch automations.
+- Godot 4.7.2.stable.official.ed1daf0bf; Blender 5.1.2 (ec6e62d40fa9); matching 4.7.2.stable Windows release x86_64 template present. Existing Windows Desktop preset: x86_64, embedded PCK. Git Bash present.
+- Read local PROGRESS, SPEC and TESTING. Official Godot CLI guide checked: https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
+- Plan: complete existing gate, fresh isolated Windows export, native regression screenshots and archive validation; require genuine functional completion evidence before .aaa-complete. Staged victory/high-HP bots do not prove campaign completion.
+- Computer-use skill read, but node_repl not exposed in selected environment; genuine UI route/focus validation may remain blocked. No cloud_threads tools exposed here; parent owns Desktop-Joe routing/activity/reporting.
+- Main runner owns this run's new evidence/build files and appended handoffs. Preserve historical logs/source work.
+
+### 2026-10-03 passing gate checkpoint
+
+- Full Git Bash gate exit 0: 3,990 passed / 0 failed; import and title/combat/map smokes pass. Raw logs retained in evidence/2026-10-03-local-completion/check-logs. Initial sandbox Bash failure retained separately.
+- Authorized read-only live remote check confirms origin dev 50a0aa7e97e9582958415e748066765704130e8a; local remains 1ad475d, five commits behind. Detailed process inspection found only this run's game gate, Codex hosts, and a separate repository session; no competing game writer identified.
+- Blender 5.1.2 reopened Cassia: two meshes, flame_flicker action, materials and dimensions recorded; exit 0. No assets edited.
+- Next: export fresh local package and run native regression captures. Genuine campaign completion remains unproven.
+
+
+### 2026-10-03 packaged Cassia checkpoint
+
+- Fresh Windows x64 export succeeded in build/local-2026.10.03-1ad475d/windows. Executable 122,471,712 bytes; SHA-256 2478FDEBB872C906CD5C511836A617A787FDFF07C010B4FC683940695F2470AE. PE 0x8664 and embedded GDPC footer verified.
+- Existing run7 tour passed at 1280x720, 1920x1080, 2560x1440: 20 images each, exit 0, zero failures, normal saves unchanged. Main runner inspected all 60 via contact sheets. Small/low-contrast combat text remains polish debt; no functional layout blocker observed in these fixtures.
+- Representative Crown source reopened with Blender 5.1.2: two meshes, diadem_turn action, materials/dimensions logged, exit 0. Native final-region and extracted-archive checks in progress.
+- Versioned candidate archive created with exact-build README, extracted executable hash matches. This is not yet a completion gate pass.
+
+
+### 2026-10-03 final local test result - completion BLOCKED
+
+- Full gate: 3,990 passed / 0 failed; native run7 and run6 tours at 720p/1080p/1440p: 129 screenshots total, all visually inspected, zero assertions/errors, six exits 0 and player saves unchanged. No runtime source/art edits.
+- Extracted ZIP normal native startup (240 frames): exit 0, no errors, normal run/profile/settings SHA-256 unchanged. This validates startup and engine-controlled shutdown, not the normal user save/quit/relaunch/Continue route.
+- Package: build/local-2026.10.03-1ad475d/windows/Bramblecrown.exe (122,471,712 bytes), SHA-256 2478FDEBB872C906CD5C511836A617A787FDFF07C010B4FC683940695F2470AE.
+- Archive: build/local-2026.10.03-1ad475d/Bramblecrown-2026.10.03-1ad475d-windows-x64.zip (52,287,795 bytes), SHA-256 91FD3283C930A78EE80891350CFA2D59D8225BD6A0CFCFCF87D893E7DE480780. Extracted EXE hash matches. Existing build/windows preserved.
+- Short tour FPS mean/range: 720p 55.5/41-61; 1080p 54.0/35-61; 1440p 51.9/26-60 on RTX 2070 SUPER. Capture/loading included; not sustained performance or minimum requirements.
+- BLOCKER: node_repl desktop-control API not exposed in selected child. Genuine five-region player-input completion, normal save/relaunch and OS focus/fullscreen acceptance remain unverified. Staged victory/high-HP fixtures cannot pass that gate. Bot reports 2/20 region-one clears and zero full-run wins, not proof of unwinnability.
+- Local dev remains 1ad475d, five commits behind verified remote 50a0aa7; package lacks newer Withering work. No unauthorized pull. Thatch/cards and historical AAA/visual polish debt remain. Audio listening, controller, 4K/ultrawide, other hardware and enjoyment unverified. No new critic/shipping-judge pass claimed.
+- .aaa-complete NOT WRITTEN; current-game.md unchanged and Bramblecrown remains active, original start date retained. No automations, uploads, publication, commits, pushes or separate repository changes.
+- Exact evidence and next action: evidence/2026-10-03-local-completion/RESULT.md and package-manifest.json. Continue acceptance on this exact extracted package with supported local computer-use or human play; fix reproduced functional blockers only. Rebuild/revalidate after source edits, and grant marker only when required functional evidence exists.
+
+## 2026-10-03 - Explicitly authorized sync, polish and local release packaging
+
+- New user instruction authorizes pulling latest dev and polishing this run, superseding prior no-pull/no-new-polish limits. No publication/upload/commit/push or scheduler changes.
+- STOP absent; no Godot/Blender/game process at startup. Pacific Saturday 16:03; scheduled 23:00 run is later. No overlapping Bramblecrown writer observed. Separate checkout and UI left alone.
+- Fast-forwarded 1ad475d to live origin/dev 50a0aa7e97e9582958415e748066765704130e8a. Git stopped on dirty PROGRESS; backed up exact original/local appendix in evidence/2026-10-03-release/sync-preservation, lifted only known own appendix, pulled, reattached byte-for-byte. All prior test source/evidence/package preserved.
+- Godot 4.7.2.stable.official.ed1daf0bf and Blender 5.1.2, matching Windows template and existing embedded-PCK Windows Desktop x64 preset retained. Withering tiers/picker now present locally.
+- Supported tools re-inspected: this child still exposes no node_repl or cloud_threads desktop-control capability. Do not route through custom UI helpers or claim physical-input/focus/playthrough evidence. Complete independent engine/native checks and retain exact remaining acceptance gaps.
+- Main runner owns edits; independent release_critic owns no files and performs no Git inspection. Plan: fix two or three material gameplay/readability/flow issues, full gate and native inspection, independent final judgement, clean versioned extracted-package validation and ZIP/handoffs. No fake .aaa-complete.
+
+## 2026-10-03 local release continuation: functional unit passed
+
+Authorized dev sync remains at 50a0aa7e97e9582958415e748066765704130e8a.
+Fixed full-health/fully-upgraded camp escape; UI and healing now share the Withering-aware rule. Added cancellable saved-run replacement and abandon confirmations, truthful combat checkpoint quit, deliberate tier-zero difficulty with cumulative penalty help, malformed checkpoint rejection and a Continue error message. Increased enemy rail text and backed the combat preview. Added native isolated UI fixtures and 87 rule checks. Final gate: 4077 passed / 0 failed; import and title/combat/map smokes pass (`evidence/2026-10-03-release/final-gate.log`). One earlier run caught noisy JSON.parse_string failure output; parser recovery was corrected rather than masking the gate.
+
+Godot 4.7.2.stable.official.ed1daf0bf; Blender 5.1.2 ec6e62d40fa9, installed Windows release template 4.7.2.stable. Fresh candidate application version 0.1.1 (PE 0.1.1.0); package/export/native verification next. Initial independent critic: RELEASE HOLD / AAA FAIL. No `.aaa-complete` yet; genuine campaign, physical inputs, focus and normal disk-save acceptance remain unverified, and Thatch remains absent from the SPEC.
+
+
+## 2026-10-03 Pacific — local 0.1.1 candidate packaged; completion remains held
+
+Dev synchronized to 50a0aa7e97e9582958415e748066765704130e8a under explicit continuation authorization. Prior local handoffs and evidence preserved; source fixes remain uncommitted. No other project writer observed; STOP absent. Original Saturday age condition applies (started 2026-09-24, age nine), but no unsupported functional-completion claim was granted.
+
+Completed: camp escape and Withering-correct healing; cancellable replacement/abandonment with Cancel focus and modal keyboard isolation; truthful checkpoint quit; malformed checkpoint rejection/recovery; deliberate tier-zero difficulty/cumulative help; enlarged enemy rail and backed preview. Application 0.1.1 / PE 0.1.1.0. Godot 4.7.2.stable.official.ed1daf0bf, Blender 5.1.2 ec6e62d40fa9, matching installed 4.7.2.stable Windows template. Representative Cassia, Withered Crown and campfire .blend sources reopened; Godot import/export and packaged material/animation assertions pass. No art source was changed.
+
+Full gate: 4077 passed / 0 failed, import and title/combat/map smokes pass. Nine final native processes (release, run7, run6 at 1280x720 / 1920x1080 / 2560x1440) exit zero; all 165 images inspected. Extracted ZIP copy passes release route (11 more inspected images) and normal 240-frame startup/shutdown, both exit zero; normal run/profile/settings hashes unchanged. Actual Vulkan Forward+ on RTX 2070 SUPER; minimum hardware, sustained FPS, listening and physical controller remain unverified. Screenshot routes are staged/synthetic, not genuine campaign completion.
+
+Package: `C:\dev\tandem_tales\bot-crafted-games\bramblecrown\build\local-0.1.1-2026.10.03-50a0aa7\Bramblecrown-0.1.1-rc1-2026.10.03-50a0aa7-windows-x64.zip` (50934803 bytes), only Bramblecrown.exe and README.txt; archive CRC/notes/hash checks pass.
+ZIP SHA-256: `8421F8AACBAA58F3C32797ECEA0BEDDB482F36F7A295C61F0AACBE2ECC1CE507`.
+EXE: 122488128 bytes; SHA-256 `877190B88A06866A241DA7728ED8D70F11288488A954E30EA5A7F5AA5FCDA376`.
+Durable evidence, exact changed-source snapshot, patch, manifest, package notes, native logs/images and independent verdict: `bramblecrown/evidence/2026-10-03-release/`.
+
+Independent read-only shipping critic: RELEASE HOLD / AAA FAIL. Targeted changed UI review and package consistency pass; genuine five-region campaign, normal packaged save/quit/relaunch/Continue, OS focus/fullscreen and physical inputs remain unverified because this child has no supported desktop-control API. Thatch remains absent from the full SPEC; art/readability/tooltip occlusion remain substantive polish debt. `.aaa-complete` remains absent and current-game.md remains active Bramblecrown. Nothing uploaded/published; no commits/pushes or automation/budget changes.
+
+Exact next action: use a local execution session with supported desktop control (or human acceptance) to play a genuine five-region route and test the extracted candidate's normal save/quit/relaunch/Continue, focus/fullscreen and controls. Preserve player data. Record the route and fix actual blockers; resolve missing SPEC content/critic findings before claiming quality completion. Do not start another game or publish this candidate while the hold remains.
+
+## 2026-10-03 Pacific 19:45 - authorized map artwork improvement
+
+User requests image-generated map art. STOP absent; no Godot/Bramblecrown processes at startup. Main runner owns map_scene.gd, new assets/textures/map-art and focused screenshot fixtures/evidence; existing dirty source and prior immutable packages preserved. Use built-in image generation for original illustrated biome maps, retain dynamic routes/icons/HUD and all game rules. Validate installed Godot import/full gate, isolated Windows export and native map captures at 720p/1080p/1440p; obtain independent visual critique. No publication, uploads, Git mutations or completion claim.
+
+User Library reference libfile_5881018b028081919b78b3a8f9862ca5 could not materialize: supported unchanged transfer helper downloaded but fails on Windows at os.setxattr (AttributeError); bounded supported retry used. No metadata bypass. Existing native Crown map screenshot inspected directly: flat parchment, repeated primitive margin symbols, empty dark surround. Improve that actual map while retaining readable gameplay overlay. Existing shipping hold remains.
+
+### 2026-10-03 Pacific - map artwork integration gate passed
+
+Five original built-in image_gen PNG paintings (1672x941 each) saved locally for Ashfen Marsh, Sunken Cloister, Glasswood, Ironroot Deeps and Crown of Thorns. Exact prompts retained in evidence/2026-10-03-map-art/generation-prompts.json. Main runner inspected generated pixels. Replaced procedural parchment/repeated edge motifs with region-specific full-screen atlas art; retained route geometry/rules/icons/HUD, backed legend, added badge rim/shadow and viewport-clamped tooltips. First gate caught texture-draw argument order, corrected; failed log retained. Full installed Git Bash gate passes: 4077 checks / 0 failed plus import/title/combat/map smokes. Independent critic confirms art cohesion and distinct biome identity; native route contrast/crop review pending. Godot 4.7.2.stable.official.ed1daf0bf, matching installed 4.7.2.stable Windows x64 template; no new Blender edits. Source/package version remains 0.1.1; new package will have a distinct map-art path/hash. Previous shipping hold and active marker retained.
+
+## 2026-10-03 Pacific 20:12 - requested map art task completed locally
+
+Built-in image_gen created five original ink/gouache atlas paintings in assets/textures/map-art (1672x941 opaque PNG each), with original prompts in evidence/2026-10-03-map-art/generation-prompts.json. Integrated biome-specific full-screen art with quiet route center, backed legend, badge rim/shadow, bounded tooltips and parchment route under-strokes. Dynamic marker geometry, map generation/rules, HUD and input retained. Independent read-only critic found edge-route contrast loss; fixed and re-exported. Focused map verdict PASS; detailed sample scope/debt in CRITIC.md. Broader RELEASE HOLD/AAA FAIL retained.
+
+Final installed gate: 4077 passed / 0 failed; import/title/combat/map smokes pass. Godot 4.7.2.stable.official.ed1daf0bf, matching Windows x64 template and embedded-PCK Windows Desktop preset. No Blender source modified. Three final native mapart tours at 720p/1080p/1440p plus extracted ZIP720p tour: each22shots, zero failures, exit0, saves unchanged during isolated tours. Main runner inspected all88 final/extracted images and original generated paintings. Extracted normal240-frame startup/engine shutdown exits0 with normalfiles unchanged. PE x64, embedded pack, ZIP CRC, exact README and all runtime/PNG hashes verified. Eleven unrelated prior runtime snapshots match byte-for-byte. Earlier candidates/logs/packages preserved.
+
+Existing check.sh headless map smoke writes a new throwaway normal run/profile. Final audit detected three extra profile run counts from this task's gates. Undo was restricted to those test increments and verified against exact prior recorded profile SHA0799CFC02747B1E72C9518382761DA979830FAF80F8F339928C4B7044069F97D; test-mutated backup and restoration proof retained. Normal run/settings hashes match previous record. Future gates must protect existing player files before smoke tests. No unrelated runtime code changed to hide this harness side effect.
+
+Final package app0.1.1 / PE0.1.1.0, distinct map-art label: build/local-0.1.1-mapart-2026.10.03/Bramblecrown-0.1.1-mapart-2026.10.03-windows-x64.zip (63383486bytes). ZIP SHA51A235A3E86EE6375D94E7C14F1EBA243657CA86826F5857516098397E97C387. EXE windows/Bramblecrown.exe (134934480bytes), SHA8A8D315FEC22C0720E4C8BF68F25D6B70A864213F527F82444978FAF11ECB053. Full evidence/manifest, source delta and snapshots, prompts, screenshots and handoff: evidence/2026-10-03-map-art/RESULT.md.
+
+Library reference libfile_5881018b028081919b78b3a8f9862ca5 remained unavailable: supported helper downloads but fails Windows os.setxattr; bounded supported retry, no metadata bypass. Existing actual native Crown baseline inspected instead. Remaining focused debt: simple symbols versus rich art, decorative landmarks, repeated arches. No genuine campaign/normal disk-save desktop acceptance, physical controller, sustained performance or minimum hardware certified. Thatch remains unfinished. .aaa-complete absent, active Bramblecrown marker/start unchanged. No commits/pushes/publication/uploads/automation/budget changes. Next: human review exact map-art package; broader completion still requires actual campaign/desktop acceptance and full SPEC/critic resolution.
+
+## 2026-10-03 Pacific 20:18 - requested new map icons
+
+Parent/user confirms approved atlas backgrounds and asks for new location icons. Prior pass retained the original procedural icon drawings, adding only badge rims/shadows. Main runner now owns new icon PNGs, map_scene.gd, the optional per-node visited flag in run_state.gd, focused tests/tour fixtures and handoffs. Preserve approved background bytes, route/hit geometry, other runtime work and all player files. STOP absent, dev unchanged, no engine/game process at startup. Use built-in imagegen for six bold transparent emblems; inspect actual small native size and available/current/visited/locked states at720p/1080p/1440p. Independent read-only critic requested. Before full gate, back up normal player data and restore exact bytes afterward: existing headless map smoke is known to write a throwaway run/profile. Retain original saves and all historical packages. Rebuild a separate local versioned ZIP. No Git mutation, publication, uploads or automation changes. Broader release hold remains.
+
+### Map icons: integration gate passed
+Six raw transparent imagegen PNGs integrated with shared node/legend rendering. Actual entered nodes carry optional visited metadata; legacy saves remain accepted without fabricated history. Initial 4082/3 failure caught from_dict dropping this field; fixed, full repeat passes 4085/0 with import and three scene smokes. Player preservation wrapper restored run/profile/settings to exact pre-test hashes. Approved five background hashes unchanged. Native export/visual review is next; no completion claim.
+
+
+## 2026-10-03 Pacific 20:41 - requested map icons complete; game release still held
+
+Six new original transparent imagegen emblems now replace the old procedural map/legend icons. Current leaf, actual-visit check and locked padlock distinguish states; optional visit history survives save roundtrip and accepts old checkpoints without fabricated history. Approved backgrounds, map route/hit geometry and 35 other prior runtime inputs remain unchanged. Main owns map_scene.gd, optional RunState metadata, focused tests/tour fixtures and asset/handoffs. Independent read-only focused critic PASS; minor elite/ornament miniature detail debt retained.
+
+Full gate4085/0 after fixing visit-load roundtrip; installed Godot4.7.2.stable.official.ed1daf0bf and matching Windows x64 template/preset. No Blender source changed (installed5.1.2 ec6e62d40fa9). Three final native tours720p/1080p/1440p plus extracted720p: each23shots/zero failures/exit0. Main visually inspected all92 final/extracted images. QA fixtures use staged progression and synthetic callbacks. Corrected gallery redraw timing; earlier failed test/old capture evidence preserved. Extracted normal240-frame startup/shutdown exit0. All player files backed up/restored exactly around known smoke writes and final hashes identical. Prior release and map-art packages preserved. Archive CRC/README/x64/embedded-PCK/runtime hashes audited.
+
+Package build/local-0.1.1-mapicons-2026.10.03/Bramblecrown-0.1.1-mapicons-2026.10.03-windows-x64.zip (71416930bytes), SHA256057B6653D63D8238B4E0A9957C05DA143A72B80575E753A0C807AAF2EB869. EXEwindows/Bramblecrown.exe (142968200bytes), SHA8DAE6DDB8441344988AB81A1E37ADD74B7493457244A40129E84185BD263DE8B. App/PE remains0.1.1/0.1.1.0. Full exact prompts, manifest, source delta/snapshots, native screenshots/logs, preservation proof and handoff: evidence/2026-10-03-map-icons/RESULT.md.
+
+Broader RELEASE HOLD/AAA FAIL unchanged: no genuine campaign/normal disk-save/relaunch/focus/fullscreen or physical-controller acceptance; supported desktop-control API absent. Thatch/full SPEC remains unfinished. No .aaa-complete; active marker/start date unchanged. No Git mutation, publication/uploads or automation/budget edits. Next: user review exact icon package; full completion still requires actual campaign/desktop acceptance and unresolved SPEC/critic work.
+
+## 2026-10-03 Pacific 23:00 - hosted local forced-completion checkpoint
+
+- Local execution confirmed on DESKTOP-JOE at C:\dev\tandem_tales\bot-crafted-games. STOP absent. Pacific Saturday 2026-10-03, started 2026-09-24, age nine: forced-completion rule applies; no new polish.
+- Documented dev and live remote refs/heads/dev both 50a0aa7e97e9582958415e748066765704130e8a. Read-only ls-remote succeeded after sandbox network restriction. All prior dirty source/art/handoffs retained; no Git mutation. No Godot/Blender/Bramblecrown process observed; parent says previous writer finished.
+- Installed Godot 4.7.2.stable.official.ed1daf0bf; Blender 5.1.2 ec6e62d40fa9; Git Bash 4.4.23(1)-release (x86_64-pc-msys); matching 4.7.2.stable Windows release x86_64 template and editor present. Windows Desktop preset remains x86_64/embedded PCK.
+- Supported tool inventory has no node_repl or cloud_threads API. Computer-use SKILL.md and guidance read; required node_repl + @oai/sky entry point cannot be invoked here. A background computer-use helper process does not supply a callable supported API. Do not build a custom helper. Parent owns routing/activity verification.
+- Main runner owns only new evidence and appended handoffs this run; no development/critic agents needed while interactive acceptance is blocked. Plan: independently verify exact existing package/source/art hashes and rerun protected full gate, retain precise blocker. No completion marker unless genuine functional acceptance passes.
+
+### 2026-10-03 Pacific 23:00 hosted run result - completion held
+
+Fresh protected full gate: 4085 passed / 0 failed; import/title/combat/map smokes pass, exit 0. Exact normal run/profile/settings bytes restored after known smoke profile mutation. Read-only current candidate audit passes ZIP CRC/README, exported/extracted EXE, 39 runtime inputs, 35 other inputs, five approved backgrounds, six icons and four historical package artifacts. Existing mapicons ZIP SHA-256 256057B6653D63D8238B4E0A9957C05DA143A72B80575E753A0C807AAF2EB869 retained. No runtime/art edits, new export, native launch or screenshots this run.
+
+BLOCKER: required node_repl + @oai/sky desktop control is absent from this local child's tools. Genuine five-region campaign, normal save/quit/relaunch/Continue and OS focus/fullscreen/controls remain unverified. Prior 92 screenshots are staged historical evidence; no fresh critic or completion verdict. Full SPEC Thatch and broad AAA/presentation debt remain. No new polish on forced Saturday.
+
+Exact evidence and next action: evidence/2026-10-03-hosted-2300/RESULT.md and candidate-audit.json. A supported local desktop session or human must complete genuine acceptance on the exact extracted mapicons candidate, preserving player files; fix reproduced functional blockers only during this forced-completion attempt. .aaa-complete absent, active marker/start unchanged. No automation/budget/Git mutation/publication/upload. Historical logs and prior local work preserved.
+
+## 2026-10-03 Pacific - explicit user-directed closeout
+
+User says: "No. Proceed as best you can. Bramblecrown should be done now. It’s time to start on the next game."
+Bramblecrown is now complete-by-user-direction for runner scheduling, with .aaa-complete explicitly recording the override. This is NOT a quality/functional-acceptance pass: genuine campaign/save/focus/control gaps, Thatch/full-SPEC debt and broad AAA FAIL remain documented. Latest exact mapicons package and all artwork preserved. Prior blocked status and evidence are historical and unchanged. Starting the next game is explicitly authorized now.

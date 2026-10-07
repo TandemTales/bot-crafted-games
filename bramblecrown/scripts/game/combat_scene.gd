@@ -227,8 +227,9 @@ func _build_ui() -> void:
 	preview_label = Label.new()
 	preview_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UITheme.anchor(preview_label, Control.PRESET_CENTER_BOTTOM, Vector2(-480, -358), Vector2(960, 32))
-	preview_label.add_theme_font_size_override("font_size", 20)
+	UITheme.anchor(preview_label, Control.PRESET_CENTER_BOTTOM, Vector2(-500, -370), Vector2(1000, 40))
+	preview_label.add_theme_font_size_override("font_size", 24)
+	preview_label.add_theme_stylebox_override("normal", UITheme.box(Color(0.025, 0.04, 0.03, 0.96), UITheme.GOLD.darkened(0.5), 1, 8, 4))
 	preview_label.add_theme_color_override("font_color", UITheme.GOLD)
 	preview_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	preview_label.add_theme_constant_override("outline_size", 5)
@@ -286,8 +287,8 @@ func _build_pause() -> Control:
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(t)
 	for pair in [["Resume", _toggle_pause], ["Toggle Fullscreen", Game.toggle_fullscreen],
-			["Save & Quit to Title", func(): Game.save_run(); Game.goto_title()],
-			["Abandon Run", _abandon]]:
+			["Quit to Checkpoint", _quit_checkpoint],
+			["Abandon Run", _confirm_abandon]]:
 		var b := Button.new()
 		b.text = pair[0]
 		b.custom_minimum_size = Vector2(320, 56)
@@ -342,6 +343,8 @@ func _open_pile(which: String) -> DeckViewer:
 
 
 func _toggle_pause() -> void:
+	if has_node("RunConfirmation"):
+		return
 	pause_layer.visible = not pause_layer.visible
 	Sfx.play("click")
 
@@ -350,6 +353,14 @@ func _abandon() -> void:
 	Game.run.status = "defeat"
 	Game.record_end(false)
 	Game.goto_scene("res://scenes/run_end.tscn")
+
+
+func _confirm_abandon() -> void:
+	RunConfirmation.open(self, "Abandon this run?", "This ends your run in defeat and permanently deletes its checkpoint.", "Abandon Run", _abandon)
+
+
+func _quit_checkpoint() -> void:
+	RunConfirmation.open(self, "Return to title?", "Your run checkpoint is kept. Continue Run restarts this fight from its beginning; cards played and damage in this fight are not saved.", "Quit to Title", func(): Game.save_run(); Game.goto_title())
 
 
 # ------------------------------------------------------------------ refresh
@@ -533,6 +544,7 @@ func _refresh_board_overlays() -> void:
 		plates[uid].preview_active = not preview_label.text.is_empty() and preview_label.text != "Hover a valid target to preview." and preview_label.text != "Not enough Energy to cast."
 		plates[uid].highlight = effects.has(uid)
 		plates[uid].queue_redraw()
+	preview_label.visible = not preview_label.text.is_empty()
 
 
 func _selected_inst() -> Dictionary:
@@ -659,7 +671,7 @@ func _on_card_pressed(cv: CardView) -> void:
 # ------------------------------------------------------------------ input
 
 func _unhandled_input(event: InputEvent) -> void:
-	if ended:
+	if ended or has_node("RunConfirmation"):
 		return
 	if event.is_action_pressed("cancel"):
 		if selected_uid >= 0:

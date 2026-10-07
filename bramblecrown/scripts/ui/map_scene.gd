@@ -2,6 +2,21 @@ extends Control
 ## Region map: pick the next node along the branching path.
 
 const ICON_R := 34.0
+const MAP_ART := {
+	"marsh": preload("res://assets/textures/map-art/ashfen-marsh.png"),
+	"cloister": preload("res://assets/textures/map-art/sunken-cloister.png"),
+	"glasswood": preload("res://assets/textures/map-art/glasswood.png"),
+	"ironroot": preload("res://assets/textures/map-art/ironroot-deeps.png"),
+	"crown": preload("res://assets/textures/map-art/crown-of-thorns.png"),
+}
+const MAP_ICONS := {
+	"fight": preload("res://assets/textures/map-icons/fight.png"),
+	"elite": preload("res://assets/textures/map-icons/elite.png"),
+	"shrine": preload("res://assets/textures/map-icons/shrine.png"),
+	"camp": preload("res://assets/textures/map-icons/camp.png"),
+	"market": preload("res://assets/textures/map-icons/market.png"),
+	"boss": preload("res://assets/textures/map-icons/boss.png"),
+}
 const NAMES := {"fight": "Blighted Clearing", "elite": "Elite: a dangerous foe", "shrine": "Shrine: an unknown encounter",
 	"camp": "Campfire: rest or tend a card", "market": "Pedlar: buy cards and charms", "boss": "Boss"}
 
@@ -9,6 +24,9 @@ var hud: RunHud
 var _hover := -1
 var _pos := {}
 var _time := 0.0
+var _art: Texture2D
+# QA-only fixture uses the exact runtime badge renderer at the same dimensions.
+var _qa_icon_gallery := false
 
 
 func _ready() -> void:
@@ -17,6 +35,7 @@ func _ready() -> void:
 	if Game.run == null:
 		Game.new_run(1)
 		return
+	_art = MAP_ART.get(Game.run.region_def().get("theme", "marsh"), MAP_ART["marsh"])
 	hud = RunHud.new()
 	add_child(hud)
 	Sfx.play_music("map")
@@ -50,77 +69,20 @@ func _draw() -> void:
 	var r := Game.run
 	if r == null or _pos.is_empty():
 		return
-	var theme_id: String = r.region_def().get("theme", "marsh")
-	var paper := Color(0.72, 0.64, 0.49)
-	var backdrop := Color(0.05, 0.07, 0.06)
-	if theme_id == "glasswood":
-		paper = Color(0.62, 0.72, 0.72)
-		backdrop = Color(0.025, 0.065, 0.09)
-	elif theme_id == "ironroot":
-		paper = Color(0.66, 0.58, 0.48)
-		backdrop = Color(0.07, 0.05, 0.04)
-	elif theme_id == "crown":
-		paper = Color(0.72, 0.62, 0.55)
-		backdrop = Color(0.08, 0.04, 0.05)
-	elif theme_id == "cloister":
-		paper = Color(0.66, 0.67, 0.63)
-		backdrop = Color(0.04, 0.045, 0.075)
-	# Region-tinted parchment. Decorative landmarks stay in its margins.
-	for i in 24:
-		var t := i / 23.0
-		draw_rect(Rect2(0, size.y * t, size.x, size.y / 23.0 + 1), backdrop.lerp(Color(0.1, 0.09, 0.07), t))
-	var scroll_w := minf(size.x * 0.7, 1240.0)
-	var sr := Rect2(size.x / 2 - scroll_w / 2, 110, scroll_w, size.y - 170)
-	draw_style_box(UITheme.box(paper, Color(0.35, 0.25, 0.14), 4, 18, 0), sr)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = r.seed_value
-	# Paper fibres and a darkened vignette edge.
-	for i in 140:
-		var p := sr.position + Vector2(rng.randf() * sr.size.x, rng.randf() * sr.size.y)
-		var d := Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(8, 30)
-		draw_line(p, p + d, Color(0.45, 0.36, 0.22, 0.12), 1.0, true)
-	for k in 10:
-		draw_style_box(UITheme.box(Color(0, 0, 0, 0), Color(0.35, 0.25, 0.14, 0.05), 4 + k * 3, 18, 0), sr.grow(-k * 3))
-	for side in [-1, 1]:
-		for i in 5:
-			var p := Vector2(size.x / 2 + side * (scroll_w / 2 - 52), 220 + i * (sr.size.y - 220) / 5.0)
-			var ink := Color(0.19, 0.29, 0.28, 0.42)
-			if theme_id == "glasswood":
-				for k in 3:
-					var root := p + Vector2(k * 15 - 15, 10)
-					var tip := root + Vector2(k * 5 - 7, -45 - k * 9)
-					draw_colored_polygon(PackedVector2Array([root + Vector2(-9, 0), tip, root + Vector2(9, -5)]), ink)
-					draw_line(root, tip, Color(0.8, 0.9, 0.88, 0.6), 2, true)
-			elif theme_id == "ironroot":
-				# Pit headframe: A-frame legs, a back stay and the winding wheel on top.
-				draw_line(p + Vector2(-20, 45), p + Vector2(0, -22), ink, 5)
-				draw_line(p + Vector2(20, 45), p + Vector2(0, -22), ink, 5)
-				draw_line(p + Vector2(-12, 18), p + Vector2(12, 18), ink, 3)
-				draw_arc(p + Vector2(0, -26), 11, 0, TAU, 18, ink, 4, true)
-				draw_line(p + Vector2(0, -26), p + Vector2(0, 45), Color(ink, ink.a * 0.6), 1.5)
-				draw_line(p + Vector2(-30, 45), p + Vector2(30, 45), ink, 3)
-			elif theme_id == "cloister":
-				draw_arc(p, 25, PI, TAU, 20, ink, 5, true)
-			elif theme_id == "crown":
-				# A thorned crown: a band with five spikes and a cane curling through it.
-				var crim := Color(0.42, 0.1, 0.12, 0.5)
-				draw_line(p + Vector2(-24, 14), p + Vector2(24, 14), ink, 5)
-				for k in 5:
-					var bx := -20.0 + k * 10.0
-					draw_colored_polygon(PackedVector2Array([p + Vector2(bx - 5, 12), p + Vector2(bx, -16 - (6 if k == 2 else 0)), p + Vector2(bx + 5, 12)]), ink)
-				var pts := PackedVector2Array()
-				for k in 13:
-					var t := k / 12.0
-					pts.append(p + Vector2(-30 + 60 * t, 24 + sin(t * TAU * 1.5) * 9))
-				draw_polyline(pts, crim, 3, true)
-				for k in 4:
-					var q: Vector2 = pts[2 + k * 3]
-					draw_line(q, q + Vector2(4, -7), crim, 2, true)
-				draw_line(p + Vector2(-25, 0), p + Vector2(-25, 45), ink, 5)
-				draw_line(p + Vector2(25, 0), p + Vector2(25, 45), ink, 5)
-			else:
-				for k in 5:
-					draw_line(p + Vector2(k * 4, 0), p + Vector2(k * 4 + rng.randf_range(-3, 3), -rng.randf_range(12, 26)), ink, 2)
+	# Full-bleed illustrated atlas. Crop only the edges on non-16:9 windows;
+	# the quiet parchment center remains behind every interactive route.
+	var texture_size := _art.get_size()
+	var scale_factor := maxf(size.x / texture_size.x, size.y / texture_size.y)
+	var visible_size := size / scale_factor
+	draw_texture_rect_region(_art, Rect2(Vector2.ZERO, size),
+		Rect2((texture_size - visible_size) * 0.5, visible_size))
+	# Dark gutters keep the HUD and legend legible over the edge illustration.
+	for i in 12:
+		var opacity := 0.44 * pow(1.0 - i / 12.0, 2.0)
+		draw_rect(Rect2(0, i * 9, size.x, 10), Color(0.06, 0.07, 0.055, opacity))
+	var legend_rect := Rect2(size.x / 2 - 566, size.y - 68, 1132, 60)
+	draw_style_box(UITheme.box(Color(0.055, 0.065, 0.05, 0.95),
+		Color(0.62, 0.48, 0.26, 0.8), 1, 10, 0), legend_rect)
 	var avail := r.available_nodes()
 	# Links.
 	for n in r.map:
@@ -132,23 +94,16 @@ func _draw() -> void:
 			var steps := int(a.distance_to(b) / 14.0)
 			for s in steps:
 				if s % 2 == 0:
-					draw_line(a.lerp(b, s / float(steps)), a.lerp(b, (s + 1) / float(steps)), col, 4 if on_path else 3, true)
+					var dash_a := a.lerp(b, s / float(steps))
+					var dash_b := a.lerp(b, (s + 1) / float(steps))
+					# A parchment under-stroke separates routes from detailed edge landmarks.
+					draw_line(dash_a, dash_b, Color(0.96, 0.88, 0.71, 0.82), 7 if on_path else 6, true)
+					draw_line(dash_a, dash_b, col, 4 if on_path else 3, true)
+	var reachable := _reachable_nodes(avail)
 	# Nodes.
 	for n in r.map:
 		var p: Vector2 = _pos[n["id"]]
-		var is_avail := avail.has(n["id"])
-		var visited: bool = n["row"] < _current_row() or n["id"] == r.node_id
-		var rad := ICON_R * (1.25 if n["type"] == "boss" else 1.0)
-		if is_avail:
-			var pulse := 0.5 + 0.5 * sin(_time * 4.0)
-			draw_circle(p, rad + 10 + pulse * 5, Color(0.55, 0.95, 0.35, 0.35))
-		if n["id"] == _hover and is_avail:
-			draw_circle(p, rad + 8, Color(1, 0.9, 0.5, 0.8))
-		draw_circle(p, rad, Color(0.18, 0.13, 0.08) if not visited else Color(0.35, 0.3, 0.22))
-		draw_arc(p, rad, 0, TAU, 40, UITheme.GOLD if is_avail else Color(0.3, 0.22, 0.12), 3, true)
-		_icon(n["type"], p, rad, 0.45 if (visited and n["id"] != r.node_id) else 1.0)
-		if n["id"] == r.node_id:
-			draw_circle(p + Vector2(rad * 0.8, -rad * 0.8), 10, UITheme.LEAF)
+		_draw_badge(n["type"], p, _node_state(n, avail, reachable), n["id"] == _hover)
 	# Use the very same drawn symbols as the nodes, with short readable labels.
 	var legend_types := ["fight", "elite", "shrine", "camp", "market", "boss"]
 	var legend_labels := ["Fight", "Elite", "Shrine", "Camp", "Pedlar", "Boss"]
@@ -156,14 +111,21 @@ func _draw() -> void:
 		var p := Vector2(size.x / 2 - 510 + i * 185, size.y - 32)
 		_icon(legend_types[i], p, ICON_R, 1.0)
 		draw_string(UITheme.font("heading"), p + Vector2(32, 8), legend_labels[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 24, UITheme.INK)
-	if _hover >= 0:
+	if _qa_icon_gallery:
+		_draw_icon_gallery()
+	if _hover >= 0 and not _qa_icon_gallery:
 		var n := r.node(_hover)
 		var txt: String = NAMES.get(n["type"], n["type"])
 		if n["type"] == "boss":
 			txt = "Boss: %s" % _boss_name()
+		var state := _node_state(n, avail, reachable)
+		var prefix := {"current": "Current", "completed": "Visited", "locked": "Locked", "future": "Later", "available": "Choose"}
+		txt = "%s: %s" % [prefix[state], txt]
 		var f := UITheme.font("heading")
 		var p: Vector2 = _pos[_hover] + Vector2(ICON_R + 16, -10)
 		var sz := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22)
+		p.x = clampf(p.x, 16, size.x - sz.x - 24)
+		p.y = clampf(p.y, 122, size.y - 86)
 		draw_style_box(UITheme.box(Color(0.06, 0.07, 0.06, 0.95), UITheme.GOLD, 1, 6, 0), Rect2(p - Vector2(8, 24), sz + Vector2(16, 14)))
 		draw_string(f, p, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, UITheme.INK)
 
@@ -173,36 +135,80 @@ func _current_row() -> int:
 	return -1 if r.node_id < 0 else int(r.node(r.node_id)["row"])
 
 
+func _reachable_nodes(avail: Array) -> Array:
+	var found: Array = []
+	var pending := avail.duplicate()
+	while not pending.is_empty():
+		var id: int = pending.pop_back()
+		if found.has(id):
+			continue
+		found.append(id)
+		pending.append_array(Game.run.node(id)["links"])
+	return found
+
+
+func _node_state(n: Dictionary, avail: Array, reachable: Array) -> String:
+	if n["id"] == Game.run.node_id:
+		return "current"
+	if n["row"] < _current_row():
+		return "completed" if n.get("visited", false) else "locked"
+	if avail.has(n["id"]):
+		return "available"
+	return "future" if reachable.has(n["id"]) else "locked"
+
+
+func _draw_badge(t: String, p: Vector2, state: String, hovered := false) -> void:
+	var rad := ICON_R * (1.25 if t == "boss" else 1.0)
+	var active := state in ["available", "current"]
+	if state == "available":
+		var pulse := 0.5 + 0.5 * sin(_time * 4.0)
+		draw_circle(p, rad + 10 + pulse * 5, Color(0.55, 0.95, 0.35, 0.35))
+	if hovered and state == "available":
+		draw_circle(p, rad + 8, Color(1, 0.9, 0.5, 0.8))
+	draw_circle(p + Vector2(0, 3), rad + 4, Color(0.12, 0.09, 0.055, 0.24))
+	draw_circle(p, rad + 2, Color(0.8, 0.68, 0.45))
+	draw_circle(p, rad, Color(0.18, 0.13, 0.08))
+	draw_arc(p, rad, 0, TAU, 40, UITheme.GOLD if active else Color(0.4, 0.31, 0.2), 3, true)
+	_icon(t, p, rad, {"available": 1.0, "current": 1.0, "future": 0.78, "completed": 0.65, "locked": 0.30}[state])
+	if state in ["current", "completed", "locked"]:
+		var mark := p + Vector2(rad * 0.78, -rad * 0.78)
+		draw_circle(mark, 13, Color(0.08, 0.10, 0.065))
+		draw_arc(mark, 13, 0, TAU, 24, UITheme.GOLD if state == "current" else Color(0.68, 0.62, 0.46), 2, true)
+		if state == "completed":
+			draw_polyline(PackedVector2Array([mark + Vector2(-7, 0), mark + Vector2(-2, 5), mark + Vector2(7, -6)]), UITheme.LEAF, 4, true)
+		elif state == "current":
+			# Leaf pointer: shape as well as color distinguishes the current location.
+			draw_colored_polygon(PackedVector2Array([mark + Vector2(0, -8), mark + Vector2(7, -1), mark + Vector2(0, 9), mark + Vector2(-7, -1)]), UITheme.LEAF)
+		else:
+			draw_arc(mark + Vector2(0, -2), 5, PI, TAU, 12, Color(0.88, 0.83, 0.70), 2, true)
+			draw_style_box(UITheme.box(Color(0.88, 0.83, 0.70), Color.TRANSPARENT, 0, 2, 0), Rect2(mark + Vector2(-6, -2), Vector2(12, 9)))
+
+
 func _icon(t: String, p: Vector2, rad: float, alpha: float) -> void:
-	var ink := Color(0.93, 0.86, 0.66, alpha)
-	match t:
-		"fight":
-			draw_line(p + Vector2(-14, 14), p + Vector2(14, -14), ink, 5, true)
-			draw_line(p + Vector2(-14, -14), p + Vector2(14, 14), ink, 5, true)
-		"elite":
-			var red := Color(0.9, 0.32, 0.25, alpha)
-			draw_circle(p + Vector2(0, 2), 13, red)
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-11, -6), p + Vector2(-22, -20), p + Vector2(-6, -12)]), red)
-			draw_colored_polygon(PackedVector2Array([p + Vector2(11, -6), p + Vector2(22, -20), p + Vector2(6, -12)]), red)
-			draw_circle(p + Vector2(-5, 0), 3.5, Color(0.1, 0.05, 0.04, alpha))
-			draw_circle(p + Vector2(5, 0), 3.5, Color(0.1, 0.05, 0.04, alpha))
-			draw_rect(Rect2(p + Vector2(-6, 9), Vector2(12, 5)), Color(0.1, 0.05, 0.04, alpha))
-		"shrine":
-			draw_arc(p + Vector2(0, 4), 14, PI, TAU, 16, ink, 4, true)
-			draw_line(p + Vector2(-14, 4), p + Vector2(-14, 16), ink, 4)
-			draw_line(p + Vector2(14, 4), p + Vector2(14, 16), ink, 4)
-			draw_circle(p + Vector2(0, 2), 4, Color(1, 0.85, 0.4, alpha))
-		"camp":
-			draw_colored_polygon(PackedVector2Array([p + Vector2(0, -18), p + Vector2(11, 4), p + Vector2(0, 14), p + Vector2(-11, 4)]), Color(1, 0.55, 0.15, alpha))
-			draw_line(p + Vector2(-14, 16), p + Vector2(14, 10), Color(0.5, 0.33, 0.18, alpha), 4)
-			draw_line(p + Vector2(-14, 10), p + Vector2(14, 16), Color(0.5, 0.33, 0.18, alpha), 4)
-		"market":
-			draw_circle(p + Vector2(0, 4), 13, Color(0.85, 0.65, 0.25, alpha))
-			draw_line(p + Vector2(-6, -12), p + Vector2(6, -12), ink, 4)
-			draw_string(UITheme.font("title"), p + Vector2(-6, 12), "g", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.3, 0.2, 0.1, alpha))
-		"boss":
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-24, 14), p + Vector2(-24, -10), p + Vector2(-12, 2), p + Vector2(0, -22), p + Vector2(12, 2), p + Vector2(24, -10), p + Vector2(24, 14)]), Color(0.7, 0.35, 0.95, alpha))
-			draw_circle(p + Vector2(0, 4), 5, Color(1, 0.8, 0.3, alpha))
+	var tex: Texture2D = MAP_ICONS[t]
+	var extent := Vector2.ONE * rad * 1.74
+	var scale_factor := minf(extent.x / tex.get_width(), extent.y / tex.get_height())
+	var dimensions := tex.get_size() * scale_factor
+	draw_texture_rect(tex, Rect2(p - dimensions * 0.5, dimensions), false, Color(1, 1, 1, alpha))
+
+
+func _draw_icon_gallery() -> void:
+	# Production-size badges; fixture is explicitly labelled, never player progression.
+	var panel := Rect2(size.x / 2 - 790, 170, 1580, 700)
+	draw_style_box(UITheme.box(Color(0.11, 0.12, 0.09, 0.98), UITheme.GOLD, 2, 12, 0), panel)
+	var font := UITheme.font("heading")
+	draw_string(font, Vector2(panel.position.x + 28, 212), "QA fixture: original icons at runtime size", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, UITheme.INK)
+	var types := ["fight", "elite", "shrine", "camp", "market", "boss"]
+	var labels := ["Fight", "Elite", "Shrine", "Camp", "Pedlar", "Boss"]
+	var states := ["available", "current", "completed", "locked", "future"]
+	for col in 6:
+		var x := panel.position.x + 340 + col * 208
+		draw_string(font, Vector2(x - 36, 260), labels[col], HORIZONTAL_ALIGNMENT_LEFT, -1, 24, UITheme.INK)
+		for row in states.size():
+			var y := 330.0 + row * 110
+			if col == 0:
+				draw_string(font, Vector2(panel.position.x + 30, y + 8), states[row].capitalize(), HORIZONTAL_ALIGNMENT_LEFT, -1, 24, UITheme.INK)
+			_draw_badge(types[col], Vector2(x, y), states[row])
 
 
 func _gui_input(event: InputEvent) -> void:

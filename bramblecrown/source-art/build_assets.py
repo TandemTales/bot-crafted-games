@@ -395,6 +395,13 @@ def build_blight():
 
 
 def build_grovewalker():
+    """Use the current Wren construction, including packed PBR surfaces and breathing."""
+    import runpy
+    runpy.run_path(os.path.join(HERE, "build_wren.py"), run_name="__main__")
+
+
+def _legacy_build_grovewalker():
+    """Historical primitive construction retained for reference only."""
     reset()
     P = palette()
     parts = []
@@ -451,6 +458,12 @@ def build_grovewalker():
 
 
 def build_cassia():
+    """Use Cassia's current textured construction and compatible brazier animation."""
+    import runpy
+    runpy.run_path(os.path.join(HERE, "build_cassia.py"), run_name="__main__")
+
+
+def _legacy_build_cassia():
     """Cassia: uncovered face, swept flame crest, split ash coat and a wing-shaped ember mantle.
     Keep the crest below the animated brazier, and all geometry inside a single hex footprint."""
     reset()

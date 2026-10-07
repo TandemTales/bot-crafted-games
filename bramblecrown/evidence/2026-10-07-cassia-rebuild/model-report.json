@@ -1,0 +1,16 @@
+{
+  "construction_meshes": 144,
+  "runtime_vertices": 50335,
+  "runtime_triangles": 98768,
+  "body_dimensions": [
+    0.872783362865448,
+    0.6103982329368591,
+    1.6679325103759766
+  ],
+  "flame_action": "flame_flicker",
+  "flame_frames": [
+    1,
+    25
+  ],
+  "packed_images": 21
+}

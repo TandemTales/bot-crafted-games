@@ -93,7 +93,7 @@ func _camp() -> void:
 		"ironroot": camp_text = "An old miners' brazier still draws. Above you, the props creak but hold."
 		"crown": camp_text = "Inside a ring of thorns that has forgotten how to close, the seed in your pack is warm."
 	_heading("Campfire", camp_text)
-	var heal := mini(r.max_hp - r.hp, int(ceil(r.max_hp * 0.3)))
+	var heal := r.camp_heal_amount()
 	_button("Rest: heal %d HP" % heal if heal > 0 else "Rest: already at full health", func():
 		var got := r.camp_rest()
 		Sfx.play("ward")
@@ -105,6 +105,11 @@ func _camp() -> void:
 			r.status = "map"
 			Sfx.play("grow")
 			_done("Your %s grows stronger." % CardDB.get_def(r.deck[i]["id"], true)["name"])))
+	_button("Leave Camp", func():
+		r.leave_room()
+		Game.save_run()
+		Sfx.play("click")
+		Game.goto_map())
 
 
 # ------------------------------------------------------------------ shrine
@@ -188,4 +193,3 @@ func _market() -> void:
 		Game.save_run()
 		Sfx.play("click")
 		Game.goto_map())
-

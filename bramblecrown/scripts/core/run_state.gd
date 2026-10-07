@@ -150,6 +150,8 @@ func enter_node(id: int) -> String:
 	if not available_nodes().has(id):
 		return ""
 	node_id = id
+	# Optional node metadata: old checkpoints remain valid without invented history.
+	node(id)["visited"] = true
 	floor_num += 1
 	var t: String = node(id)["type"]
 	match t:
@@ -304,8 +306,12 @@ func leave_reward() -> void:
 
 # ------------------------------------------------------------------ camp / market / shrine
 
+func camp_heal_amount() -> int:
+	return mini(max_hp - hp, int(ceil(max_hp * (0.2 if withering >= 7 else 0.3))))
+
+
 func camp_rest() -> int:
-	var heal := int(ceil(max_hp * (0.2 if withering >= 7 else 0.3)))
+	var heal := camp_heal_amount()
 	var before := hp
 	hp = mini(max_hp, hp + heal)
 	status = "map"
@@ -480,6 +486,8 @@ func from_dict(d: Dictionary) -> void:
 			links.append(int(l))
 		map.append({"id": int(n["id"]), "row": int(n["row"]), "col": int(n["col"]),
 			"width": int(n["width"]), "type": n["type"], "links": links})
+		if n.has("visited"):
+			map[-1]["visited"] = n["visited"]
 	node_id = int(d["node_id"])
 	floor_num = int(d["floor"])
 	used_encounters = d["used_encounters"].duplicate()
@@ -502,9 +510,106 @@ func to_json() -> String:
 
 
 static func from_json(text: String) -> RunState:
-	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return null
+	var parsed = json.data
+	if typeof(parsed) != TYPE_DICTIONARY or not _valid_save(parsed):
 		return null
 	var r := RunState.new()
 	r.from_dict(parsed)
 	return r
+
+
+static func _number(value: Variant) -> bool:
+	return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) and is_finite(float(value)) and float(value) == floor(float(value))
+
+
+## Reject damaged schemas before any required-key indexing or scene routing.
+static func _valid_save(d: Dictionary) -> bool:
+	if d.get("version", 1) != 1:
+		return false
+	if not _number(d.get("withering", 0)) or d.get("withering", 0) < 0 or d.get("withering", 0) > Withering.MAX_TIER:
+		return false
+	for key in ["seed", "hp", "max_hp", "gold", "region", "node_id", "floor"]:
+		if not _number(d.get(key)):
+			return false
+	if d["max_hp"] < 1 or d["hp"] < 0 or d["hp"] > d["max_hp"] or d["gold"] < 0 or d["region"] < 0 or d["region"] >= EncounterDB.REGIONS.size():
+		return false
+	if not WalkerDB.ORDER.has(d.get("walker")):
+		return false
+	if typeof(d.get("rng")) != TYPE_DICTIONARY:
+		return false
+	for key in ["seed", "state"]:
+		if typeof(d["rng"].get(key)) != TYPE_STRING or not d["rng"][key].is_valid_int():
+			return false
+	for key in ["deck", "charms", "map", "used_encounters", "used_events"]:
+		if typeof(d.get(key)) != TYPE_ARRAY:
+			return false
+	if d["deck"].is_empty() or d["map"].is_empty():
+		return false
+	for card in d["deck"]:
+		if typeof(card) != TYPE_DICTIONARY or not CardDB.CARDS.has(card.get("id")) or typeof(card.get("up")) != TYPE_BOOL:
+			return false
+	for charm in d["charms"]:
+		if not CharmDB.CHARMS.has(charm):
+			return false
+	var ids := []
+	for n in d["map"]:
+		if typeof(n) != TYPE_DICTIONARY or typeof(n.get("links")) != TYPE_ARRAY:
+			return false
+		if n.has("visited") and typeof(n["visited"]) != TYPE_BOOL:
+			return false
+		for key in ["id", "row", "col", "width"]:
+			if not _number(n.get(key)):
+				return false
+		if ids.has(n["id"]) or not ["fight", "elite", "boss", "camp", "shrine", "market"].has(n.get("type")):
+			return false
+		ids.append(n["id"])
+	for n in d["map"]:
+		for link in n["links"]:
+			if not _number(link) or not ids.has(link):
+				return false
+	if d["node_id"] != -1 and not ids.has(d["node_id"]):
+		return false
+	var status: Variant = d.get("status", "map")
+	if not ["map", "combat", "reward", "camp", "shrine", "market", "victory", "defeat"].has(status):
+		return false
+	var encounter: Variant = d.get("current_encounter", "")
+	if typeof(encounter) != TYPE_STRING or (encounter != "" and not EncounterDB.ENCOUNTERS.has(encounter)):
+		return false
+	if status == "combat" and encounter == "" and d["node_id"] == -1:
+		return false
+	var event: Variant = d.get("current_event", "")
+	if typeof(event) != TYPE_STRING or (event != "" and not EventDB.EVENTS.has(event)) or (status == "shrine" and event == ""):
+		return false
+	for key in ["reward", "market", "stats"]:
+		if typeof(d.get(key, {})) != TYPE_DICTIONARY:
+			return false
+	for value in d.get("stats", {}).values():
+		if not _number(value):
+			return false
+	var reward_data: Dictionary = d.get("reward", {})
+	if not _number(reward_data.get("gold", 0)) or typeof(reward_data.get("cards", [])) != TYPE_ARRAY:
+		return false
+	for card in reward_data.get("cards", []):
+		if not CardDB.CARDS.has(card):
+			return false
+	var charm: Variant = reward_data.get("charm", "")
+	if typeof(charm) != TYPE_STRING or (charm != "" and not CharmDB.CHARMS.has(charm)):
+		return false
+	var market_data: Dictionary = d.get("market", {})
+	if typeof(market_data.get("items", [])) != TYPE_ARRAY or not _number(market_data.get("remove_price", 75)) or typeof(market_data.get("removed", false)) != TYPE_BOOL:
+		return false
+	for item in market_data.get("items", []):
+		if typeof(item) != TYPE_DICTIONARY or not _number(item.get("price")) or typeof(item.get("sold")) != TYPE_BOOL:
+			return false
+		if item.get("kind") == "card":
+			if not CardDB.CARDS.has(item.get("id")):
+				return false
+		elif item.get("kind") == "charm":
+			if not CharmDB.CHARMS.has(item.get("id")):
+				return false
+		else:
+			return false
+	return true

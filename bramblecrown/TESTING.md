@@ -192,3 +192,46 @@ the hovered hex instead of the OS pointer, including keyboard/controller cursor 
 `73b_cassia_aimed_preview` is the added image (20 total). Run at 720p/1080p/1440p and inspect
 all images, especially the longer Aim Kindle card rules and targeting instructions. This is
 staged input regression evidence, not human play or a five-region completion route.
+
+## 2026-10-03 local 0.1.1 release regression
+
+Run the installed Git Bash `tools/check.sh` gate. The new rule cases reject malformed,
+missing-key and invalid-reference checkpoints without script errors; round-trip all eleven
+Withering tiers; and verify camp healing and full-health/fully-upgraded escape.
+
+Launch the **exported executable**, including an extracted ZIP copy:
+
+```powershell
+./Bramblecrown.exe --screenshot-tour <absolute-evidence-dir> --shot-size 1280x720 --tour-only release --log-file <absolute-log>
+```
+
+Repeat at 1920x1080 and 2560x1440. `release` checks replacement/abandon cancellation,
+Cancel focus, Escape and Space isolation, explicit checkpoint-quit semantics, tier-zero
+default/cumulative difficulty help, Leave Camp, exact advertised healing, rail targeting,
+six-enemy panels and resize. Run `run7` and `run6` at those resolutions for Cassia and
+final-region coverage. Inspect every resulting image and require zero failures and unchanged
+normal player files. Record the actual native process exit and executable SHA-256.
+
+These fixtures suppress normal save/profile/settings writes and stage encounters. They do
+not certify a genuine campaign, normal disk-save/relaunch/Continue, OS focus/fullscreen,
+physical controller, audio listening, sustained performance or enjoyment. A release judge
+must retain those acceptance gaps and the missing Thatch SPEC content in its verdict.
+
+## 2026-10-03 illustrated map regression
+
+Original AI-generated ink/gouache atlas textures are in assets/textures/map-art (five 1672x941 opaque PNGs). Routes, icons, hit target geometry and run rules remain drawn/handled at runtime. Full-screen art crops evenly to cover the window; the quiet center protects route contrast. A backed legend and viewport-clamped tooltip preserve readability.
+
+Run tools/check.sh via installed Git Bash, then export Windows Desktop to a new isolated local folder. Launch the exported executable with --screenshot-tour <absolute-dir> --shot-size WxH --tour-only mapart --log-file <absolute-log>. Repeat 1280x720, 1920x1080 and 2560x1440. Each process produces 22 captures: initial, available hover, staged progress and boss hover for five regions, plus wide/tall resize. Assertions require the correct full-resolution texture, every retained marker hit target, a harmless margin click, available-node click creating a real combat state, synthetic D-pad selection, resized hit targets and unchanged normal player save/profile/settings. Inspect every image; require exit 0 and no script/import/runtime errors. These are staged callback/input regressions, not physical input or genuine campaign acceptance. Retain previous shipping hold.
+
+Generation prompts/mode, exact PNG hashes, package identity, native logs and visual critique belong in evidence/2026-10-03-map-art. The supplied Library reference could not be inspected: its supported materializer fails on Windows os.setxattr after successful download. No metadata bypass or speculative download URL was used. Existing native Crown baseline was inspected.
+
+Existing tools/check.sh map smoke invokes a normal Game.new_run and can write run/profile data. Before future gate runs, protect existing player files and verify exact restoration afterward. This map task restored three test-induced run-counter increments against the prior recorded profile SHA-256; normal run/settings hashes match that prior record. See evidence/2026-10-03-map-art/profile-restoration.json. Native mapart tours separately suppress all normal player writes and assert file hashes remain unchanged during each tour.
+
+
+## 2026-10-03 - illustrated map icon regression checks
+
+Latest candidate: build/local-0.1.1-mapicons-2026.10.03/; exact identity in evidence/2026-10-03-map-icons/package-manifest.json. Six generated PNGs are raw RGBA, alpha0..255. Approved map-art hashes must remain unchanged. Test optional node visited metadata roundtrip, missing legacy metadata and malformed flags in test_map_visit_history. Unchosen siblings cannot show completed checks; current/available/future/locked icons use distinct overlays/dimming.
+
+Protect normal player data before check.sh: run evidence/2026-10-03-map-icons/run-gate.ps1 through installed PowerShell, with no other engine/game writer. It backs up run/profile/settings, runs installed Git Bash tools/check.sh and restores exact bytes after known profile smoke mutations. Full pass4085/0. Do not invoke unprotected headless map smoke on the user's profile.
+
+Native exported/extracted EXE: `--screenshot-tour <absolute-dir> --shot-size 1280x720 --tour-only mapicons`. Repeat at 1920x1080 and 2560x1440. Each tour captures 23 images including five region start/hover/progress/boss maps, wide/tall resizes and an explicitly labelled 30-badge production-size state gallery. Tour suppresses normal writes; its footer must report zero failures and unchanged saves. Synthetic callbacks and staged history are not genuine campaign, disk save/relaunch or physical-controller proof. Main inspected 92 final/extracted images; independent scoped PASS samples in CRITIC.md. Final-audit.py verifies exact ZIP/EXE/runtime/background/player hashes, archive CRC and notes. Normal extracted startup is a 240-frame title load/shutdown, not a focus test. Prior broad release hold remains.

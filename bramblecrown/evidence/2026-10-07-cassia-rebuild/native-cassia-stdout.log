@@ -1,0 +1,111 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.341 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 2070 SUPER
+
+CASSIA_QA_START native renderer=forward_plus
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@527","frame":215,"overlay_valid":false,"overlay_visible":false}
+[selection] {"event":"opened","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":215,"overlay_valid":true,"overlay_visible":true}
+CASSIA_CHECK PASS native capture 01-production-selection-1080
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@572
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":332,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":332,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":333,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":333,"overlay_valid":true,"overlay_visible":false}
+CASSIA_CHECK PASS Back closes overlay cycle 0
+CASSIA_CHECK PASS native capture selection-back-0
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":354,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":354,"overlay_valid":true,"overlay_visible":true}
+CASSIA_CHECK PASS New Run reopens after Back cycle 0
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@572
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":373,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":373,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":374,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":374,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":374,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":374,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":374,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":374,"overlay_valid":true,"overlay_visible":false}
+CASSIA_CHECK PASS Back closes overlay cycle 1
+CASSIA_CHECK PASS native capture selection-back-1
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":392,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":392,"overlay_valid":true,"overlay_visible":true}
+CASSIA_CHECK PASS New Run reopens after Back cycle 1
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@572
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":411,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":411,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@572","frame":411,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":411,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":411,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":411,"overlay_valid":true,"overlay_visible":false}
+CASSIA_CHECK PASS Back closes overlay cycle 2
+CASSIA_CHECK PASS native capture selection-back-2
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":430,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":430,"overlay_valid":true,"overlay_visible":true}
+CASSIA_CHECK PASS New Run reopens after Back cycle 2
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT Begin as Cassia rect=[P: (1320.0, 890.0), S: (504.0, 64.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@557/@HBoxContainer@558/@VBoxContainer@565/@Button@571
+CASSIA_CHECK PASS input target exists
+CASSIA_INPUT Replace Run rect=[P: (970.0, 632.0), S: (386.0, 64.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+CASSIA_INPUT_HOVER /root/Title/RunConfirmation/@ColorRect@573/@PanelContainer@574/@VBoxContainer@575/@HBoxContainer@578/Confirm
+[selection] overlay_tree_exited
+CASSIA_CHECK PASS Begin starts Cassia after repeated Back
+CASSIA_CHECK PASS Begin reaches map after repeated Back
+CASSIA_CHECK PASS native capture selection-begin-map
+CASSIA_CHECK PASS GLB contains an AnimationPlayer
+CASSIA_ANIMATIONS ["flame_flicker"]
+CASSIA_CHECK PASS original flame_flicker clip name imports
+CASSIA_CHECK PASS one second flame loop
+CASSIA_CHECK PASS original brazier_flame node name retained
+CASSIA_CHECK PASS flame scale animation moves imported geometry
+CASSIA_CHECK PASS runtime mesh imports
+CASSIA_MESH cassia surfaces=18 morphs=0 bounds=[P: (-0.404557, 0.000479, -0.315288), S: (0.872783, 1.667933, 0.610398)]
+CASSIA_CHECK PASS material present on surface 0
+CASSIA_CHECK PASS material present on surface 1
+CASSIA_CHECK PASS material present on surface 2
+CASSIA_CHECK PASS material present on surface 3
+CASSIA_CHECK PASS material present on surface 4
+CASSIA_CHECK PASS material present on surface 5
+CASSIA_CHECK PASS material present on surface 6
+CASSIA_CHECK PASS material present on surface 7
+CASSIA_CHECK PASS material present on surface 8
+CASSIA_CHECK PASS material present on surface 9
+CASSIA_CHECK PASS material present on surface 10
+CASSIA_CHECK PASS material present on surface 11
+CASSIA_CHECK PASS material present on surface 12
+CASSIA_CHECK PASS material present on surface 13
+CASSIA_CHECK PASS material present on surface 14
+CASSIA_CHECK PASS material present on surface 15
+CASSIA_CHECK PASS material present on surface 16
+CASSIA_CHECK PASS material present on surface 17
+CASSIA_MESH brazier_flame surfaces=2 morphs=0 bounds=[P: (-0.043982, 0.0, -0.045208), S: (0.100576, 0.315, 0.087501)]
+CASSIA_CHECK PASS material present on surface 0
+CASSIA_CHECK PASS material present on surface 1
+CASSIA_CHECK PASS native capture 02-production-combat-default-1080
+CASSIA_CHECK PASS production board starts flame animation
+CASSIA_CHECK PASS native capture 03-production-combat-max-zoom-1080
+CASSIA_CHECK PASS native capture 04-production-combat-max-zoom-720
+CASSIA_CHECK PASS normal player file unchanged: user://run.json
+CASSIA_CHECK PASS normal player file unchanged: user://profile.json
+CASSIA_CHECK PASS normal player file unchanged: user://settings.json
+CASSIA_VISUAL_QA_COMPLETE failures=0

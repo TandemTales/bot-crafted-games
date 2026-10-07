@@ -35,6 +35,33 @@ func _run() -> void:
 	win.position = Vector2i.ZERO
 	win.size = res
 	await _wait(2.5)
+	if only == "wren":
+		var qa := load("res://tools/wren_visual_qa.gd").new() as Node
+		add_child(qa)
+		return
+	if only == "cassia-rebuild":
+		var qa := load("res://tools/cassia_visual_qa.gd").new() as Node
+		add_child(qa)
+		return
+	if only in ["mapart", "mapicons"]:
+		await _map_art_regressions()
+		if only == "mapicons":
+			get_window().size = res
+			await _wait(0.5)
+			var map_scene = get_tree().current_scene
+			map_scene._qa_icon_gallery = true
+			await _wait(0.3)
+			await _shot("map_8_icon_states_runtime_size")
+		_finish()
+		return
+	if only == "release":
+		await _release_regressions()
+		_finish()
+		return
+	if only == "selection":
+		await _selection_back_regressions()
+		_finish()
+		return
 	if only == "run7":
 		await _cassia()
 		_finish()
@@ -130,6 +157,287 @@ func _check(ok: bool, message: String) -> void:
 	if not ok:
 		failures += 1
 		printerr("[tour] FAIL: ", message)
+
+
+func _selection_back_regressions() -> void:
+	var title = get_tree().current_scene
+	await _shot("selection_01_title")
+	await _click_control(title._new_btn)
+	await _wait(0.25)
+	_check(is_instance_valid(title._select_layer), "New Run opens Grovewalker selection")
+	var layer: CanvasLayer = title._select_layer
+	var back := _button_with_text(layer, "Back")
+	_check(back != null, "selection screen exposes Back")
+	await _shot("selection_02_open")
+	await _click_control(back)
+	await _wait(0.25)
+	_check(not title._selection_is_open(), "Back closes selection overlay")
+	_check(title._new_btn.visible and title._new_btn.is_visible_in_tree(), "Back restores the previous screen")
+	await _click_control(title._new_btn)
+	await _wait(0.25)
+	_check(is_instance_valid(title._select_layer), "New Run reopens selection after Back")
+	layer = title._select_layer
+	var begin := _button_with_text(layer, "Begin as Wren")
+	_check(begin != null and not begin.disabled, "Begin as Wren is clickable after reopening")
+	await _shot("selection_03_reopened")
+	await _click_control(begin)
+	await _wait(0.5)
+	_check(Game.run != null and Game.run.walker == "wren", "Begin as Wren starts the selected character")
+	_check(get_tree().current_scene.scene_file_path.ends_with("map.tscn"), "Begin transitions to the run map")
+	# Re-enter selection from the replacement flow and repeat Back/reopen/Begin.
+	Game.goto_title()
+	await _wait(0.6)
+	title = get_tree().current_scene
+	await _click_control(title._new_btn)
+	await _wait(0.25)
+	layer = title._select_layer
+	back = _button_with_text(layer, "Back")
+	await _click_control(back)
+	await _wait(0.25)
+	await _click_control(title._new_btn)
+	await _wait(0.25)
+	layer = title._select_layer
+	begin = _button_with_text(layer, "Begin as Wren")
+	_check(begin != null and not begin.disabled, "repeated Back/reopen preserves Begin as Wren")
+	await _shot("selection_04_repeated")
+	await _click_control(begin)
+	await _wait(0.25)
+	var confirm := _button_with_text(title, "Confirm")
+	_check(confirm != null, "replacing a run presents the confirmation")
+	if confirm != null:
+		await _click_control(confirm)
+		await _wait(0.6)
+	_check(Game.run != null and Game.run.walker == "wren", "confirmed repeated flow starts Wren")
+	_check(get_tree().current_scene.scene_file_path.ends_with("map.tscn"), "confirmed repeated flow reaches map")
+
+
+func _button_with_text(parent: Node, label: String) -> Button:
+	for node in parent.find_children("*", "Button", true, false):
+		if node.text == label:
+			return node
+	return null
+
+
+func _click_control(control: Control) -> void:
+	if not is_instance_valid(control):
+		return
+	var point := control.get_global_rect().get_center()
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.position = point
+	event.global_position = point
+	event.window_id = get_viewport().get_window_id()
+	event.pressed = true
+	Input.parse_input_event(event)
+	await _wait(0.06)
+	event.pressed = false
+	Input.parse_input_event(event)
+	await _wait(0.18)
+
+
+## Map-only fixtures: artwork, marker hit targets, staged progress and routing.
+## No physical input, disk-save acceptance or genuine campaign claim.
+func _map_art_regressions() -> void:
+	var themes := ["marsh", "cloister", "glasswood", "ironroot", "crown"]
+	for region in 5:
+		Game.new_run(8800 + region)
+		var r := Game.run
+		r.region = region
+		r.generate_map()
+		Game.goto_map()
+		await _wait(0.8)
+		var sc = get_tree().current_scene
+		_check(sc._art == sc.MAP_ART[themes[region]], "correct illustrated region texture")
+		_check(sc._art.get_width() >= 1600, "map art retains original raster resolution")
+		_check(sc._pos.size() == r.map.size(), "all runtime map markers retained")
+		for node in r.map:
+			_check(sc._node_at(sc._pos[node["id"]]) == node["id"], "node hit target matches drawing")
+		await _shot("map_%d_%s_start" % [region + 1, themes[region]])
+		var first: int = r.available_nodes()[0]
+		var motion := InputEventMouseMotion.new()
+		motion.position = sc._pos[first]
+		sc._gui_input(motion)
+		_check(sc._hover == first, "pointer hover retains available node")
+		await _shot("map_%d_%s_hover" % [region + 1, themes[region]])
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		click.position = Vector2(30, 400)
+		sc._gui_input(click)
+		_check(r.node_id == -1 and r.status == "map", "decorative margin cannot enter a node")
+		click.position = sc._pos[first]
+		sc._gui_input(click)
+		await _wait(1.0)
+		_check(r.node_id == first and r.status == "combat", "available node click routes to combat")
+		_check(Game.combat != null, "map click creates actual encounter state")
+		# Stage a checkpoint further along the route to inspect current/visited/available states.
+		Game.combat = null
+		for step in 2:
+			r.enter_node(r.available_nodes()[0])
+		r.floor_num = 3
+		r.status = "map"
+		Game.goto_map()
+		await _wait(0.7)
+		sc = get_tree().current_scene
+		var avail := r.available_nodes()
+		var reachable: Array = sc._reachable_nodes(avail)
+		for node in r.map:
+			var state: String = sc._node_state(node, avail, reachable)
+			_check(state != "completed" or node.get("visited", false), "unchosen branch cannot show completed check")
+			if node["id"] == r.node_id:
+				_check(state == "current", "current node retains unique location marker")
+			elif node.get("visited", false):
+				_check(state == "completed", "actual previous choice shows completed check")
+			elif avail.has(node["id"]):
+				_check(state == "available", "available choice retains active badge")
+		_check(sc.MAP_ICONS.size() == 6, "six distinct illustrated location textures loaded")
+		var joy := InputEventJoypadButton.new()
+		joy.pressed = true
+		joy.button_index = JOY_BUTTON_DPAD_RIGHT
+		sc._unhandled_input(joy)
+		_check(r.available_nodes().has(sc._hover), "D-pad still selects an available route")
+		await _shot("map_%d_%s_progress" % [region + 1, themes[region]])
+		sc._hover = r.map[-1]["id"]
+		await _shot("map_%d_%s_boss" % [region + 1, themes[region]])
+	# Aspect changes exercise crop and retained marker positions without touching save data.
+	get_window().size = Vector2i(res.x, int(res.y * 0.8))
+	await _wait(0.7)
+	var resized_map = get_tree().current_scene
+	for node in Game.run.map:
+		_check(resized_map._node_at(resized_map._pos[node["id"]]) == node["id"], "resized markers remain clickable")
+	await _shot("map_6_wide_resize")
+	get_window().size = Vector2i(int(res.x * 0.8), res.y)
+	await _wait(0.7)
+	await _shot("map_7_tall_resize")
+
+
+func _button_text(node: Node, text: String) -> Button:
+	if node is Button and node.text == text:
+		return node
+	for child in node.get_children():
+		var found := _button_text(child, text)
+		if found != null:
+			return found
+	return null
+
+
+## Isolated fixtures exercise the packaged UI; not a human campaign or disk-save acceptance.
+func _release_regressions() -> void:
+	Game.profile["bosses"] = 1
+	Game.profile["withering"] = 10
+	var r := RunState.new()
+	r.new_run(101003)
+	Game.run = r
+	Game.goto_title()
+	await _wait(1.3)
+	var title = get_tree().current_scene
+	title._open_select()
+	await _wait(0.3)
+	_check(title._tier == 0, "difficulty starts at deliberate tier zero")
+	title._tier = 10
+	title._refresh_tier()
+	_check(title._tier_label.tooltip_text == Withering.describe(10), "cumulative Withering effects available")
+	await _shot("90_release_difficulty")
+	var before := r.to_json()
+	title._begin_run("wren")
+	await _wait(0.3)
+	var dialog := title.get_node("RunConfirmation")
+	var cancel := dialog.find_child("Cancel", true, false) as Button
+	_check(cancel.has_focus(), "replace confirmation initially focuses Cancel")
+	await _shot("91_release_replace_confirmation")
+	cancel.pressed.emit()
+	await _wait(0.3)
+	_check(Game.run == r and r.to_json() == before, "cancelling replacement preserves active run")
+	title._begin_run("wren")
+	await _wait(0.2)
+	dialog = title.get_node("RunConfirmation")
+	(dialog.find_child("Confirm", true, false) as Button).pressed.emit()
+	await _wait(1.4)
+	_check(Game.run != r and Game.run.withering == 10 and Game.run.status == "map", "confirmed replacement starts selected tier")
+	r = Game.run
+	r.status = "camp"
+	r.hp = r.max_hp
+	for card in r.deck:
+		card["up"] = true
+	Game.route_to_status()
+	await _wait(1.3)
+	var room = get_tree().current_scene
+	var leave := _button_text(room, "Leave Camp")
+	_check(leave != null and not leave.disabled, "full-health fully-upgraded camp has an advancing action")
+	await _shot("92_release_full_camp")
+	if leave != null:
+		leave.pressed.emit()
+	await _wait(1.1)
+	_check(r.status == "map", "Leave Camp reaches map")
+	r.status = "camp"
+	r.hp = 1
+	Game.route_to_status()
+	await _wait(1.1)
+	room = get_tree().current_scene
+	var expected := r.camp_heal_amount()
+	var rest := _button_text(room, "Rest: heal %d HP" % expected)
+	_check(rest != null, "Withering camp label matches actual heal")
+	await _shot("93_release_withering_camp")
+	if rest != null:
+		rest.pressed.emit()
+	await _wait(0.3)
+	_check(r.hp == 1 + expected and r.status == "map", "packaged Rest heals exact advertised amount")
+	r.hp = r.max_hp
+	r.status = "map"
+	r.enter_node(r.available_nodes()[0])
+	Game.goto_combat()
+	await _wait(3.0)
+	var sc = get_tree().current_scene
+	sc._toggle_pause()
+	sc._confirm_abandon()
+	await _wait(0.3)
+	dialog = sc.get_node("RunConfirmation")
+	cancel = dialog.find_child("Cancel", true, false) as Button
+	_check(cancel.has_focus(), "abandon confirmation initially focuses Cancel")
+	await _shot("94_release_abandon_confirmation")
+	cancel.pressed.emit()
+	await _wait(0.3)
+	_check(r.status == "combat" and Game.run == r, "cancelling abandon preserves run")
+	sc._confirm_abandon()
+	await _wait(0.2)
+	var escape := InputEventKey.new()
+	escape.keycode = KEY_ESCAPE
+	escape.physical_keycode = KEY_ESCAPE
+	escape.pressed = true
+	get_viewport().push_input(escape, true)
+	await _wait(0.2)
+	escape.pressed = false
+	get_viewport().push_input(escape, true)
+	_check(not sc.has_node("RunConfirmation") and sc.pause_layer.visible and r.status == "combat", "Escape cancels modal without changing underlying pause/run")
+	sc._confirm_abandon()
+	await _wait(0.2)
+	var space := InputEventKey.new()
+	space.keycode = KEY_SPACE
+	space.physical_keycode = KEY_SPACE
+	space.pressed = true
+	get_viewport().push_input(space, true)
+	space.pressed = false
+	get_viewport().push_input(space, true)
+	await _wait(0.2)
+	_check(not sc.has_node("RunConfirmation") and r.status == "combat" and sc.pause_layer.visible, "Space accepts focused Cancel without ending turn or abandoning")
+	sc._quit_checkpoint()
+	await _wait(0.3)
+	dialog = sc.get_node("RunConfirmation")
+	_check((dialog.find_child("Cancel", true, false) as Button).has_focus(), "checkpoint quit initially focuses Cancel")
+	await _shot("95_release_checkpoint_warning")
+	(dialog.find_child("Cancel", true, false) as Button).pressed.emit()
+	await _wait(0.2)
+	_check(get_tree().current_scene == sc and r.status == "combat", "cancelling checkpoint quit preserves fight")
+	sc._toggle_pause()
+	await _shot("96_release_combat_readability")
+	sc._toggle_pause()
+	sc._quit_checkpoint()
+	await _wait(0.2)
+	dialog = sc.get_node("RunConfirmation")
+	(dialog.find_child("Confirm", true, false) as Button).pressed.emit()
+	await _wait(1.1)
+	_check(get_tree().current_scene.has_method("_open_select") and r.status == "combat", "confirmed checkpoint quit reaches title and keeps run")
+	await _rail_input()
 
 
 func _glasswood() -> void:

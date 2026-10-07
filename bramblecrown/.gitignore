@@ -2,3 +2,4 @@
 build/
 *.tmp
 *.blend1
+__pycache__/

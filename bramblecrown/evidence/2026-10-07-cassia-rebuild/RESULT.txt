@@ -1,0 +1,63 @@
+Cassia rebuild and combined Wren/Cassia delivery - 2026-10-07
+
+Cassia has been rebuilt in installed Blender 5.1.2 with continuous facial
+surfaces, separate eyes/lids/lips, UV skin, swept copper crest, orange mantle,
+leather inset, fitted charcoal coat, lined split tails, scarf, articulated
+fingers, laced boots, belt equipment, caged brazier staff and palm cinder.
+Two rendered iterations were inspected; the second corrected crest roots,
+shoulder inset clearance, grip placement and ground contact.
+
+Editable source: source-art/cassia.blend
+Game export: assets/models/cassia.glb
+Regeneration: source-art/build_cassia.py and cassia_textures.py
+Textures: source-art/cassia-textures (21 original albedo/roughness/normal maps,
+UV mapped and packed into the blend; 2048 cloth/skin, 1024 other surfaces).
+Durable checkpoint: cassia-final-checkpoint.blend in this evidence directory.
+144 construction meshes; runtime 50,335 vertices / 98,768 triangles, 18 body
+material surfaces plus 2 flame surfaces. Counts describe the export, not art quality.
+No preexisting skeletal rig existed. The original brazier_flame node and
+one-second flame_flicker object-scale action remain compatible. Movement and
+rotation still use the existing game scene logic; a full skeletal combat
+animation set has not been added.
+
+Validation:
+- Blender source reopened successfully: 21 packed images, no missing textures,
+  flame_flicker action and cassia/brazier_flame runtime objects present.
+- Godot 4.7.2 import and Windows export completed without errors.
+- Final EXE ran natively on Vulkan Forward+ / RTX 2070 SUPER twice: Cassia QA and
+  Wren regression both exited 0 with zero failed assertions and empty stderr.
+- Each run performed 3 synthetic mouse Back/reopen cycles through the native
+  GUI dispatch path, then Begin (including existing-run confirmation) to map.
+- Cassia flame transform was sampled at two animation times and changed;
+  production combat starts the animation. Wren breathing also passed.
+- Selection, default combat, maximum zoom 1080p and maximum zoom 720p captured.
+  Cassia full/face/high-angle Blender renders and all four primary native
+  camera captures were inspected directly. Title after Back and Cassia map
+  capture were inspected. Final Wren selection/default combat were inspected.
+- Run/profile/settings hashes were unchanged by both tests. Cassia QA unlock
+  was in memory only. Normal unlock requirement remains unchanged.
+- Accepted Wren source/export, title Back implementation and HP layout match
+  protected-wren-ui.json byte for byte.
+
+Back issue (fixed before Cassia): native logs traced the stall to destroying
+live preview SubViewports. Selection now hides/pauses one cached layer and
+reuses it, preserving focus restoration. Six additional Back/reopen cycles in
+this combined package passed. Details and before/after logs remain under
+../2026-10-07-wren-rebuild.
+
+Limits: physical mouse/controller acceptance, a full campaign, and sustained
+performance profiling were not performed. Existing card illustrations retain
+the older models. The unrelated reported crash remains deferred. No claim of
+AAA or photorealistic quality. No other characters/projects were edited by
+this task; prior unrelated dirty work and old build archives were preserved.
+
+Delivery: build/local-0.1.1-wren-cassia-2026.10.07 plus .zip. The package manifest
+contains EXE and model/source hashes; package-verification.json records ZIP
+CRC verification and the archived EXE hash match. Stable launch after promotion:
+build/latest/windows/Bramblecrown.exe. The promotion helper verifies the stage,
+refuses a running latest executable and keeps the previous latest directory.
+
+Reproduce native QA (with an absolute output directory):
+Bramblecrown.exe -- --screenshot-tour <dir> --tour-only cassia-rebuild --cassia-out <dir>
+Bramblecrown.exe -- --screenshot-tour <dir> --tour-only wren --wren-out <dir>
+The release template disables --script overrides; use the supported tour entry.

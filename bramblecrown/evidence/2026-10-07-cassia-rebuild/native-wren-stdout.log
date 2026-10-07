@@ -1,0 +1,104 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.341 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 2070 SUPER
+
+WREN_QA_START native renderer=forward_plus
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@527","frame":216,"overlay_valid":false,"overlay_visible":false}
+[selection] {"event":"opened","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":216,"overlay_valid":true,"overlay_visible":true}
+WREN_CHECK PASS native capture 01-production-selection-1080
+WREN_CHECK PASS input target exists
+WREN_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@573
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":332,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":332,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":333,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":333,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":333,"overlay_valid":true,"overlay_visible":false}
+WREN_CHECK PASS Back closes overlay cycle 0
+WREN_CHECK PASS native capture selection-back-0
+WREN_CHECK PASS input target exists
+WREN_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":353,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":353,"overlay_valid":true,"overlay_visible":true}
+WREN_CHECK PASS New Run reopens after Back cycle 0
+WREN_CHECK PASS input target exists
+WREN_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@573
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":371,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":371,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":372,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":372,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":372,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":372,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":372,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":372,"overlay_valid":true,"overlay_visible":false}
+WREN_CHECK PASS Back closes overlay cycle 1
+WREN_CHECK PASS native capture selection-back-1
+WREN_CHECK PASS input target exists
+WREN_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":391,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":391,"overlay_valid":true,"overlay_visible":true}
+WREN_CHECK PASS New Run reopens after Back cycle 1
+WREN_CHECK PASS input target exists
+WREN_INPUT Back rect=[P: (840.0, 990.0), S: (240.0, 60.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@Button@573
+[selection] {"event":"back_mouse_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":409,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_button_down","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":409,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_mouse_up","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"back_pressed","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"close_entered","focus":"/root/Title/@CanvasLayer@532/@Control@533/@Button@573","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"root_hidden","focus":"none","frame":410,"overlay_valid":true,"overlay_visible":true}
+[selection] {"event":"closed_cached_layer","focus":"none","frame":410,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"title_focus_restored","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":410,"overlay_valid":true,"overlay_visible":false}
+WREN_CHECK PASS Back closes overlay cycle 2
+WREN_CHECK PASS native capture selection-back-2
+WREN_CHECK PASS input target exists
+WREN_INPUT New Run rect=[P: (110.0, 488.0), S: (420.0, 66.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528
+[selection] {"event":"open_requested","focus":"/root/Title/@CanvasLayer@520/@Control@521/@VBoxContainer@523/@Button@528","frame":428,"overlay_valid":true,"overlay_visible":false}
+[selection] {"event":"reopened_cached_layer","focus":"/root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556","frame":428,"overlay_valid":true,"overlay_visible":true}
+WREN_CHECK PASS New Run reopens after Back cycle 2
+WREN_CHECK PASS input target exists
+WREN_INPUT Begin as Wren rect=[P: (420.0, 890.0), S: (504.0, 64.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/@CanvasLayer@532/@Control@533/@HBoxContainer@536/@PanelContainer@542/@HBoxContainer@543/@VBoxContainer@550/@Button@556
+WREN_CHECK PASS input target exists
+WREN_INPUT Replace Run rect=[P: (970.0, 632.0), S: (386.0, 64.0)] viewport=[P: (0.0, 0.0), S: (1920.0, 1080.0)]
+WREN_INPUT_HOVER /root/Title/RunConfirmation/@ColorRect@574/@PanelContainer@575/@VBoxContainer@576/@HBoxContainer@579/Confirm
+[selection] overlay_tree_exited
+WREN_CHECK PASS Begin starts Wren after repeated Back
+WREN_CHECK PASS Begin reaches map after repeated Back
+WREN_CHECK PASS native capture selection-begin-map
+WREN_CHECK PASS GLB contains an AnimationPlayer
+WREN_ANIMATIONS ["Wren_Breathe"]
+WREN_CHECK PASS breathing clip imports
+WREN_CHECK PASS four second breathing loop
+WREN_CHECK PASS runtime mesh imports
+WREN_MESH grovewalker surfaces=15 morphs=1 bounds=[P: (-0.484989, -0.000335, -0.213889), S: (0.985851, 1.52976, 0.450077)]
+WREN_CHECK PASS breathing morph retained
+WREN_CHECK PASS material present on surface 0
+WREN_CHECK PASS material present on surface 1
+WREN_CHECK PASS material present on surface 2
+WREN_CHECK PASS material present on surface 3
+WREN_CHECK PASS material present on surface 4
+WREN_CHECK PASS material present on surface 5
+WREN_CHECK PASS material present on surface 6
+WREN_CHECK PASS material present on surface 7
+WREN_CHECK PASS material present on surface 8
+WREN_CHECK PASS material present on surface 9
+WREN_CHECK PASS material present on surface 10
+WREN_CHECK PASS material present on surface 11
+WREN_CHECK PASS material present on surface 12
+WREN_CHECK PASS material present on surface 13
+WREN_CHECK PASS material present on surface 14
+WREN_CHECK PASS native capture 02-production-combat-default-1080
+WREN_CHECK PASS production board starts breathing animation
+WREN_CHECK PASS native capture 03-production-combat-max-zoom-1080
+WREN_CHECK PASS native capture 04-production-combat-max-zoom-720
+WREN_CHECK PASS normal player file unchanged: user://run.json
+WREN_CHECK PASS normal player file unchanged: user://profile.json
+WREN_CHECK PASS normal player file unchanged: user://settings.json
+WREN_VISUAL_QA_COMPLETE failures=0

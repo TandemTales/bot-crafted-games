@@ -7,6 +7,18 @@ var _continue_btn: Button
 var _new_btn: Button
 var _tier := 0
 var _tier_label: Label
+var _select_layer: CanvasLayer
+var _select_root: Control
+var _select_first: Button
+
+
+func _selection_is_open() -> bool:
+	return is_instance_valid(_select_layer) and _select_layer.visible and is_instance_valid(_select_root) and _select_root.visible
+
+
+func _selection_log(event: String) -> void:
+	var focus := get_viewport().gui_get_focus_owner()
+	print("[selection] ", JSON.stringify({"event": event, "frame": Engine.get_process_frames(), "overlay_valid": is_instance_valid(_select_layer), "overlay_visible": _select_layer.visible if is_instance_valid(_select_layer) else false, "focus": str(focus.get_path()) if is_instance_valid(focus) else "none"}))
 
 
 func _ready() -> void:
@@ -81,7 +93,7 @@ func _build_ui() -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 50)
 	v.add_child(spacer)
-	_continue_btn = _btn(v, "Continue Run", func(): Sfx.play("click"); Game.continue_run())
+	_continue_btn = _btn(v, "Continue Run", _continue_run)
 	_continue_btn.visible = Game.has_saved_run()
 	_new_btn = _btn(v, "New Run", _open_select)
 	_btn(v, "Toggle Fullscreen (F11)", func(): Sfx.play("click"); Game.toggle_fullscreen())
@@ -109,11 +121,31 @@ func _btn(parent: Control, text: String, cb: Callable) -> Button:
 
 ## Walker select: a staged model, pitch, starter deck and lock condition for each Grovewalker.
 func _open_select() -> void:
+	_selection_log("open_requested")
+	if is_instance_valid(_select_layer):
+		if _selection_is_open():
+			_selection_log("open_ignored_visible_layer")
+			return
+		_tier = 0
+		_refresh_tier()
+		_select_layer.process_mode = Node.PROCESS_MODE_INHERIT
+		_select_root.mouse_filter = Control.MOUSE_FILTER_STOP
+		_select_layer.show()
+		_select_root.show()
+		for viewport in _select_layer.find_children("*", "SubViewport", true, false):
+			viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		if is_instance_valid(_select_first):
+			_select_first.grab_focus()
+		_selection_log("reopened_cached_layer")
+		return
 	Sfx.play("click")
 	var layer := CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
+	_select_layer = layer
+	layer.tree_exited.connect(func(): print("[selection] overlay_tree_exited"))
 	var root := Control.new()
+	_select_root = root
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.theme = UITheme.theme()
 	layer.add_child(root)
@@ -140,7 +172,7 @@ func _open_select() -> void:
 	row.offset_right = -80
 	row.add_theme_constant_override("separation", 40)
 	root.add_child(row)
-	_tier = Withering.unlocked(Game.profile)
+	_tier = 0
 	_add_tier_picker(root)
 	var first: Button = null
 	for w in WalkerDB.ORDER:
@@ -157,11 +189,40 @@ func _open_select() -> void:
 	back.offset_top = -90
 	back.offset_bottom = -30
 	back.pressed.connect(func():
+		_selection_log("back_pressed")
 		Sfx.play("click")
-		layer.queue_free()
-		_new_btn.grab_focus())
+		_close_select(layer, root))
+	back.button_down.connect(func(): _selection_log("back_button_down"))
+	back.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+			_selection_log("back_mouse_down" if event.pressed else "back_mouse_up"))
 	root.add_child(back)
 	(first if first != null else back).grab_focus()
+	_select_first = first if first != null else back
+	_selection_log("opened")
+
+
+func _close_select(layer: CanvasLayer, root: Control) -> void:
+	_selection_log("close_entered")
+	# Keep the live 3D previews alive. Destroying their SubViewports from the
+	# button callback stalls the native renderer after the layer exits the tree.
+	# A single cached layer is bounded to this title scene and reused on reopen.
+	root.hide()
+	_selection_log("root_hidden")
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.hide()
+	for viewport in layer.find_children("*", "SubViewport", true, false):
+		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	layer.process_mode = Node.PROCESS_MODE_DISABLED
+	if is_instance_valid(_new_btn):
+		_restore_title_focus.call_deferred()
+	_selection_log("closed_cached_layer")
+
+
+func _restore_title_focus() -> void:
+	if is_instance_valid(_new_btn):
+		_new_btn.grab_focus()
+	_selection_log("title_focus_restored")
 
 
 func _walker_panel(row: Control, w: String) -> Button:
@@ -259,8 +320,7 @@ func _walker_panel(row: Control, w: String) -> Button:
 	b.add_theme_font_size_override("font_size", 30)
 	b.pressed.connect(func():
 		Sfx.play("click")
-		Game.clear_run()
-		Game.new_run(-1, w, _tier))
+		_begin_run(w))
 	v.add_child(b)
 	return b if open else null
 
@@ -312,7 +372,27 @@ func _add_tier_picker(root: Control) -> void:
 
 
 func _refresh_tier() -> void:
+	_tier_label.tooltip_text = Withering.describe(_tier) if _tier > 0 else "No Withering penalties."
 	if _tier == 0:
 		_tier_label.text = "Withering 0 - the forest as it was."
 	else:
-		_tier_label.text = "Withering %d - %s: %s" % [_tier, Withering.TIERS[_tier - 1]["name"], Withering.TIERS[_tier - 1]["text"]]
+		_tier_label.text = "Withering %d (cumulative) - %s\nHover for all active penalties." % [_tier, Withering.TIERS[_tier - 1]["name"]]
+
+
+func _begin_run(walker: String) -> void:
+	var begin := func(): Game.clear_run(); Game.new_run(-1, walker, _tier)
+	if Game.has_saved_run() or (Game.run != null and not Game.run.status in ["victory", "defeat"]):
+		RunConfirmation.open(self, "Replace saved run?", "Beginning a new run permanently replaces your saved checkpoint. Cancel to keep it and use Continue Run.", "Replace Run", begin)
+	else:
+		begin.call()
+
+
+func _continue_run() -> void:
+	Sfx.play("click")
+	if not Game.continue_run():
+		var dialog := AcceptDialog.new()
+		dialog.title = "Cannot continue this checkpoint"
+		dialog.dialog_text = "The saved run could not be read or has invalid data. It has been preserved. Back up run.json in your user data folder before starting a replacement run."
+		dialog.min_size = Vector2i(600, 220)
+		add_child(dialog)
+		dialog.popup_centered()

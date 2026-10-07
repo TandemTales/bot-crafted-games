@@ -49,6 +49,8 @@ func continue_run() -> bool:
 	if not has_saved_run():
 		return false
 	var f := FileAccess.open(RUN_PATH, FileAccess.READ)
+	if f == null:
+		return false
 	var r := RunState.from_json(f.get_as_text())
 	if r == null:
 		return false

@@ -17,7 +17,7 @@ var pending_damage := 0
 var pending_ward_break := 0
 var highlight := false
 var rail_number := 0
-const RAIL_SIZE := Vector2(278, 112)
+const RAIL_SIZE := Vector2(320, 122)
 
 
 func _init() -> void:
@@ -68,7 +68,9 @@ func _draw() -> void:
 		draw_rect(Rect2(bar.position + Vector2(bar.size.x * after, 0), Vector2(bar.size.x * (frac - after), bar.size.y)), Color(1, 0.85, 0.4, 0.85))
 	var hp_text := "%d/%d" % [hp, max_hp]
 	var ts := fb.get_string_size(hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14)
-	draw_string(fb, Vector2(W / 2 - ts.x / 2, y + 12), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+	# Keep the bottom of the glyphs inside the HP fill instead of letting
+	# font descent hang below the narrow bar.
+	draw_string(fb, Vector2(W / 2 - ts.x / 2, y + 10), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 	if ward > 0:
 		var c := Vector2(6, y + 7)
 		_shield(c, 13, UITheme.WARD)
@@ -151,8 +153,8 @@ func _draw_rail() -> void:
 	draw_style_box(UITheme.box(Color(0.035, 0.055, 0.049, 0.97), edge, 2, 10, 0), Rect2(Vector2.ZERO, RAIL_SIZE))
 	draw_circle(Vector2(20, 21), 13, edge)
 	draw_string(f, Vector2(14, 27), str(rail_number), HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color(0.07, 0.08, 0.06))
-	draw_string(f, Vector2(40, 27), title, HORIZONTAL_ALIGNMENT_LEFT, 230, 21, UITheme.INK)
-	var bar := Rect2(12, 38, 254, 16)
+	draw_string(f, Vector2(40, 28), title, HORIZONTAL_ALIGNMENT_LEFT, 268, 24, UITheme.INK)
+	var bar := Rect2(12, 40, 296, 20)
 	draw_rect(bar, Color(0.12, 0.07, 0.06))
 	var frac := clampf(float(hp) / max_hp, 0, 1)
 	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, 16)), UITheme.BLOOD.darkened(0.18))
@@ -162,9 +164,9 @@ func _draw_rail() -> void:
 	var hp_text := "%d / %d HP" % [hp, max_hp]
 	if ward > 0:
 		hp_text += "   |   %d Ward" % ward
-	draw_string(fb, Vector2(18, 52), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
+	draw_string(fb, Vector2(18, 57), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
 	if preview_active:
-		draw_multiline_string(fb, Vector2(12, 77), pending_effects if not pending_effects.is_empty() else "No effect", HORIZONTAL_ALIGNMENT_LEFT, 254, 16, 2, UITheme.GOLD if not pending_effects.is_empty() else UITheme.INK_DIM)
+		draw_multiline_string(fb, Vector2(12, 83), pending_effects if not pending_effects.is_empty() else "No effect", HORIZONTAL_ALIGNMENT_LEFT, 296, 18, 2, UITheme.GOLD if not pending_effects.is_empty() else UITheme.INK_DIM)
 		return
 	var bits: PackedStringArray = []
 	var danger := false
@@ -175,13 +177,13 @@ func _draw_rail() -> void:
 			s += " %s" % ic["n"]
 		bits.append(s)
 		danger = danger or ic.get("hot", false)
-	draw_string(f, Vector2(12, 78), " / ".join(bits) if not bits.is_empty() else "Reposition", HORIZONTAL_ALIGNMENT_LEFT, 254, 20, Color(1, 0.49, 0.36) if danger else UITheme.INK)
+	draw_string(f, Vector2(12, 84), " / ".join(bits) if not bits.is_empty() else "Reposition", HORIZONTAL_ALIGNMENT_LEFT, 296, 22, Color(1, 0.49, 0.36) if danger else UITheme.INK)
 	var states: PackedStringArray = []
 	for s in statuses:
 		if int(statuses[s]) > 0:
 			states.append("%s %d" % [s.capitalize(), statuses[s]])
 	var detail: String = "  /  ".join(states) if not states.is_empty() else intent.get("name", "")
-	draw_string(fb, Vector2(12, 100), detail, HORIZONTAL_ALIGNMENT_LEFT, 254, 16, UITheme.GOLD if preview_active else UITheme.INK_DIM)
+	draw_string(fb, Vector2(12, 112), detail, HORIZONTAL_ALIGNMENT_LEFT, 296, 18, UITheme.GOLD if preview_active else UITheme.INK_DIM)
 
 
 func _shield(c: Vector2, r: float, col: Color) -> void:

@@ -13,7 +13,7 @@ func _init() -> void:
 		"test_player_move", "test_enemy_thicket_cost", "test_enemy_attack_and_ward",
 		"test_blight_empower_and_rot", "test_spread_locked", "test_burn_grove", "test_victory",
 		"test_defeat", "test_deterministic_combat", "test_summon_max", "test_boss_phase2",
-		"test_map_generation", "test_run_save_load", "test_rewards_and_market", "test_events",
+		"test_map_generation", "test_map_visit_history", "test_run_save_load", "test_release_save_recovery", "test_release_camp", "test_rewards_and_market", "test_events",
 		"test_autoplay_region", "test_preview_matches_play", "test_smart_bot_balance",
 		"test_region_data", "test_daze", "test_shield_and_heal_allies", "test_region2_boss_phase2",
 		"test_region_transition",
@@ -45,6 +45,76 @@ func check(cond: bool, msg: String) -> void:
 	else:
 		_fails += 1
 		printerr("FAIL [%s] %s" % [_current, msg])
+
+
+func test_release_save_recovery() -> bool:
+	var r := RunState.new()
+	r.new_run(1919)
+	var valid := r.to_dict()
+	check(RunState.from_json(JSON.stringify(valid)) != null, "valid legacy-compatible checkpoint accepted")
+	for text in ["{", "[]", "{}", "null", "{\"version\":999}"]:
+		check(RunState.from_json(text) == null, "invalid top-level save safely rejected: " + text)
+	for key in ["seed", "hp", "max_hp", "gold", "region", "node_id", "floor", "rng", "walker", "deck", "charms", "map", "used_encounters", "used_events"]:
+		var damaged := valid.duplicate(true)
+		damaged.erase(key)
+		check(RunState.from_json(JSON.stringify(damaged)) == null, "missing field safely rejected: " + key)
+	for pair in [["hp", "broken"], ["hp", -1], ["region", 99], ["walker", "missing"], ["withering", {}], ["stats", []], ["market", {"items": [null]}], ["reward", {"cards": ["missing"]}], ["status", "missing"], ["deck", [{"id": "missing", "up": false}]], ["rng", {"state": "broken"}]]:
+		var damaged := valid.duplicate(true)
+		damaged[pair[0]] = pair[1]
+		check(RunState.from_json(JSON.stringify(damaged)) == null, "malformed field safely rejected: " + str(pair[0]))
+	var damaged := valid.duplicate(true)
+	damaged["map"][0]["links"] = [99999]
+	check(RunState.from_json(JSON.stringify(damaged)) == null, "dangling map links rejected")
+	for tier in range(11):
+		r.new_run(1919, "wren", tier)
+		var restored := RunState.from_json(r.to_json())
+		check(restored != null and restored.to_json() == r.to_json(), "Withering %d checkpoint roundtrip" % tier)
+	return true
+
+
+func test_map_visit_history() -> bool:
+	var r := RunState.new()
+	r.new_run(8804)
+	check(r.map.all(func(n): return not n.has("visited")), "fresh map invents no visited path")
+	var first: int = r.available_nodes()[0]
+	var alternatives := r.available_nodes().slice(1)
+	r.enter_node(first)
+	check(r.node(first).get("visited", false), "chosen encounter records actual visit")
+	check(alternatives.all(func(id): return not r.node(id).get("visited", false)), "unchosen siblings are not completed")
+	var second: int = r.available_nodes()[0]
+	r.enter_node(second)
+	var restored := RunState.from_json(r.to_json())
+	check(restored != null and restored.node(first).get("visited", false) and restored.node(second).get("visited", false), "actual visits survive checkpoint roundtrip")
+	check(restored.map.filter(func(n): return n.get("visited", false)).size() == 2, "roundtrip invents no completed branches")
+	var legacy := r.to_dict().duplicate(true)
+	for node in legacy["map"]:
+		node.erase("visited")
+	var old := RunState.from_json(JSON.stringify(legacy))
+	check(old != null and old.map.all(func(n): return not n.has("visited")), "legacy checkpoint loads without fabricated visit marks")
+	legacy["map"][0]["visited"] = "broken"
+	check(RunState.from_json(JSON.stringify(legacy)) == null, "malformed optional visit flag safely rejected")
+	r.generate_map()
+	check(r.map.all(func(n): return not n.has("visited")), "new region resets its map visit marks")
+	return true
+
+
+func test_release_camp() -> bool:
+	for tier in range(11):
+		var r := RunState.new()
+		r.new_run(2026, "wren", tier)
+		r.status = "camp"
+		r.hp = 1
+		var expected := int(ceil(r.max_hp * (0.2 if tier >= 7 else 0.3)))
+		check(r.camp_heal_amount() == expected, "Withering %d advertised heal matches rule" % tier)
+		check(r.camp_rest() == expected and r.hp == 1 + expected and r.status == "map", "camp heals and advances at tier %d" % tier)
+		r.hp = r.max_hp
+		r.status = "camp"
+		for card in r.deck:
+			card["up"] = true
+		check(r.camp_heal_amount() == 0, "full health offers no heal")
+		r.leave_room()
+		check(r.status == "map" and r.hp == r.max_hp, "fully upgraded full-health camp has safe escape")
+	return true
 
 
 func test_ironroot_progression() -> bool:
