@@ -1,4 +1,14 @@
 # BRAMBLECROWN — Progress
+## 2026-10-16 — Run 16 (Pacific Friday, age 22 days) — no work; release still awaiting user approval
+
+- STOP absent; HEAD == origin/dev ad10b1c, tree clean. Not a Saturday. Game is still unreleased: itch channel holds
+  build #2014268 (2026.09.24), page is Draft, no .aaa-complete.
+- The only blocker is unchanged from Runs 14-15: Butler push and making the page Public were denied by the permission
+  classifier and need the user's explicit OK. I did not retry or work around it, and did not start new polish
+  while a release decision is pending. No code, gate or export was run this session.
+- **Next:** user approves (or adds an allow rule for) Butler push to shoejunk/bramblecrown:windows and publishing
+  the page; then re-export (footer text changed after the Run 14 package), run the gate, push, player-path verify,
+  write .aaa-complete.
 ## 2026-10-04 — Run 15 (Pacific Sunday, age 10 days) — release still blocked
 
 - STOP absent. Not a Saturday; the forced release (2026-10-03) was blocked at `butler push` by the permission
