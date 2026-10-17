@@ -1,4 +1,15 @@
 # BRAMBLECROWN — Progress
+## 2026-10-17 — Run 17 (Pacific Saturday, age 23 days) — forced release re-attempted: BLOCKED AT UPLOAD (3rd time)
+
+- STOP absent; HEAD == origin/dev cde26b9. Godot 4.7.2.
+- **Verified:** full gate 4,085 passed / 0 failed. Fresh Windows export (includes the Run 15 "Early access build" footer):
+  build/windows/Bramblecrown.exe, SHA-256 022bacf3bb8b48d83862c3a8841f4d7efe4190fae561e71cac489199463c0ea8.
+  Packaged run7 tour at 1280x720: 21 shots, 0 failures, exit 0, normal saves unchanged; I read the Cassia-select shot.
+- **Blocked:** `butler push` (using C:\dev\bayou\dist\tools\butler\butler.exe, existing login) to shoejunk/bramblecrown:windows
+  was denied by the auto-mode classifier ([Create Public Surface]). Not retried or worked around. NOT uploaded, NOT released,
+  no .aaa-complete. itch channel still holds #2014268; page still Draft.
+- **Next:** user adds a Bash allow rule for Butler push (or runs it): copy build/windows/Bramblecrown.exe to a clean dir,
+  `butler push <dir> shoejunk/bramblecrown:windows`, make page Public, player-path verify, write .aaa-complete.
 ## 2026-10-16 — Run 16 (Pacific Friday, age 22 days) — no work; release still awaiting user approval
 
 - STOP absent; HEAD == origin/dev ad10b1c, tree clean. Not a Saturday. Game is still unreleased: itch channel holds
