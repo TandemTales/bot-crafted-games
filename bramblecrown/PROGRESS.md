@@ -1,4 +1,9 @@
 # BRAMBLECROWN — Progress
+## 2026-10-20 — Run 18 (Pacific Tuesday, age 26 days) — no work; release still awaiting user approval
+
+- STOP absent; HEAD == origin/dev 1de9b8c, tree clean. Not a Saturday and the quality gate is not passed (AAA FAIL stands), so no release and no new polish.
+- Unchanged blocker from Runs 14-17: `butler push` to shoejunk/bramblecrown:windows and making the page Public need the user's explicit OK. Not attempted. itch channel holds #2014268, page Draft, no .aaa-complete.
+- **Next:** user runs/approves the Butler push (build/windows/Bramblecrown.exe from Run 17) and publishes the page, then player-path verify and write .aaa-complete; or tells the runner to start the next game.
 ## 2026-10-17 — Run 17 (Pacific Saturday, age 23 days) — forced release re-attempted: BLOCKED AT UPLOAD (3rd time)
 
 - STOP absent; HEAD == origin/dev cde26b9. Godot 4.7.2.
